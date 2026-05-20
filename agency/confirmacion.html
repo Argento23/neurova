@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Pago Confirmado! - GenerArise AI</title>
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Grotesk:wght@300;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .confirmation-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .confirmation-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .success-icon {
+            font-size: 5rem;
+            color: #4ade80;
+            margin-bottom: 2rem;
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .confirmation-card h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .confirmation-card p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .info-box {
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 4px solid #6366f1;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .info-box p {
+            margin: 0.5rem 0;
+            font-size: 0.95rem;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(99, 102, 241, 0.3);
+            border-radius: 50%;
+            border-top-color: #6366f1;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .logo-3d {
+            height: 60px;
+            width: auto;
+            filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.4));
+            animation: logo-float-3d 4s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes logo-float-3d {
+            0%, 100% { transform: translateY(0) rotateY(0deg); }
+            50% { transform: translateY(-10px) rotateY(10deg); }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="noise-overlay"></div>
+    <div class="gradient-sphere sphere-1"></div>
+    <div class="gradient-sphere sphere-2"></div>
+
+    <div class="confirmation-container">
+        <div class="confirmation-card">
+            <img src="assets/logo.png" alt="GenerArise" class="logo-3d">
+            <div class="success-icon">
+                <i class="fa-solid fa-check-circle"></i>
+            </div>
+            <h1>¡Pago Confirmado!</h1>
+            <p>
+                Gracias por confiar en <strong>GenerArise AI</strong>. Tu auditoría ha sido reservada exitosamente.
+            </p>
+
+            <div class="info-box">
+                <p><i class="fa-solid fa-envelope" style="color: #6366f1; margin-right: 8px;"></i>
+                    <strong>Te hemos enviado un email</strong> con los próximos pasos y el enlace para agendar tu sesión
+                    de descubrimiento.
+                </p>
+                <p><i class="fa-solid fa-clock" style="color: #6366f1; margin-right: 8px;"></i>
+                    Nuestro equipo te contactará en las próximas <strong>24 horas</strong>.
+                </p>
+            </div>
+
+            <p id="emailStatus" style="font-size: 0.9rem; color: #6366f1;">
+                <i class="fa-solid fa-paper-plane"></i> Enviando email de confirmación
+                <span class="loading-spinner"></span>
+            </p>
+
+            <a href="https://cal.com/gustavo-a.-dornhofer-nqjqos/auditoria-estrategica-ia" target="_blank"
+                class="cta-button primary"
+                style="margin-top: 2rem; display: inline-flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-calendar" style="margin-right: 10px;"></i> Agendar Mi Sesión Ahora
+            </a>
+
+            <a href="index.html" class="cta-button secondary"
+                style="margin-top: 1rem; display: inline-flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-home" style="margin-right: 10px;"></i> Volver al Inicio
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // URL del Webhook para enviar el email DESPUÉS del pago
+        const emailWebhookUrl = "https://manager.generarise.space/webhook/SEND_LEAD_EMAIL";
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Get payment status from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentStatus = urlParams.get('status'); // e.g., 'approved'
+            const paymentId = urlParams.get('payment_id');
+            const preferenceId = urlParams.get('preference_id');
+
+            // Retrieve stored lead data
+            const leadData = sessionStorage.getItem('pendingLeadData');
+
+            if (paymentStatus === 'approved' && leadData) {
+                const data = JSON.parse(leadData);
+                data.paymentId = paymentId;
+                data.preferenceId = preferenceId;
+                data.paymentConfirmed = true;
+
+                try {
+                    // Send email NOW (after payment confirmed)
+                    const response = await fetch(emailWebhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (response.ok) {
+                        document.getElementById('emailStatus').innerHTML =
+                            '<i class="fa-solid fa-check"></i> Email enviado exitosamente';
+
+                        // Clear stored data
+                        sessionStorage.removeItem('pendingLeadData');
+                    } else {
+                        throw new Error('Failed to send email');
+                    }
+                } catch (error) {
+                    console.error('Error sending email:', error);
+                    document.getElementById('emailStatus').innerHTML =
+                        '<i class="fa-solid fa-exclamation-triangle"></i> Email será enviado en breve';
+                }
+            } else if (paymentStatus === 'pending') {
+                document.querySelector('.confirmation-card h1').innerHTML = 'Pago Pendiente';
+                document.querySelector('.confirmation-card p').innerHTML =
+                    'Tu pago está siendo procesado. Te notificaremos cuando se confirme.';
+                document.querySelector('.success-icon').innerHTML =
+                    '<i class="fa-solid fa-clock"></i>';
+                document.getElementById('emailStatus').style.display = 'none';
+            } else if (paymentStatus === 'rejected' || paymentStatus === 'failure') {
+                document.querySelector('.confirmation-card h1').innerHTML = 'Pago Rechazado';
+                document.querySelector('.confirmation-card p').innerHTML =
+                    'Hubo un problema con tu pago. Por favor, intenta nuevamente o contáctanos.';
+                document.querySelector('.success-icon').innerHTML =
+                    '<i class="fa-solid fa-times-circle" style="color: #ef4444;"></i>';
+                document.getElementById('emailStatus').style.display = 'none';
+            } else {
+                // No payment info or no lead data
+                document.querySelector('.info-box').style.display = 'none';
+                document.getElementById('emailStatus').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>

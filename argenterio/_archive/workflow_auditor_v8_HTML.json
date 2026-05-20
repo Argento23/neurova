@@ -1,0 +1,202 @@
+{
+    "name": "Argenterio - Auditor V7 (Fixed Connections)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "argenterio-audit-v1",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Data",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                300
+            ],
+            "webhookId": "argenterio-audit-v1"
+        },
+        {
+            "parameters": {
+                "modelName": "models/llama-3.3-70b-versatile",
+                "options": {}
+            },
+            "name": "Groq Chat Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                220,
+                520
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "prompt": "=Analista ARGT-26. Tu misi\u00f3n: Analizar finanzas para un TEASER de venta. \n\nDATOS DEL USUARIO:\n- Ingresos: {{ $('Webhook Data').item.json.body.ingresos }}\n- Gastos: {{ $('Webhook Data').item.json.body.gastos }}\n- Deuda: {{ $('Webhook Data').item.json.body.deudas }}\n- Miedo Principal: {{ $('Webhook Data').item.json.body.objetivo }}\n\nSALIDA REQUERIDA:\nEscribe un solo p\u00e1rrafo corto (m\u00e1ximo 3 l\u00edneas) y alarmista. Usa un tono t\u00e9cnico pero urgente. Dile directamente por qu\u00e9 est\u00e1 en peligro bas\u00e1ndote en sus n\u00fameros. NO des la soluci\u00f3n todav\u00eda, solo el diagn\u00f3stico del problema para que quiera comprar el reporte."
+            },
+            "name": "AI Teaser Generator",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                220,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.mercadopago.com/checkout/preferences",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "contentType": "json",
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "items",
+                            "value": "={{ [ { \"title\": \"Informe Shield Argenterio\", \"quantity\": 1, \"currency_id\": \"ARS\", \"unit_price\": 15000 } ] }}"
+                        },
+                        {
+                            "name": "back_urls",
+                            "value": "={{ { \"success\": \"https://argenterio.com/agency/confirmacion.html\", \"failure\": \"https://argenterio.com/agency/confirmacion.html\", \"pending\": \"https://argenterio.com/agency/confirmacion.html\" } }}"
+                        },
+                        {
+                            "name": "auto_return",
+                            "value": "approved"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Crear Link MP",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                480,
+                300
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_MP_ACCESS_TOKEN_ID",
+                    "name": "MercadoPago Token (Header Auth)"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ {\n    \"message\": \"Analisis Completado\",\n    \"mp_link\": $('Crear Link MP').item.json.init_point,\n    \"paypal_link\": \"https://www.paypal.com/ncp/payment/LP2ZBHDAJPLDY\",\n    \"teaser\": $('AI Teaser Generator').item.json.text\n} }}",
+                "options": {}
+            },
+            "name": "Responder a Web (JSON)",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                750,
+                550
+            ]
+        },
+        {
+            "parameters": {
+                "senderEmail": "security@argenterio.com",
+                "toEmail": "={{ $('Webhook Data').item.json[\"body\"][\"email\"] }}",
+                "subject": "\u26a0\ufe0f Tu Pre-Diagn\u00f3stico de Riesgo Financiero",
+                "htmlContent": "={{ $json.html }}"
+            },
+            "name": "Email - Teaser + Link",
+            "type": "n8n-nodes-base.sendInBlue",
+            "typeVersion": 2,
+            "position": [
+                750,
+                300
+            ],
+            "credentials": {
+                "sendInBlueApi": {
+                    "id": "YOUR_BREVO_CREDENTIAL_ID",
+                    "name": "Brevo/Sendinblue"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "\n    const htmlTemplate = `<!DOCTYPE html>\n<html lang=\"es\">\n\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>An\u00e1lisis Financiero Completado</title>\n</head>\n\n<body\n    style=\"margin: 0; padding: 0; background-color: #050505; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #e0e0e0; -webkit-font-smoothing: antialiased;\">\n\n    <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"\n        style=\"background-color: #000000; padding: 40px 10px; background-image: radial-gradient(#1a1a1a 1px, transparent 1px); background-size: 20px 20px;\">\n        <tr>\n            <td align=\"center\">\n                <!-- Main Container -->\n                <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"\n                    style=\"background-color: #0a0a0a; border: 1px solid #222; max-width: 600px; width: 100%; border-radius: 8px; overflow: hidden; box-shadow: 0 0 40px rgba(255, 51, 51, 0.05);\">\n\n                    <!-- Header -->\n                    <tr>\n                        <td\n                            style=\"padding: 30px; border-bottom: 2px solid #ff3333; background: linear-gradient(180deg, #0f0f0f 0%, #050505 100%); text-align: left;\">\n                            <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                                <tr>\n                                    <td>\n                                        <span\n                                            style=\"color: #ffffff; font-weight: 800; font-size: 22px; letter-spacing: 1px;\">ARGENTERIO<span\n                                                style=\"color:#ff3333;\">_</span></span>\n                                    </td>\n                                    <td align=\"right\">\n                                        <span\n                                            style=\"background-color: rgba(255, 51, 51, 0.1); border: 1px solid #ff3333; color: #ff3333; font-size: 10px; padding: 4px 8px; border-radius: 2px; font-family: 'Courier New', monospace; letter-spacing: 1px;\">STATUS:\n                                            PENDING</span>\n                                    </td>\n                                </tr>\n                            </table>\n                        </td>\n                    </tr>\n\n                    <!-- Body -->\n                    <tr>\n                        <td style=\"padding: 40px 30px;\">\n\n                            <!-- Status Box -->\n                            <div\n                                style=\"background-color: rgba(255, 51, 51, 0.03); border-left: 3px solid #ff3333; padding: 15px; margin-bottom: 30px;\">\n                                <p\n                                    style=\"margin: 0; font-family: 'Courier New', monospace; font-size: 14px; color: #ff3333;\">\n                                    >> ALERTA_DETECTADA [!]\n                                </p>\n                            </div>\n\n                            <p style=\"color: #cccccc; font-size: 16px; line-height: 1.6; margin-bottom: 20px;\">\n                                Hemos procesado tus datos preliminares. Nuestro sistema de IA ha detectado los\n                                siguientes indicadores en tu perfil financiero:\n                            </p>\n\n                            <!-- Teaser Text -->\n                            <div\n                                style=\"background-color: #111; padding: 20px; border-radius: 4px; border: 1px dashed #444; margin-bottom: 30px; font-family: 'Courier New', monospace; color: #e0e0e0; font-size: 14px; line-height: 1.5;\">\n                                {{teaser_text}}\n                            </div>\n\n                            <p style=\"color: #cccccc; font-size: 16px; line-height: 1.6; margin-bottom: 35px;\">\n                                Esta es solo la punta del iceberg. El <strong>Reporte Shield Completo</strong> contiene\n                                las estrategias exactas para blindar tu patrimonio contra estos riesgos.\n                            </p>\n\n                            <!-- CTA Buttons -->\n                            <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                                <tr>\n                                    <td align=\"center\" style=\"padding: 10px 0 20px 0;\">\n                                        <a href=\"{{payment_link}}\"\n                                            style=\"background: linear-gradient(90deg, #009ee3 0%, #008ad3 100%); color: #ffffff; text-decoration: none; padding: 16px 30px; font-weight: 700; font-size: 16px; display: inline-block; border-radius: 4px; box-shadow: 0 4px 15px rgba(0, 158, 227, 0.3); margin-bottom: 10px; width: 220px; text-align: center;\">\n                                            Pagar con MercadoPago\n                                        </a>\n                                        <br>\n                                        <a href=\"{{paypal_link}}\"\n                                            style=\"background: linear-gradient(90deg, #003087 0%, #00256b 100%); color: #ffffff; text-decoration: none; padding: 16px 30px; font-weight: 700; font-size: 16px; display: inline-block; border-radius: 4px; box-shadow: 0 4px 15px rgba(0, 48, 135, 0.3); width: 220px; text-align: center;\">\n                                            Pagar con PayPal (USD)\n                                        </a>\n                                    </td>\n                                </tr>\n                            </table>\n\n                            <!-- Separator -->\n                            <hr style=\"border: none; border-top: 1px solid #222; margin: 30px 0;\">\n\n                            <p style=\"color: #666; font-size: 13px; line-height: 1.6; text-align: center;\">\n                                <strong style=\"color: #fff;\">Argenterio AI</strong><br>\n                                Tu defensa financiera en tiempos de caos.\n                            </p>\n\n                        </td>\n                    </tr>\n\n                    <!-- Footer -->\n                    <tr>\n                        <td\n                            style=\"background-color: #080808; padding: 30px; text-align: center; border-top: 1px solid #222;\">\n                            <p style=\"color: #444444; font-size: 11px; margin: 0;\">\n                                ARGENTERIO FINANCIAL DEFENSE AI<br>\n                                \u00a9 2026 NEUROVA. ALL RIGHTS RESERVED.\n                            </p>\n                        </td>\n                    </tr>\n                </table>\n            </td>\n        </tr>\n    </table>\n\n</body>\n\n</html>`;\n    \n    const mp_link = $('Crear Link MP').item.json.init_point || '#';\n    const teaser_text = $('AI Teaser Generator').item.json.text || 'An\u00e1lisis pendiente...';\n    const paypal_link = \"https://www.paypal.com/ncp/payment/LP2ZBHDAJPLDY\"; // Hardcoded in V7\n    \n    let finalHtml = htmlTemplate.replace('{{teaser_text}}', teaser_text);\n    finalHtml = finalHtml.replace('{{payment_link}}', mp_link);\n    finalHtml = finalHtml.replace('{{paypal_link}}', paypal_link);\n    \n    return {\n        json: {\n            html: finalHtml\n        }\n    };\n    "
+            },
+            "id": "html_builder_argt",
+            "name": "HTML Builder",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                600,
+                450
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook Data": {
+            "main": [
+                [
+                    {
+                        "node": "AI Teaser Generator",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Chat Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Teaser Generator",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Teaser Generator": {
+            "main": [
+                [
+                    {
+                        "node": "Crear Link MP",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Crear Link MP": {
+            "main": [
+                [
+                    {
+                        "node": "Responder a Web (JSON)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "HTML Builder",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "HTML Builder": {
+            "main": [
+                [
+                    {
+                        "node": "Email - Teaser + Link",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

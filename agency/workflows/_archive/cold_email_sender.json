@@ -1,0 +1,475 @@
+{
+    "name": "GenerArise - Cold Email Automation",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "days",
+                            "daysInterval": 1
+                        },
+                        {
+                            "field": "hours",
+                            "triggerAtHour": 10
+                        }
+                    ]
+                }
+            },
+            "id": "cron",
+            "name": "Cron Diario 10am",
+            "type": "n8n-nodes-base.cron",
+            "typeVersion": 1,
+            "position": [
+                240,
+                400
+            ]
+        },
+        {
+            "parameters": {},
+            "id": "manual",
+            "name": "Manual Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                240,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "read",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "leads_outreach",
+                    "mode": "list"
+                }
+            },
+            "id": "read_leads",
+            "name": "Leer Leads Sheet",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                460,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.Estado }}",
+                            "rightValue": "Pendiente",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "filter_pending",
+            "name": "Filtrar Pendientes",
+            "type": "n8n-nodes-base.filter",
+            "typeVersion": 2,
+            "position": [
+                680,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "numberToReturn": 10
+            },
+            "id": "limit",
+            "name": "Limitar a 10/día",
+            "type": "n8n-nodes-base.limit",
+            "typeVersion": 1,
+            "position": [
+                900,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "nombre",
+                            "name": "nombre",
+                            "value": "={{ $json.Nombre }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "empresa",
+                            "name": "empresa",
+                            "value": "={{ $json.Empresa }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "email",
+                            "name": "email",
+                            "value": "={{ $json.Email }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "industria",
+                            "name": "industria",
+                            "value": "={{ $json.Industria }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "pais",
+                            "name": "pais",
+                            "value": "={{ $json.Pais }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "prep_data",
+            "name": "Preparar Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                1120,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.industria }}",
+                            "rightValue": "Inmobiliaria",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_real_estate",
+            "name": "Es Inmobiliaria?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1340,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.industria }}",
+                            "rightValue": "Hotel",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_hotel",
+            "name": "Es Hotel?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1340,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "subject",
+                            "name": "subject",
+                            "value": "={{ $json.nombre }}, 67 consultas sin responder = 67 ventas perdidas",
+                            "type": "string"
+                        },
+                        {
+                            "id": "body",
+                            "name": "body",
+                            "value": "=Hola {{ $json.nombre }},\n\nVi que {{ $json.empresa }} publica en Zonaprop/MercadoLibre, pero hay un problema:\n\n→ Recibís consultas a las 2 AM, domingos, feriados\n→ Perdés leads porque respondés tarde\n→ Tu equipo repite las mismas respuestas 50 veces/día\n\nTe muestro cómo automatizar esto con IA para que:\n✅ Respondas en 60 segundos (incluso dormido)\n✅ Califiques leads automáticamente\n✅ Nunca pierdas una consulta\n\n*Implemento gratis por 15 días. Si no ves resultados, no me pagás nada.*\n\n¿Mañana a las 15:00 o pasado a las 11:00 para una demo de 20 min?\n\nSaludos,\nGustavo Eder\nGenerArise AI\n+54 9 11 7358 5449\nwww.generarise.space",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "template_real_estate",
+            "name": "Template Inmobiliaria",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                1560,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "subject",
+                            "name": "subject",
+                            "value": "={{ $json.nombre }}, 73% Ihrer Buchungsanfragen unbeantwortet",
+                            "type": "string"
+                        },
+                        {
+                            "id": "body",
+                            "name": "body",
+                            "value": "=Guten Tag {{ $json.nombre }},\n\nAls argentinisch-österreichischer KI-Spezialist habe ich ein Problem entdeckt:\n\n{{ $json.empresa }} verliert Buchungen aus Lateinamerika (wachsender Markt!) wegen Sprachbarrieren und Zeitzonenproblemen.\n\nMeine Lösung wurde in 12 Hotels in Buenos Aires getestet. Ergebnis:\n\n✅ 100% Antwortquote in DE/EN/ES/IT\n✅ 40% mehr Direktbuchungen\n✅ Null zusätzlicher Personalaufwand\n\nIch bringe diese bewährte Technologie jetzt nach Österreich.\n\n*Kostenloser 30-Tage-Test für die ersten 5 Hotels.*\n\nInteresse an einer 15-Min-Demo?\n\nMit freundlichen Grüßen,\nGustavo Eder\nArgentinisch-Österreichischer Staatsbürger\nGenerArise AI | Buenos Aires ↔ Wien\n\n📱 WhatsApp: +54 9 11 7358 5449\n🌐 generarise.space",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "template_hotel",
+            "name": "Template Hotel (DE)",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                1560,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "fromEmail": "agentes.space@gmail.com",
+                "toEmail": "={{ $json.email }}",
+                "subject": "={{ $json.subject }}",
+                "emailType": "text",
+                "message": "={{ $json.body }}",
+                "options": {}
+            },
+            "id": "send_email",
+            "name": "Enviar Email",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2.1,
+            "position": [
+                1780,
+                400
+            ],
+            "credentials": {
+                "gmailOAuth2": {
+                    "id": "YOUR_GMAIL_CREDENTIAL_ID",
+                    "name": "Gmail account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "amount": 5,
+                "unit": "seconds"
+            },
+            "id": "wait",
+            "name": "Esperar 5 seg",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                2000,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "leads_outreach",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Estado": "Enviado",
+                        "Fecha_Envio": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}"
+                    }
+                }
+            },
+            "id": "update_status",
+            "name": "Actualizar Estado",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                2220,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Cron Diario 10am": {
+            "main": [
+                [
+                    {
+                        "node": "Leer Leads Sheet",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Leer Leads Sheet",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Leer Leads Sheet": {
+            "main": [
+                [
+                    {
+                        "node": "Filtrar Pendientes",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtrar Pendientes": {
+            "main": [
+                [
+                    {
+                        "node": "Limitar a 10/día",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Limitar a 10/día": {
+            "main": [
+                [
+                    {
+                        "node": "Preparar Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Preparar Data": {
+            "main": [
+                [
+                    {
+                        "node": "Es Inmobiliaria?",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Es Hotel?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Es Inmobiliaria?": {
+            "main": [
+                [
+                    {
+                        "node": "Template Inmobiliaria",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Es Hotel?": {
+            "main": [
+                [
+                    {
+                        "node": "Template Hotel (DE)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Template Inmobiliaria": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Template Hotel (DE)": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar Email": {
+            "main": [
+                [
+                    {
+                        "node": "Esperar 5 seg",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Esperar 5 seg": {
+            "main": [
+                [
+                    {
+                        "node": "Actualizar Estado",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "cold-email-automation-v1"
+}

@@ -1,0 +1,258 @@
+{
+    "name": "Cilo - Automatización Mayorista Fábrica V1",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "cilo-mayorista",
+                "options": {}
+            },
+            "id": "webhook-trigger",
+            "name": "Webhook WhatsApp (Lead)",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ],
+            "webhookId": "cilo-mayorista"
+        },
+        {
+            "parameters": {
+                "model": "llama3-70b-8192"
+            },
+            "id": "groq-model",
+            "name": "Groq Llama 3",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                470,
+                500
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres el asistente de la fábrica de Cilo. Clasifica el mensaje entrante.\n\nMensaje del cliente: {{ $json.body.message }}\nTeléfono: {{ $json.body.phone }}\n\nDebe extraer:\n- Nombre del producto que pide.\n- Cantidad (si la menciona, sino 'No especificada').\n- Nombre del cliente (si lo firma).\n\nDevuelve un JSON con: { \"producto\": \"...\", \"cantidad\": \"...\", \"cliente\": \"...\" }",
+                "hasOutputParser": true
+            },
+            "id": "ia-extractor",
+            "name": "IA Extractor",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                470,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "lookup",
+                "documentId": {
+                    "__rl": true,
+                    "value": "ID_DE_TU_GOOGLE_SHEET",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "Stock",
+                    "mode": "list"
+                },
+                "lookupColumn": "Producto",
+                "lookupValue": "={{ $json.producto }}"
+            },
+            "id": "google-sheets",
+            "name": "Verificar Stock (Sheets)",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.3,
+            "position": [
+                700,
+                300
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_SHEETS_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "number": [
+                        {
+                            "value1": "={{ $json.Stock_Disponible }}",
+                            "operation": "larger",
+                            "value2": 0
+                        }
+                    ]
+                }
+            },
+            "id": "router",
+            "name": "Condicional Switch (Stock)",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                920,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "chatId": "ID_TELEGRAM_JEFE_PLANTA",
+                "text": "=🚨 ALERTA PRODUCCIÓN 🚨\n\nHa entrado un pedido mayorista buscando: {{ $('IA Extractor').item.json.producto }}\n\nActualmente el stock en Sheets figura como BAJO o NULO. Por favor verificar y programar horneada."
+            },
+            "id": "telegram-fabrica",
+            "name": "Aviso a Fábrica",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.1,
+            "position": [
+                1150,
+                450
+            ],
+            "credentials": {
+                "telegramApi": {
+                    "id": "YOUR_TELEGRAM_ID",
+                    "name": "Telegram Bot"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://tu-api/sendText",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "phone",
+                            "value": "={{ $('IA Extractor').item.json.phone }}"
+                        },
+                        {
+                            "name": "text",
+                            "value": "=¡Hola! 👋 Confirmamos que HICIMOS UNA RESERVA de stock para tu pedido de {{ $('IA Extractor').item.json.producto }}. \n\nEn unos minutos te adjuntamos el PDF con precios mayoristas y formatos de empaque para que cerremos tu compra."
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "whatsapp-client",
+            "name": "Respuesta WhatsApp (Hay Stock)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1150,
+                150
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://tu-api/sendText",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "phone",
+                            "value": "={{ $('IA Extractor').item.json.phone }}"
+                        },
+                        {
+                            "name": "text",
+                            "value": "=¡Hola! 👋 El producto {{ $('IA Extractor').item.json.producto }} está actualmente en ciclo de producción. \n\nAcabamos de dar aviso a la fábrica para que nos pasen la fecha exacta de entrega. En breve un asesor te confirmará la disponibilidad total. ¡Gracias por confiar en Cilo!"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "whatsapp-client-no-stock",
+            "name": "Respuesta WhatsApp (Sin Stock)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1400,
+                450
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook WhatsApp (Lead)": {
+            "main": [
+                [
+                    {
+                        "node": "IA Extractor",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Llama 3": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "IA Extractor",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IA Extractor": {
+            "main": [
+                [
+                    {
+                        "node": "Verificar Stock (Sheets)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Verificar Stock (Sheets)": {
+            "main": [
+                [
+                    {
+                        "node": "Condicional Switch (Stock)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Condicional Switch (Stock)": {
+            "main": [
+                [
+                    {
+                        "node": "Respuesta WhatsApp (Hay Stock)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Aviso a Fábrica",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Aviso a Fábrica": {
+            "main": [
+                [
+                    {
+                        "node": "Respuesta WhatsApp (Sin Stock)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

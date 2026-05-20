@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Austria Tourismus 4.0 - Stefan AI Concierge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --emerald: #10b981;
+            --gold: #d4af37;
+            --bg: #010409;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        h1,
+        h2,
+        .playfair {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--emerald), #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-bg {
+            background: linear-gradient(rgba(1, 4, 9, 0.8), rgba(1, 4, 9, 0.95)), url('https://images.unsplash.com/photo-1516550893923-42d28e5677af?auto=format&fit=crop&q=80&w=2000');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .card-premium {
+            border-bottom: 2px solid transparent;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .card-premium:hover {
+            background: rgba(255, 255, 255, 0.04);
+            transform: translateY(-8px);
+            border-bottom-color: var(--emerald);
+        }
+
+        .sepia-glow {
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.05);
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+
+            .hero-bg {
+                background: white;
+                padding-top: 2rem;
+            }
+
+            .glass {
+                border: 1px solid #ddd;
+                background: white;
+                color: black;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Cover Page -->
+    <section class="min-h-screen flex flex-col justify-center items-center text-center p-10 hero-bg">
+        <div
+            class="mb-12 glass px-8 py-3 rounded-full border-emerald-500/20 text-emerald-400 text-xs font-bold tracking-[0.4em] uppercase">
+            Digitale Exzellenz für die Hotellerie
+        </div>
+
+        <div class="max-w-5xl space-y-8">
+            <h1 class="text-6xl md:text-9xl font-bold tracking-tight leading-none text-white">
+                Tourismus <span class="gradient-text italic">4.0</span>
+            </h1>
+            <p class="text-xl md:text-3xl text-slate-400 font-light max-w-3xl mx-auto leading-relaxed">
+                Willkommen in der Zukunft der Gastfreundschaft. Mit <span class="text-white font-medium">Stefan
+                    AI</span> definieren wir den Concierge-Service für Luxushotels neu.
+            </p>
+        </div>
+
+        <div class="mt-24 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-6xl w-full">
+            <div class="glass p-8 rounded-3xl border-white/5 sepia-glow">
+                <span class="text-4xl font-bold text-emerald-400">24/7</span>
+                <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-2">Bereitschaft</p>
+            </div>
+            <div class="glass p-8 rounded-3xl border-white/5 sepia-glow">
+                <span class="text-4xl font-bold text-white">Nativ</span>
+                <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-2">Multilingual</p>
+            </div>
+            <div class="glass p-8 rounded-3xl border-white/5 sepia-glow">
+                <span class="text-4xl font-bold text-emerald-400">PMS</span>
+                <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-2">Integration</p>
+            </div>
+            <div class="glass p-8 rounded-3xl border-white/5 sepia-glow">
+                <span class="text-4xl font-bold text-white">+65%</span>
+                <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-2">Conversion</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Vision -->
+    <section class="py-32 px-10 max-w-7xl mx-auto grid md:grid-cols-2 gap-20 items-center">
+        <div class="space-y-8">
+            <h2 class="text-5xl font-bold leading-tight">Warum <span class="text-emerald-500">Stefan AI?</span></h2>
+            <p class="text-lg text-slate-400 leading-relaxed font-light">
+                Stefan ist nicht nur ein Chatbot – er ist ein hochmoderner KI-Agent, der Ihre Gäste versteht, berät und
+                Buchungen direkt in Ihr System einpflegt.
+            </p>
+            <ul class="space-y-6 text-slate-300">
+                <li class="flex items-start gap-4">
+                    <div
+                        class="mt-1 w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500">
+                        ✓</div>
+                    <div>
+                        <span class="font-bold text-white block">Echte Emotionale Intelligenz</span>
+                        Stefan erkennt die Stimmung des Gastes und passt seine Tonalität an.
+                    </div>
+                </li>
+                <li class="flex items-start gap-4">
+                    <div
+                        class="mt-1 w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500">
+                        ✓</div>
+                    <div>
+                        <span class="font-bold text-white block">Spezialisiert auf Österreich</span>
+                        Optimiert für lokale Dialekte (auf Wunsch) und kulturelle Standards.
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="relative">
+            <div class="glass p-2 rounded-[40px] rotate-2 scale-105 overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=1200"
+                    alt="Luxus Hotel" class="rounded-[38px] opacity-80">
+            </div>
+            <div class="absolute -bottom-10 -left-10 glass p-8 rounded-3xl -rotate-3 border-emerald-500/30">
+                <p class="text-sm font-bold">"Der Meilenstein für Luxushotels."</p>
+                <p class="text-[10px] text-slate-500 uppercase mt-1">Tourismus Expert Hub</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Grid -->
+    <section class="py-32 px-10 bg-white/5">
+        <div class="max-w-7xl mx-auto space-y-20">
+            <div class="text-center space-y-4">
+                <h2 class="text-4xl font-bold">Ihre Digitale Transformation</h2>
+                <div class="w-20 h-1 bg-emerald-500 mx-auto rounded-full"></div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass p-10 rounded-[32px] card-premium space-y-6">
+                    <div class="text-4xl text-emerald-400">🌍</div>
+                    <h3 class="text-2xl font-bold">Sprachbarrieren eliminieren</h3>
+                    <p class="text-slate-400 font-light">Stefan spricht fließend Deutsch (Sie/Du), Englisch, Spanisch
+                        und Italienisch – nativ und ohne Akzent.</p>
+                </div>
+                <div class="glass p-10 rounded-[32px] card-premium space-y-6">
+                    <div class="text-4xl text-emerald-400">🏢</div>
+                    <h3 class="text-2xl font-bold">Deep PMS Integration</h3>
+                    <p class="text-slate-400 font-light">Direkte Anbindung an Systeme wie MEWS, Cloudbeds oder Infor für
+                        automatisierte Check-ins.</p>
+                </div>
+                <div class="glass p-10 rounded-[32px] card-premium space-y-6">
+                    <div class="text-4xl text-emerald-400">💍</div>
+                    <h3 class="text-2xl font-bold">Upselling Strategien</h3>
+                    <p class="text-slate-400 font-light">KI-gesteuerte Empfehlungen für Spa-Pakete, Upgrades und
+                        exklusive Hotelangebote.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="py-40 px-10 relative overflow-hidden">
+        <div class="max-w-4xl mx-auto text-center space-y-12">
+            <h2 class="text-5xl md:text-7xl font-bold italic playfair">Exzellenz wartet nicht.</h2>
+            <p class="text-xl text-slate-400 font-light">Vereinbaren Sie Ihr kostenloses Strategie-Gespräch für
+                "Tourismus 4.0".</p>
+            <div class="pt-6">
+                <div
+                    class="inline-block bg-emerald-500 text-black px-16 py-6 rounded-2xl font-bold text-xl hover:bg-emerald-400 transition-colors shadow-2xl shadow-emerald-500/20 active:scale-95 cursor-pointer">
+                    Jetzt Audit Anfragen
+                </div>
+            </div>
+            <div class="pt-10 flex justify-center gap-10 text-xs font-bold uppercase tracking-[0.3em] text-slate-500">
+                <span>Argenterio.com</span>
+                <span>Stefan AI</span>
+                <span>Austria Nexus</span>
+            </div>
+        </div>
+    </section>
+
+    <footer class="p-20 text-center opacity-40">
+        <p class="text-xs tracking-widest uppercase">&copy; 2026 GenerArise / Argenterio - Visionary Hospitality
+            Technology.</p>
+    </footer>
+
+    <div class="no-print fixed bottom-8 right-8">
+        <button onclick="window.print()"
+            class="bg-white text-black px-8 py-4 rounded-full font-bold shadow-2xl hover:bg-emerald-500 hover:text-white transition-all active:scale-95">
+            Drucken / PDF
+        </button>
+    </div>
+</body>
+
+</html>

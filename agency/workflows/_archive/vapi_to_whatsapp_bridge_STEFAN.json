@@ -1,0 +1,132 @@
+{
+    "name": "Vapi to WhatsApp Bridge - STEFAN (Austria)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "vapi-stefan-bridge",
+                "options": {},
+                "responseMode": "responseNode"
+            },
+            "id": "webhook-stefan",
+            "name": "Stefan Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "phone-id",
+                            "name": "phone",
+                            "value": "={{ $json.body?.message?.toolCalls?.[0]?.function?.arguments?.phone || $json.body?.phone }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "msg-id",
+                            "name": "message",
+                            "value": "={{ $json.body?.message?.toolCalls?.[0]?.function?.arguments?.message || $json.body?.message }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "call-id",
+                            "name": "toolCallId",
+                            "value": "={{ $json.body?.message?.toolCalls?.[0]?.id }}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-node-stefan",
+            "name": "Prepare Data Stefan",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                350,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "Argenterio",
+                "options_message": {
+                    "number": "={{ $json.phone }}",
+                    "textMessage": {
+                        "text": "={{ $json.message }}"
+                    }
+                }
+            },
+            "id": "evo-stefan",
+            "name": "Evolution API Austria",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                600,
+                300
+            ],
+            "continueOnFail": true,
+            "credentials": {
+                "evolutionApi": {
+                    "id": "CHANGE_FOR_AUSTRIA_CREDENTIAL_ID",
+                    "name": "Argenterio Instance"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $('Prepare Data Stefan').item.json.toolCallId }}\",\n      \"result\": \"Information sent to the hotel via WhatsApp.\"\n    }\n  ]\n}"
+            },
+            "id": "respond-stefan",
+            "name": "Respond to Vapi Stefan",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.1,
+            "position": [
+                850,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Stefan Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Data Stefan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Data Stefan": {
+            "main": [
+                [
+                    {
+                        "node": "Evolution API Austria",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Evolution API Austria": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Vapi Stefan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

@@ -1,0 +1,187 @@
+{
+  "name": "AI_LEAD_AUDITOR_V1",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tally-lead-audit",
+        "options": {}
+      },
+      "name": "Webhook - Tally Form",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "generarise-audit-webhook"
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "nombre_empresa",
+              "value": "={{ $json.body.data.fields.find(f => f.label === 'Nombre de la Empresa').value }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $json.body.data.fields.find(f => f.type === 'EMAIL').value }}"
+            },
+            {
+              "name": "telefono",
+              "value": "={{ $json.body.data.fields.find(f => f.type === 'PHONE_NUMBER').value }}"
+            },
+            {
+              "name": "sector",
+              "value": "={{ $json.body.data.fields.find(f => f.label === 'Sector de tu negocio').value }}"
+            },
+            {
+              "name": "volumen_mensajes",
+              "value": "={{ $json.body.data.fields.find(f => f.label.includes('volumen aproximado')).value }}"
+            },
+            {
+              "name": "problema_principal",
+              "value": "={{ $json.body.data.fields.find(f => f.label.includes('problema principal')).value }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Extract Tally Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer TU_API_KEY_DE_OPENROUTER"
+            },
+            {
+              "name": "HTTP-Referer",
+              "value": "https://generarise.com"
+            },
+            {
+              "name": "X-Title",
+              "value": "GenerArise Lead Auditor"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"meta-llama/llama-3-8b-instruct:free\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Eres un Consultor Experto en Automatización y Operaciones de 'GenerArise'. Tu objetivo es crear una auditoría personalizada y altamente persuasiva para un posible cliente B2B basada en los datos tácticos que nos proporcionó. \\n\\nInstrucciones:\\n1. Analiza el 'problema_principal', el 'sector' y el 'volumen_mensajes'.\\n2. Estima el impacto económico o de tiempo que están perdiendo por no tener automatización.\\n3. Propón UNA o DOS soluciones específicas y ejecutables (ej. 'Agente de Voz Vapi' o 'Asistente WhatsApp').\\n4. Redacta el resultado como un mensaje de texto fluido, profesional. No debe parecer generado por IA. Invita sutilmente a una llamada.\\n\\nOutput:\\nTexto de 3-4 párrafos máximo.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Datos de la empresa:\\nEmpresa: {{ $json.nombre_empresa }}\\nSector: {{ $json.sector }}\\nVolumen: {{ $json.volumen_mensajes }}\\nDolor principal: {{ $json.problema_principal }}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "name": "OpenRouter - Generar Auditoría",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "email_destino",
+              "value": "={{ $node['Extract Tally Data'].json.email }}"
+            },
+            {
+              "name": "telefono_destino",
+              "value": "={{ $node['Extract Tally Data'].json.telefono }}"
+            },
+            {
+              "name": "auditoria_texto",
+              "value": "={{ $json.choices[0].message.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Prepare Output",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "chatId": "TU_ID_DE_TELEGRAM_INTERNO",
+        "text": "=🚀 NUEVO LEAD AUDITADO\n\nEmpresa: {{ $node['Extract Tally Data'].json.nombre_empresa }}\nEmail: {{ $node['Extract Tally Data'].json.email }}\n\n--- PROPUESTA GENERADA ---\n\n{{ $json.auditoria_texto }}\n\n-------------------------\n(Puedes enviar esto manualmente o habilitar el nodo de Gmail/WhatsApp a la derecha de este nodo para envío automático)."
+      },
+      "name": "Telegram - Notificar a Gustavo",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook - Tally Form": {
+      "main": [
+        [
+          {
+            "node": "Extract Tally Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Tally Data": {
+      "main": [
+        [
+          {
+            "node": "OpenRouter - Generar Auditoría",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter - Generar Auditoría": {
+      "main": [
+        [
+          {
+            "node": "Prepare Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Output": {
+      "main": [
+        [
+          {
+            "node": "Telegram - Notificar a Gustavo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "pinData": {}
+}

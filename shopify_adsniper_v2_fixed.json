@@ -1,0 +1,186 @@
+{
+    "name": "Shopify AdSniper AI - Wealth Multiplier (FIXED v2)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "shopify-adsniper",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "id": "webhook",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "={{ $json.body.product_url }}",
+                "options": {
+                    "redirect": {
+                        "redirect": true
+                    }
+                }
+            },
+            "id": "scrape",
+            "name": "Scrape Product",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                450,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "dataPropertyName": "data",
+                "extractionValues": {
+                    "values": [
+                        {
+                            "key": "title",
+                            "cssSelector": "h1, .product-title, .product_title",
+                            "returnValue": "text",
+                            "returnArray": false
+                        },
+                        {
+                            "key": "price",
+                            "cssSelector": ".price, #price, [itemprop='price'], .product-price",
+                            "returnValue": "text",
+                            "returnArray": false
+                        },
+                        {
+                            "key": "description",
+                            "cssSelector": ".description, #description, [itemprop='description'], .product-description",
+                            "returnValue": "html",
+                            "returnArray": false
+                        },
+                        {
+                            "key": "image",
+                            "cssSelector": "img",
+                            "returnValue": "attribute",
+                            "attribute": "src",
+                            "returnArray": true
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "extract",
+            "name": "Extract Data",
+            "type": "n8n-nodes-base.htmlExtract",
+            "typeVersion": 1,
+            "position": [
+                650,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// Normalización Robusta\nconst rawDesc = $input.item.json.description || '';\nconst cleanDesc = rawDesc.replace(/<[^>]*>/g, ' ').replace(/\\s+/g, ' ').trim().substring(0, 3000);\nconst images = $input.item.json.image || [];\n// Filtrar imagenes de productos (evitar iconos)\nconst mainImage = images.find(img => (img.includes('products') || img.includes('cdn.shopify.com')) && !img.includes('icon')) || images[0] || '';\n\nreturn {\n  product_url: $('Webhook').item.json.body.product_url,\n  title: $input.item.json.title || 'Producto Sin Nombre',\n  price: $input.item.json.price || 'Consultar',\n  description: cleanDesc,\n  main_image: mainImage\n};"
+            },
+            "id": "normalize",
+            "name": "Normalize",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                850,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq_model",
+            "name": "Groq Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                1050,
+                500
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=SYSTEM ROLE:\nYou are AdSniper, an elite Direct Response Copywriter for E-commerce (specializing in Facebook/Instagram Ads).\nYour goal is to maximize ROAS (Return on Ad Spend).\n\nPRODUCT INFO:\nName: {{ $json.title }}\nPrice: {{ $json.price }}\nDescription: {{ $json.description }}\nImage URL: {{ $json.main_image }}\n\nTASK:\nGenerate 3 distinct Facebook Ad Variations for this product.\n\nVARIATION 1: LOGIC & BENEFITS (The \"Why\")\nFocus on problem/solution, features, and rationality.\n\nVARIATION 2: EMOTIONAL & DESIRE (The \"Feel\")\nFocus on status, transformation, or relief of pain.\n\nVARIATION 3: SCARCITY & PATTERN INTERRUPT (The \"FOMO\")\nShort, punchy, controversial, or urgent.\n\nFOR EACH VARIATION, PROVIDE:\n- **Headline**: Catchy, < 10 words.\n- **Primary Text**: The body copy (Hook, Story, Offer).\n- **Image Prompt**: A detailed prompt for Midjourney/Dall-E to generate a high-CTR image specific to this angle.\n\nOUTPUT FORMAT:\nReturn ONLY a valid JSON array of objects. Do not include markdown formatting like ```json ... ```.\nExample:\n[\n  { \"type\": \"Logic\", \"headline\": \"...\", \"primary_text\": \"...\", \"image_prompt\": \"...\" },\n  ...\n]",
+                "hasOutputParser": false
+            },
+            "id": "ai_generator",
+            "name": "AdSniper AI Generator",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1050,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Scrape Product",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Scrape Product": {
+            "main": [
+                [
+                    {
+                        "node": "Extract Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract Data": {
+            "main": [
+                [
+                    {
+                        "node": "Normalize",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Normalize": {
+            "main": [
+                [
+                    {
+                        "node": "AdSniper AI Generator",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AdSniper AI Generator",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

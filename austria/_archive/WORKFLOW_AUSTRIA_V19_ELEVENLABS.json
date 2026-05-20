@@ -1,0 +1,191 @@
+{
+    "name": "Austria Voice Assistant V19 (ELEVENLABS EDITION)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "austria-leads-v19",
+                "options": {}
+            },
+            "id": "webhook-trigger",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "content": "🚀 V19 - ELEVENLABS EDITION\n\nCAMBIOS:\n1. TTS cambiado de Google a ElevenLabs.\n2. Lógica de selección de voz para Daniel/Javier.\n3. IA configurada para Llama 3 (Groq/Gemini).\n\n⚠️ SETUP:\n- Agrega tu 'xi-api-key' en el nodo de ElevenLabs.\n- Configura el Voice ID de Daniel o Javier.",
+                "height": 400,
+                "width": 400
+            },
+            "id": "instrucciones",
+            "name": "Instrucciones",
+            "type": "n8n-nodes-base.stickyNote",
+            "typeVersion": 1,
+            "position": [
+                1400,
+                250
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// NORMALIZADOR INPUT V19\nlet userMessage = $input.item.json.body?.message || \"Hola\";\nreturn { json: { user_message: userMessage, remote_jid: $input.item.json.body?.remote_jid || \"User\" } };"
+            },
+            "id": "normalizer",
+            "name": "Normalizar Input",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "model": "llama-3.3-70b-versatile",
+                "options": {
+                    "temperature": 0.5
+                }
+            },
+            "id": "groq_model",
+            "name": "Groq Llama 3",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                500,
+                500
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "REPLACE_WITH_GROQ_ID",
+                    "name": "Groq Account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.user_message }}",
+                "options": {
+                    "systemMessage": "Eres un asistente experto. Responde brevemente en JSON:\n{\n  \"respuesta_voz\": \"...\",\n  \"idioma\": \"es | de\"\n}"
+                }
+            },
+            "id": "ai_brain",
+            "name": "AI Brain",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "let data = $input.item.json.response || {};\nlet lang = data.idioma || \"es\";\n// Mapeo de voces ElevenLabs\n// Daniel (Austria/DE): onwK4e9ZLuTAKqWW03F9\n// Javier (Templates/ES): ErXw9S1aaW0S2UuS5PIn (Ejemplo)\nlet voiceId = (lang === 'de') ? \"onwK4e9ZLuTAKqWW03F9\" : \"ErXw9S1aaW0S2UuS5PIn\";\n\nreturn {\n  json: {\n    text: data.respuesta_voz || \"Hola\",\n    voice_id: voiceId,\n    lang: lang\n  }\n};"
+            },
+            "id": "logic",
+            "name": "Logic Filter",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                750,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "=https://api.elevenlabs.io/v1/text-to-speech/{{ $json.voice_id }}",
+                "method": "POST",
+                "authentication": "headerAuth",
+                "headerParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "xi-api-key",
+                            "value": "sk_595e6d4a32ae3176d5f539396c03e5df3e09d2988260ee91"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "bodyParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "text",
+                            "value": "={{ $json.text }}"
+                        },
+                        {
+                            "name": "model_id",
+                            "value": "eleven_multilingual_v2"
+                        }
+                    ]
+                },
+                "options": {
+                    "responseFormat": "file"
+                }
+            },
+            "id": "eleven_tts",
+            "name": "ElevenLabs TTS",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1000,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Normalizar Input",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Normalizar Input": {
+            "main": [
+                [
+                    {
+                        "node": "AI Brain",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Llama 3": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Brain",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Brain": {
+            "main": [
+                [
+                    {
+                        "node": "Logic Filter",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Logic Filter": {
+            "main": [
+                [
+                    {
+                        "node": "ElevenLabs TTS",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

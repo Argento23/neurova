@@ -1,0 +1,137 @@
+{
+    "name": "TEST BASICO - Solo SerpAPI + Sheet",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "start",
+            "name": "Start",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                240,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://serpapi.com/search.json",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "queryAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "api_key",
+                            "value": "9be0d43581dc9220232e9a2819f308c303a32082a1e62f97c9c87b75dfde8d72"
+                        },
+                        {
+                            "name": "engine",
+                            "value": "google_maps"
+                        },
+                        {
+                            "name": "q",
+                            "value": "Dentistas en Buenos Aires"
+                        },
+                        {
+                            "name": "num",
+                            "value": "3"
+                        }
+                    ]
+                }
+            },
+            "id": "serp",
+            "name": "Buscar",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                460,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "local_results"
+            },
+            "id": "split",
+            "name": "Dividir",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 3,
+            "position": [
+                680,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "1b_nPYFDov3Rg2ljPQ6hRLwUhoSznfw5GmyneBqCNJWg",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "Hoja 1",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "text": "={{ $json.title }}",
+                        "search_term": "Dentistas",
+                        "location": "Buenos Aires"
+                    }
+                }
+            },
+            "id": "sheet",
+            "name": "Guardar",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                900,
+                300
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "zwdmBzveCXv4B3Ec",
+                    "name": "Google Sheets account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Start": {
+            "main": [
+                [
+                    {
+                        "node": "Buscar",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Buscar": {
+            "main": [
+                [
+                    {
+                        "node": "Dividir",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Dividir": {
+            "main": [
+                [
+                    {
+                        "node": "Guardar",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

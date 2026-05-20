@@ -1,0 +1,266 @@
+{
+    "name": "GenerArise AI - Lead Qualification & Agenda",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "793adffe-d06a-42d5-b480-f8747ae5108d",
+                "options": {}
+            },
+            "name": "Webhook_Agency_V3",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ],
+            "webhookId": "793adffe-d06a-42d5-b480-f8747ae5108d",
+            "id": "webhook-agency-v3"
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_AGENCY_LEADS_SHEET_ID",
+                    "mode": "list"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "gid=0",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Fecha": "={{ $now.toISO() }}",
+                        "Nombre": "={{ $json[\"body\"][\"name\"] }}",
+                        "Empresa": "={{ $json[\"body\"][\"company\"] }}",
+                        "Email": "={{ $json[\"body\"][\"email\"] }}",
+                        "Rol": "={{ $json[\"body\"][\"role\"] }}",
+                        "Industria": "={{ $json[\"body\"][\"industry\"] }}",
+                        "Presupuesto": "={{ $json[\"body\"][\"budget\"] }}",
+                        "Mensaje": "={{ $json[\"body\"][\"message\"] }}",
+                        "Estado": "Nuevo"
+                    }
+                },
+                "options": {}
+            },
+            "name": "Guardar Lead en Sheets",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                300,
+                300
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets"
+                }
+            },
+            "id": "save-lead-sheet"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.groq.com/openai/v1/chat/completions",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "contentType": "json",
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "model",
+                            "value": "llama-3.3-70b-versatile"
+                        },
+                        {
+                            "name": "messages",
+                            "value": "={{ [\n  {\n    \"role\": \"system\",\n    \"content\": \"Eres el 'Senior Sales AI' de GenerArise AI. Tu trabajo es generar CÓDIGO HTML limpio y profesional para un correo de ventas.\\n\\nINSTRUCCIONES DE IDIOMA:\\nSi el lead parece hablar español, el contenido será en ESPAÑOL. Si es inglés, en INGLÉS.\\n\\nTU TAREA:\\nRellena la plantilla HMTL que te daré abajo con un mensaje de ventas persuasivo y personalizado.\\n NO cambies los estilos CSS ni la estructura principal. Solo inserta el texto en los párrafos <human_text> correspondientes.\\n\\nPLANTILLA A USAR (Devuelve ESTO completo con tu texto dentro):\\n<!DOCTYPE html><html><head><meta charset=\\\"utf-8\\\"><style>body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background-color:#f7f7f7;color:#333333;margin:0;padding:0}.wrapper{background-color:#f7f7f7;padding:30px 0}.container{max-width:600px;margin:0 auto;background-color:#ffffff;border-radius:4px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.05)}.header{background-color:#1a1a1a;padding:25px;text-align:center}.hero-img{width:100%;display:block}.content{padding:40px;line-height:1.7}.agency-name{color:#ffffff;font-size:20px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;margin:0}.accent-bar{width:40px;height:3px;background-color:#c5a059;margin:20px 0}.button{display:inline-block;background-color:#1a1a1a;color:#ffffff!important;text-decoration:none;padding:16px 32px;border-radius:2px;font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;margin:25px 0}.footer{padding:30px;text-align:center;font-size:12px;color:#999999;border-top:1px solid #eeeeee}.highlight{color:#c5a059;font-weight:bold}</style></head><body><div class=\\\"wrapper\\\"><div class=\\\"container\\\"><div class=\\\"header\\\"><p class=\\\"agency-name\\\">GENERARISE AGENCY</p></div><img src=\\\"https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=800\\\" alt=\\\"GenerArise AI\\\" class=\\\"hero-img\\\"><div class=\\\"content\\\"><h2 style=\\\"margin-top:0;font-weight:300;font-size:22px;\\\">Optimización IA para <span class=\\\"highlight\\\">\" + $('Webhook_Agency_V3').item.json[\"body\"][\"company\"] + \"</span></h2><div class=\\\"accent-bar\\\"></div><p>Hola <strong>\" + $('Webhook_Agency_V3').item.json[\"body\"][\"name\"] + \"</strong>,</p>   <p>AQUÍ ESCRIBE: Agradecimiento por contactar y valida que entiendes su problema: \" + $('Webhook_Agency_V3').item.json[\"body\"][\"message\"] + \"</p>   <p>AQUÍ ESCRIBE: Explicación en 2 líneas de cómo los Agentes de IA de GenerArise resuelven eso.</p>   <p>AQUÍ ESCRIBE: Petición de 2 horarios para una auditoría.</p>   <div style=\\\"text-align:center;\\\"><a href=\\\"https://cal.com/gustavo-a.-dornhofer-nqjqos/auditoria-estrategica-ia\\\" class=\\\"button\\\">Agendar Auditoría de 15 min</a></div><p style=\\\"font-weight:bold;margin-bottom:0;\\\">Gustavo Dornhofer</p><p style=\\\"margin-top:0;color:#777777;\\\">Director Comercial @ GenerArise AI</p></div><div class=\\\"footer\\\">&copy; 2026 Generarise Agency | Estrategia & Innovación Digital.</div></div></div></body></html>\\n\\nIMPORTANTE: Devuelve SOLO el código HTML final listo para enviarse. Nada más.\"\n  },\n  {\n    \"role\": \"user\",\n    \"content\": \"Genera el HTML para este lead:\\nNombre: \" + $('Webhook_Agency_V3').item.json[\"body\"][\"name\"] + \"\\nEmpresa: \" + $('Webhook_Agency_V3').item.json[\"body\"][\"company\"] + \"\\nMensaje: \" + $('Webhook_Agency_V3').item.json[\"body\"][\"message\"] + \"\\nIdioma: \" + ($('Webhook_Agency_V3').item.json[\"body\"][\"lang\"] || 'es')\n  }\n] }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Groq - Redactar HTML",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                500,
+                300
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq API Key"
+                }
+            },
+            "id": "groq-draft-html"
+        },
+        {
+            "parameters": {
+                "senderEmail": "noreply@generarise.space",
+                "toEmail": "={{ $('Webhook_Agency_V3').item.json[\"body\"][\"email\"] }}",
+                "subject": "Optimización IA para {{ $('Webhook_Agency_V3').item.json[\"body\"][\"company\"] }}",
+                "htmlContent": "={{ $json[\"choices\"][0][\"message\"][\"content\"] }}"
+            },
+            "name": "Brevo - Enviar Propuesta",
+            "type": "n8n-nodes-base.sendInBlue",
+            "typeVersion": 2,
+            "position": [
+                700,
+                300
+            ],
+            "credentials": {
+                "sendInBlueApi": {
+                    "id": "YOUR_BREVO_CREDENTIAL_ID",
+                    "name": "Brevo/Sendinblue"
+                }
+            },
+            "id": "brevo-send-proposal"
+        },
+        {
+            "parameters": {
+                "amount": 48,
+                "unit": "hours"
+            },
+            "id": "wait-48-hours",
+            "name": "Esperar 48 Horas",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                950,
+                300
+            ],
+            "webhookId": "wait-lead-followup"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.groq.com/openai/v1/chat/completions",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "contentType": "json",
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "model",
+                            "value": "llama-3.3-70b-versatile"
+                        },
+                        {
+                            "name": "messages",
+                            "value": "={{ [\n  {\n    \"role\": \"system\",\n    \"content\": \"Eres el 'Senior Sales AI'. Genera el HTML para el correo de SEGUIMIENTO (Follow-up).\\nUsarás la MISMA PLANTILLA HTML anterior, pero cambiando el texto del cuerpo.\\n\\nESTRATEGIA: 'Value Follow-Up'.\\nTEXTO A INSERTAR EN LOS P:\\n1. Párrafo 1: Menciona una idea rápida para la industria \" + $('Webhook_Agency_V3').item.json[\"body\"][\"industry\"] + \".\\n2. Párrafo 2: Ejemplo breve de reducción de costos con IA.\\n3. Párrafo 3: Invitación casual a la auditoría.\\n\\nPLANTILLA HTML (Misma estructura, solo cambia el texto interior de los <p>):\\n<!DOCTYPE html><html>... (Usa la misma estructura CSS/HTML que conoces) ... <div class=\\\"content\\\"> ... <p>Hola \" + $('Webhook_Agency_V3').item.json[\"body\"][\"name\"] + \"...</p> <p>[INSERTAR TEXTO SEGUIMIENTO 1]</p> <p>[INSERTAR TEXTO SEGUIMIENTO 2]</p> ... </html>\\n\\nIMPORTANTE: Devuelve el HTML COMPLETO y válido.\"\n  },\n  {\n    \"role\": \"user\",\n    \"content\": \"Genera HTML de seguimiento para: \" + $('Webhook_Agency_V3').item.json[\"body\"][\"name\"] + \" (\" + $('Webhook_Agency_V3').item.json[\"body\"][\"company\"] + \")\"\n  }\n] }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Groq - Redactar Seguimiento HTML",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1150,
+                300
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq API Key"
+                }
+            },
+            "id": "groq-draft-followup-html"
+        },
+        {
+            "parameters": {
+                "senderEmail": "noreply@generarise.space",
+                "toEmail": "={{ $('Webhook_Agency_V3').item.json[\"body\"][\"email\"] }}",
+                "subject": "Idea rápida para {{ $('Webhook_Agency_V3').item.json[\"body\"][\"company\"] }}",
+                "htmlContent": "={{ $json[\"choices\"][0][\"message\"][\"content\"] }}"
+            },
+            "id": "brevo-follow-up",
+            "name": "Brevo - Enviar Seguimiento",
+            "type": "n8n-nodes-base.sendInBlue",
+            "typeVersion": 2,
+            "position": [
+                1350,
+                300
+            ],
+            "credentials": {
+                "sendInBlueApi": {
+                    "id": "YOUR_BREVO_CREDENTIAL_ID",
+                    "name": "Brevo/Sendinblue"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook_Agency_V3": {
+            "main": [
+                [
+                    {
+                        "node": "Guardar Lead en Sheets",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Guardar Lead en Sheets": {
+            "main": [
+                [
+                    {
+                        "node": "Groq - Redactar HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq - Redactar HTML": {
+            "main": [
+                [
+                    {
+                        "node": "Brevo - Enviar Propuesta",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Brevo - Enviar Propuesta": {
+            "main": [
+                [
+                    {
+                        "node": "Esperar 48 Horas",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Esperar 48 Horas": {
+            "main": [
+                [
+                    {
+                        "node": "Groq - Redactar Seguimiento HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq - Redactar Seguimiento HTML": {
+            "main": [
+                [
+                    {
+                        "node": "Brevo - Enviar Seguimiento",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

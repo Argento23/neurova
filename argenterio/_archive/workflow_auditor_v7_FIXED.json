@@ -1,0 +1,178 @@
+{
+    "name": "Argenterio - Auditor V7 (Fixed Connections)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "argenterio-audit-v1",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Data",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                300
+            ],
+            "webhookId": "argenterio-audit-v1"
+        },
+        {
+            "parameters": {
+                "modelName": "models/llama-3.3-70b-versatile",
+                "options": {}
+            },
+            "name": "Groq Chat Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                220,
+                520
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "prompt": "=Analista ARGT-26. Tu misión: Analizar finanzas para un TEASER de venta. \n\nDATOS DEL USUARIO:\n- Ingresos: {{ $('Webhook Data').item.json.body.ingresos }}\n- Gastos: {{ $('Webhook Data').item.json.body.gastos }}\n- Deuda: {{ $('Webhook Data').item.json.body.deudas }}\n- Miedo Principal: {{ $('Webhook Data').item.json.body.objetivo }}\n\nSALIDA REQUERIDA:\nEscribe un solo párrafo corto (máximo 3 líneas) y alarmista. Usa un tono técnico pero urgente. Dile directamente por qué está en peligro basándote en sus números. NO des la solución todavía, solo el diagnóstico del problema para que quiera comprar el reporte."
+            },
+            "name": "AI Teaser Generator",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                220,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.mercadopago.com/checkout/preferences",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "contentType": "json",
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "items",
+                            "value": "={{ [ { \"title\": \"Informe Shield Argenterio\", \"quantity\": 1, \"currency_id\": \"ARS\", \"unit_price\": 15000 } ] }}"
+                        },
+                        {
+                            "name": "back_urls",
+                            "value": "={{ { \"success\": \"https://argenterio.com/agency/confirmacion.html\", \"failure\": \"https://argenterio.com/agency/confirmacion.html\", \"pending\": \"https://argenterio.com/agency/confirmacion.html\" } }}"
+                        },
+                        {
+                            "name": "auto_return",
+                            "value": "approved"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Crear Link MP",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                480,
+                300
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_MP_ACCESS_TOKEN_ID",
+                    "name": "MercadoPago Token (Header Auth)"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ {\n    \"message\": \"Analisis Completado\",\n    \"mp_link\": $('Crear Link MP').item.json.init_point,\n    \"paypal_link\": \"https://www.paypal.com/ncp/payment/LP2ZBHDAJPLDY\",\n    \"teaser\": $('AI Teaser Generator').item.json.text\n} }}",
+                "options": {}
+            },
+            "name": "Responder a Web (JSON)",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                750,
+                550
+            ]
+        },
+        {
+            "parameters": {
+                "senderEmail": "security@argenterio.com",
+                "toEmail": "={{ $('Webhook Data').item.json[\"body\"][\"email\"] }}",
+                "subject": "⚠️ Tu Pre-Diagnóstico de Riesgo Financiero",
+                "htmlContent": "=<!DOCTYPE html><html><head><style>body{font-family:'Courier New',monospace;background:#f4f4f4;padding:20px;color:#333}.card{background:#fff;padding:30px;border-top:5px solid #ff3333;max-width:600px;margin:0 auto}</style></head><body><div class=\"card\"><h1>ARGENTERIO_ STATUS: PENDING</h1><p>Hemos procesado tus datos.</p><div style='background:#ffe6e6; padding:15px; border-left:4px solid red'><strong>DIAGNÓSTICO PRELIMINAR:</strong><br><br>{{ $('AI Teaser Generator').item.json.text }}</div><p>Para desbloquear el reporte completo, completa el pago:</p><a href='{{ $('Crear Link MP').item.json.init_point }}' style='display:inline-block;padding:10px 20px;background:#009ee3;color:white;text-decoration:none;font-weight:bold;margin-right:10px'>MERCADO PAGO</a> <a href='https://www.paypal.com/ncp/payment/LP2ZBHDAJPLDY' style='display:inline-block;padding:10px 20px;background:#003087;color:white;text-decoration:none;font-weight:bold'>PAYPAL</a></div></body></html>"
+            },
+            "name": "Email - Teaser + Link",
+            "type": "n8n-nodes-base.sendInBlue",
+            "typeVersion": 2,
+            "position": [
+                750,
+                300
+            ],
+            "credentials": {
+                "sendInBlueApi": {
+                    "id": "YOUR_BREVO_CREDENTIAL_ID",
+                    "name": "Brevo/Sendinblue"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook Data": {
+            "main": [
+                [
+                    {
+                        "node": "AI Teaser Generator",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Chat Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Teaser Generator",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Teaser Generator": {
+            "main": [
+                [
+                    {
+                        "node": "Crear Link MP",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Crear Link MP": {
+            "main": [
+                [
+                    {
+                        "node": "Responder a Web (JSON)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Email - Teaser + Link",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

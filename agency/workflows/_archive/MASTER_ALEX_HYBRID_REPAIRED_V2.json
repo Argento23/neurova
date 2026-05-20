@@ -1,0 +1,266 @@
+{
+    "name": "ALEX_HYBRID_REPAIRED_V2",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "whatsapp-alex-chat",
+                "options": {}
+            },
+            "id": "alex-wa-in",
+            "name": "WhatsApp Directo (Alex)",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                140
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "vapi-whatsapp-bridge",
+                "options": {},
+                "responseMode": "responseNode"
+            },
+            "id": "alex-vapi-in",
+            "name": "Puente Vapi (Alex)",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                340
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "as-phone",
+                            "name": "phone",
+                            "value": "={{ ($json.body?.data?.key?.remoteJid || $json.body.message.toolCalls[0].function.arguments.phone || \"\").toString().replace(/[^0-9@s.whatsapp.net]/g, '') }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "as-msg-vapi",
+                            "name": "msg_vapi",
+                            "value": "={{ ($json.body?.message?.toolCalls?.[0].function.arguments.message || \"\").toString() }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "as-tool-id",
+                            "name": "toolCallId",
+                            "value": "={{ $json.body?.message?.toolCalls?.[0].id || \"no-id\" }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "as-user-txt",
+                            "name": "user_text",
+                            "value": "={{ $json.body?.data?.message?.conversation || $json.body?.data?.message?.extendedTextMessage?.text || $json.body?.data?.message?.listResponseMessage?.title || $json.body?.data?.message?.buttonsResponseMessage?.selectedButtonId || \"Hola\" }}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "alex-set",
+            "name": "Normalization Node",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                300,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeFilter": "string"
+                    },
+                    "conditions": [
+                        {
+                            "id": "is-vapi",
+                            "leftValue": "={{ $json.toolCallId }}",
+                            "rightValue": "no-id",
+                            "operator": {
+                                "type": "string",
+                                "operation": "notEquals"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                }
+            },
+            "id": "alex-if",
+            "name": "Is Vapi?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                500,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $json.toolCallId }}\",\n      \"result\": \"SUCCESS: Alex sent the WhatsApp message.\"\n    }\n  ]\n}",
+                "options": {}
+            },
+            "id": "alex-resp",
+            "name": "Respond to Vapi",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                700,
+                360
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile",
+                "options": {
+                    "temperature": 0.7
+                }
+            },
+            "id": "alex-groq",
+            "name": "Groq Alex",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                700,
+                140
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres Alex, Senior SDR de GenerArise AI.\n\nIDENTIDAD: Directo, experto, ventas agresivas. No pides permiso para automatizar, pides cita para demostrarlo. Habla como un humano experto, no como un robot.\n\nUSUARIO DICE: {{ $json.user_text }}\n\nTAREA: Responde de forma muy persuasiva y conversacional. Tu objetivo es que agenden la auditoría aquí: https://cal.com/gustavo-a.-dornhofer-nqjqos/argenterio\nINSTRUCCIONES: Responde siempre de forma completa y amable antes de poner el link al final. RESPUESTA SOLO TEXTO.",
+                "hasOutputParser": true
+            },
+            "id": "alex-ai",
+            "name": "AI SDR Alex",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                850,
+                140
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "GenerArise",
+                "options_message": {
+                    "number": "={{ $json.phone.includes('@') ? $json.phone : $json.phone + '@s.whatsapp.net' }}",
+                    "textMessage": {
+                        "text": "={{ $node[\"AI SDR Alex\"]?.json?.text || $json.msg_vapi }}"
+                    }
+                }
+            },
+            "id": "alex-evo",
+            "name": "Evolution Alex",
+            "type": "n8n-nodes-base.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                1100,
+                240
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "WhatsApp Directo (Alex)": {
+            "main": [
+                [
+                    {
+                        "node": "Normalization Node",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Puente Vapi (Alex)": {
+            "main": [
+                [
+                    {
+                        "node": "Normalization Node",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Normalization Node": {
+            "main": [
+                [
+                    {
+                        "node": "Is Vapi?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is Vapi?": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Vapi",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Evolution Alex",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "AI SDR Alex",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Alex": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI SDR Alex",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI SDR Alex": {
+            "main": [
+                [
+                    {
+                        "node": "Evolution Alex",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

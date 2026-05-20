@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KI-Chatbot für Ihr Unternehmen | Argenterio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --austria-red: #ED2939;
+            --dark-bg: #0a0e27;
+            --text-gray: #94a3b8;
+            --green: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: #e0e7ff;
+            line-height: 1.6;
+        }
+
+        /* Nav */
+        nav {
+            position: fixed;
+            width: 100%;
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(237, 41, 57, 0.2);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--austria-red), #ff6b9d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .lang-switcher {
+            display: flex;
+            gap: 15px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            color: #94a3b8;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .lang-btn.active {
+            background: var(--austria-red);
+            color: white;
+        }
+
+        .btn-nav {
+            background: var(--austria-red);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+
+        .btn-nav:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            margin-top: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(237, 41, 57, 0.1), rgba(118, 75, 162, 0.1));
+        }
+
+        .hero-image {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.3;
+        }
+
+        .hero-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 25px;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, var(--austria-red), #ff6b9d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-content p {
+            font-size: 1.3rem;
+            color: var(--text-gray);
+            margin-bottom: 35px;
+        }
+
+        .btn-primary {
+            background: var(--austria-red);
+            color: white;
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(237, 41, 57, 0.3);
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(237, 41, 57, 0.5);
+        }
+
+        .trust-badges {
+            display: flex;
+            gap: 25px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .trust-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-gray);
+            font-size: 0.95rem;
+        }
+
+        .trust-badge::before {
+            content: "✓";
+            color: var(--green);
+            font-weight: bold;
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8));
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(237, 41, 57, 0.3);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--austria-red), #ff6b9d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        /* Features */
+        .features {
+            padding: 120px 20px;
+            background: linear-gradient(180deg, var(--dark-bg), #0f1629);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-badge {
+            background: rgba(237, 41, 57, 0.1);
+            color: var(--austria-red);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .section-header h2 {
+            font-size: 3rem;
+            font-weight: 900;
+            margin: 20px 0;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.6));
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid rgba(237, 41, 57, 0.2);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(237, 41, 57, 0.5);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        /* Pricing */
+        .pricing {
+            padding: 120px 20px;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.6));
+            border-radius: 20px;
+            padding: 50px;
+            border: 2px solid rgba(237, 41, 57, 0.2);
+            position: relative;
+        }
+
+        .pricing-card.featured {
+            border-color: var(--austria-red);
+            transform: scale(1.05);
+        }
+
+        .pricing-badge {
+            position: absolute;
+            top: -15px;
+            right: 30px;
+            background: var(--austria-red);
+            color: white;
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .pricing-price {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--austria-red);
+            margin: 15px 0;
+        }
+
+        .pricing-price span {
+            font-size: 1.2rem;
+            color: var(--text-gray);
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin: 30px 0;
+        }
+
+        .pricing-features li {
+            padding: 12px 0;
+            color: var(--text-gray);
+            display: flex;
+            gap: 10px;
+        }
+
+        .pricing-features li::before {
+            content: "✓";
+            color: var(--green);
+            font-weight: bold;
+        }
+
+        .pricing-cta {
+            width: 100%;
+            padding: 18px;
+            background: transparent;
+            border: 2px solid var(--austria-red);
+            color: #fff;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pricing-card.featured .pricing-cta {
+            background: var(--austria-red);
+        }
+
+        /* Testimonials */
+        .testimonials {
+            padding: 120px 20px;
+            background: #0f1629;
+        }
+
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .testimonial-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.6));
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid rgba(237, 41, 57, 0.2);
+        }
+
+        .testimonial-header {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--austria-red), #ff6b9d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .testimonial-stars {
+            color: #fbbf24;
+            font-size: 1.2rem;
+        }
+
+        /* CTA */
+        .final-cta {
+            padding: 120px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(237, 41, 57, 0.1), rgba(118, 75, 162, 0.1));
+        }
+
+        .final-cta h2 {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 25px;
+        }
+
+        .cta-form {
+            max-width: 600px;
+            margin: 40px auto 0;
+            display: flex;
+            gap: 15px;
+        }
+
+        .cta-form input {
+            flex: 1;
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid rgba(237, 41, 57, 0.3);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        .cta-form button {
+            padding: 20px 50px;
+            background: var(--austria-red);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* Footer */
+        footer {
+            background: #0a0e27;
+            padding: 60px 20px 30px;
+            border-top: 1px solid rgba(237, 41, 57, 0.2);
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 40px;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(237, 41, 57, 0.1);
+            color: var(--text-gray);
+        }
+
+        /* Language Content */
+        .lang-content {
+            display: none;
+        }
+
+        .lang-content.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+
+            .hero-container,
+            .footer-container {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .cta-form {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Argenterio</div>
+            <div style="display: flex; gap: 30px; align-items: center;">
+                <div class="lang-switcher">
+                    <button class="lang-btn active" onclick="switchLang('de')" data-lang="de">🇦🇹 DE</button>
+                    <button class="lang-btn" onclick="switchLang('en')" data-lang="en">🇬🇧 EN</button>
+                    <button class="lang-btn" onclick="switchLang('es')" data-lang="es">🇦🇷 ES</button>
+                </div>
+                <a href="#cta" class="btn-nav" id="nav-cta">Kostenlos testen</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section - GERMAN -->
+    <section class="hero lang-content active" data-lang="de">
+        <div class="hero-bg"></div>
+        <img src="../assets/vienna-skyline.jpg" alt="Vienna" class="hero-image" onerror="this.style.display='none'">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1><span class="highlight">24/7 KI-Chatbot</span><br>für österreichische<br>Unternehmen</h1>
+                <p>Automatisieren Sie Kundenanfragen in 4 Sprachen (DE/EN/ES/IT). Keine verlorenen Anfragen mehr.</p>
+                <button class="btn-primary"
+                    onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">30 Tage kostenlos
+                    testen</button>
+                <div class="trust-badges">
+                    <div class="trust-badge">Keine Kreditkarte</div>
+                    <div class="trust-badge">DSGVO-konform</div>
+                    <div class="trust-badge">Setup in 8 Tagen</div>
+                </div>
+            </div>
+            <div class="hero-card">
+                <h3 style="text-align:center; margin-bottom:30px;">Bewährte Ergebnisse</h3>
+                <div class="stat-grid">
+                    <div style="text-align:center;">
+                        <div class="stat-number">40%</div>
+                        <div class="stat-label">Mehr Buchungen</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">Abdeckung</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div class="stat-number">60s</div>
+                        <div class="stat-label">Antwortzeit</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div class="stat-number">4.9/5</div>
+                        <div class="stat-label">Zufriedenheit</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hero Section - ENGLISH -->
+    <section class="hero lang-content" data-lang="en">
+        <div class="hero-bg"></div>
+        <img src="../assets/vienna-skyline.jpg" alt="Vienna" class="hero-image" onerror="this.style.display='none'">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1><span class="highlight">24/7 AI Chatbot</span><br>for European<br>Businesses</h1>
+                <p>Automate customer inquiries in 4 languages (DE/EN/ES/IT). Never miss a lead again.</p>
+                <button class="btn-primary"
+                    onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">Start 30-Day Free
+                    Trial</button>
+                <div class="trust-badges">
+                    <div class="trust-badge">No credit card required</div>
+                    <div class="trust-badge">GDPR compliant</div>
+                    <div class="trust-badge">Setup in 8 days</div>
+                </div>
+            </div>
+            <div class="hero-card">
+                <h3 style="text-align:center; margin-bottom:30px;">Proven Results</h3>
+                <div class="stat-grid">
+                    <div style="text-align:center;">
+                        <div class="stat-number">40%</div>
+                        <div class="stat-label">More Bookings</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">Coverage</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div class="stat-number">60s</div>
+                        <div class="stat-label">Response Time</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div class="stat-number">4.9/5</div>
+                        <div class="stat-label">Satisfaction</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hero Section - SPANISH -->
+    <section class="hero lang-content" data-lang="es">
+        <div class="hero-bg"></div>
+        <img src="../assets/buenos-aires.jpg" alt="Buenos Aires" class="hero-image" onerror="this.style.display='none'">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1><span class="highlight">Chatbot IA 24/7</span><br>para tu Negocio<br>en LATAM</h1>
+                <p>Automatiza consultas en WhatsApp, Email y más. Nunca pierdas un cliente por responder tarde.</p>
+                <button class="btn-primary"
+                    onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">Probar Gratis 15
+                    Días</button>
+                <div class="trust-badges">
+                    <div class="trust-badge">Sin tarjeta de crédito</div>
+                    <div class="trust-badge">100% seguro</div>
+                    <div class="trust-badge">Setup en 7 días</div>
+                </div>
+            </div>
+            <div class="hero-card">
+                <h3 style="text-align:center; margin-bottom:30px;">Resultados Comprobados</h3>
+                <div class="stat-grid">
+                    <div style="text-align:center;">
+                        <div class="stat-number">47%</div>
+                        <div class="stat-label">Más Consultas</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">Cobertura</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div class="stat-number">60s</div>
+                        <div class="stat-label">Tiempo Respuesta</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div class="stat-number">4.9/5</div>
+                        <div class="stat-label">Satisfacción</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features - GERMAN -->
+    <section class="features lang-content active" data-lang="de">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">🇦🇹 Für Österreich entwickelt</span>
+                <h2>Perfekt für Ihr Unternehmen</h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Mehrsprachig</h3>
+                    <p>Deutsch, Englisch, Spanisch, Italienisch. Perfekt für Hotels mit internationalen Gästen.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏨</div>
+                    <h3>Hotels</h3>
+                    <p>Automatische Buchungen, Zimmerverfügbarkeit, Amenities. Keine verpassten Reservierungen.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚖️</div>
+                    <h3>Rechtsanwälte</h3>
+                    <p>Dringende Fälle sofort erkannt. Calendly-Integration. 24/7 Erstberatung.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Steuerberater</h3>
+                    <p>Auto-Preisangebote. Lead-Erfassung. Spart 12 Stunden/Woche.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>DSGVO-konform</h3>
+                    <p>Alle Daten in Europa. Vollständige EU-Compliance.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3>Analytics</h3>
+                    <p>Leads/Tag, Peak-Zeiten, Konversionsrate. Kontinuierliche Optimierung.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features - ENGLISH -->
+    <section class="features lang-content" data-lang="en">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">🌍 Built for Europe</span>
+                <h2>Perfect for Your Business</h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Multilingual</h3>
+                    <p>German, English, Spanish, Italian. Perfect for international clients.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏨</div>
+                    <h3>Hotels</h3>
+                    <p>Automatic bookings, room availability, amenities. No missed reservations.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚖️</div>
+                    <h3>Law Firms</h3>
+                    <p>Urgent cases detected instantly. Calendly integration. 24/7 initial consultation.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Accountants</h3>
+                    <p>Auto quotes. Lead capture. Saves 12 hours/week.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>GDPR Compliant</h3>
+                    <p>All data in Europe. Full EU compliance.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3>Analytics</h3>
+                    <p>Leads/day, peak times, conversion rate. Continuous optimization.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features - SPANISH -->
+    <section class="features lang-content" data-lang="es">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">🇦🇷 Hecho en Argentina</span>
+                <h2>Perfecto para tu Negocio</h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>WhatsApp 24/7</h3>
+                    <p>Respuestas automáticas en tu WhatsApp Business. Nunca pierdas una consulta.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏠</div>
+                    <h3>Inmobiliarias</h3>
+                    <p>Calificación automática de leads. Derivación a asesor. FAQ propiedades.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">👨‍⚖️</div>
+                    <h3>Abogados</h3>
+                    <p>Detección de urgencias. Email automático. Calendly integrado.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🧮</div>
+                    <h3>Contadores</h3>
+                    <p>Calculador vencimientos AFIP. Alertas automáticas. Pricing por régimen.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🍽️</div>
+                    <h3>Restaurantes</h3>
+                    <p>Reservas automáticas. Info menú y delivery. Email staff confirmación.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Reportes</h3>
+                    <p>Leads por día, horarios pico, tasa conversión. Todo en Google Sheets.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing - All Languages -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge lang-content active" data-lang="de">💎 Transparente Preise</span>
+                <span class="section-badge lang-content" data-lang="en">💎 Transparent Pricing</span>
+                <span class="section-badge lang-content" data-lang="es">💎 Precios Transparentes</span>
+                <h2 class="lang-content active" data-lang="de">Wählen Sie Ihren Plan</h2>
+                <h2 class="lang-content" data-lang="en">Choose Your Plan</h2>
+                <h2 class="lang-content" data-lang="es">Elige tu Plan</h2>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Basic</h3>
+                    <div class="pricing-price lang-content active" data-lang="de">€797<span>/Monat</span></div>
+                    <div class="pricing-price lang-content" data-lang="en">$797<span>/month</span></div>
+                    <div class="pricing-price lang-content" data-lang="es">$597<span>/mes</span></div>
+                    <ul class="pricing-features lang-content active" data-lang="de">
+                        <li>1 Kanal (WhatsApp oder Email)</li>
+                        <li>500 Nachrichten/Monat</li>
+                        <li>24/7 Automatische Antworten</li>
+                        <li>Email-Support</li>
+                    </ul>
+                    <ul class="pricing-features lang-content" data-lang="en">
+                        <li>1 Channel (WhatsApp or Email)</li>
+                        <li>500 messages/month</li>
+                        <li>24/7 Auto-responses</li>
+                        <li>Email support</li>
+                    </ul>
+                    <ul class="pricing-features lang-content" data-lang="es">
+                        <li>1 Canal (WhatsApp o Email)</li>
+                        <li>500 mensajes/mes</li>
+                        <li>Respuestas automáticas 24/7</li>
+                        <li>Soporte por email</li>
+                    </ul>
+                    <button class="pricing-cta"
+                        onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                        <span class="lang-content active" data-lang="de">Jetzt starten</span>
+                        <span class="lang-content" data-lang="en">Get Started</span>
+                        <span class="lang-content" data-lang="es">Comenzar</span>
+                    </button>
+                </div>
+                <div class="pricing-card featured">
+                    <div class="pricing-badge">⭐ <span class="lang-content active" data-lang="de">BELIEBT</span><span
+                            class="lang-content" data-lang="en">POPULAR</span><span class="lang-content"
+                            data-lang="es">POPULAR</span></div>
+                    <h3>Pro</h3>
+                    <div class="pricing-price lang-content active" data-lang="de">€1,297<span>/Monat</span></div>
+                    <div class="pricing-price lang-content" data-lang="en">$1,297<span>/month</span></div>
+                    <div class="pricing-price lang-content" data-lang="es">$897<span>/mes</span></div>
+                    <ul class="pricing-features lang-content active" data-lang="de">
+                        <li>2 Kanäle (WhatsApp + Email)</li>
+                        <li>2,000 Nachrichten/Monat</li>
+                        <li>Mehrsprachig (DE/EN/ES/IT)</li>
+                        <li>CRM-Integration</li>
+                        <li>Priority Support</li>
+                    </ul>
+                    <ul class="pricing-features lang-content" data-lang="en">
+                        <li>2 Channels (WhatsApp + Email)</li>
+                        <li>2,000 messages/month</li>
+                        <li>Multilingual (DE/EN/ES/IT)</li>
+                        <li>CRM Integration</li>
+                        <li>Priority support</li>
+                    </ul>
+                    <ul class="pricing-features lang-content" data-lang="es">
+                        <li>2 Canales (WhatsApp + Email)</li>
+                        <li>2,000 mensajes/mes</li>
+                        <li>Reportes avanzados</li>
+                        <li>Integración CRM</li>
+                        <li>Soporte prioritario</li>
+                    </ul>
+                    <button class="pricing-cta"
+                        onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                        <span class="lang-content active" data-lang="de">Jetzt starten</span>
+                        <span class="lang-content" data-lang="en">Get Started</span>
+                        <span class="lang-content" data-lang="es">Comenzar</span>
+                    </button>
+                </div>
+                <div class="pricing-card">
+                    <h3>Enterprise</h3>
+                    <div class="pricing-price lang-content active" data-lang="de">€1,997<span>/Monat</span></div>
+                    <div class="pricing-price lang-content" data-lang="en">$1,997<span>/month</span></div>
+                    <div class="pricing-price lang-content" data-lang="es">$1,297<span>/mes</span></div>
+                    <ul class="pricing-features lang-content active" data-lang="de">
+                        <li>Unbegrenzte Kanäle</li>
+                        <li>Unbegrenzte Nachrichten</li>
+                        <li>Custom AI-Training</li>
+                        <li>API-Zugang</li>
+                        <li>Account Manager</li>
+                    </ul>
+                    <ul class="pricing-features lang-content" data-lang="en">
+                        <li>Unlimited channels</li>
+                        <li>Unlimited messages</li>
+                        <li>Custom AI training</li>
+                        <li>API access</li>
+                        <li>Account manager</li>
+                    </ul>
+                    <ul class="pricing-features lang-content" data-lang="es">
+                        <li>Canales ilimitados</li>
+                        <li>Mensajes ilimitados</li>
+                        <li>IA personalizada</li>
+                        <li>API completa</li>
+                        <li>Account manager</li>
+                    </ul>
+                    <button class="pricing-cta"
+                        onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                        <span class="lang-content active" data-lang="de">Kontakt</span>
+                        <span class="lang-content" data-lang="en">Contact</span>
+                        <span class="lang-content" data-lang="es">Contacto</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="final-cta" id="cta">
+        <div class="container">
+            <h2 class="lang-content active" data-lang="de">Starten Sie Ihre kostenlose Testphase</h2>
+            <h2 class="lang-content" data-lang="en">Start Your Free Trial Today</h2>
+            <h2 class="lang-content" data-lang="es">Comienza tu Prueba Gratis Hoy</h2>
+            <form class="cta-form" onsubmit="handleSubmit(event)">
+                <input type="email" placeholder="Email" required>
+                <button type="submit">
+                    <span class="lang-content active" data-lang="de">Kostenlos testen</span>
+                    <span class="lang-content" data-lang="en">Start Free Trial</span>
+                    <span class="lang-content" data-lang="es">Empezar Gratis</span>
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-bottom">
+            <span class="lang-content active" data-lang="de">© 2026 Argenterio. Entwickelt mit ❤️ in Buenos Aires für
+                Europa</span>
+            <span class="lang-content" data-lang="en">© 2026 Argenterio. Built with ❤️ in Buenos Aires for the
+                World</span>
+            <span class="lang-content" data-lang="es">© 2026 Argenterio. Hecho con ❤️ en Buenos Aires</span>
+        </div>
+    </footer>
+
+    <script>
+        function switchLang(lang) {
+            // Hide all lang content
+            document.querySelectorAll('.lang-content').forEach(el => el.classList.remove('active'));
+            // Show selected lang
+            document.querySelectorAll(`.lang-content[data-lang="${lang}"]`).forEach(el => el.classList.add('active'));
+            // Update lang buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.lang-btn[data-lang="${lang}"]`).classList.add('active');
+            // Update nav CTA text
+            const navCta = {
+                de: 'Kostenlos testen',
+                en: 'Free Trial',
+                es: 'Probar Gratis'
+            };
+            document.getElementById('nav-cta').textContent = navCta[lang];
+            // Update HTML lang attribute
+            document.documentElement.lang = lang;
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            const email = e.target.querySelector('input').value;
+            alert('Thank you! Check your email: ' + email);
+        }
+    </script>
+</body>
+
+</html>

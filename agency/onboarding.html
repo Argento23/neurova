@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido a GenerArise | Guía de Inicio</title>
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #ec4899;
+            --bg: #0a0a0c;
+            --text: #ffffff;
+            --text-dim: rgba(255, 255, 255, 0.6);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-3d {
+            height: 80px;
+            width: auto;
+            filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.4));
+            animation: logo-float-3d 4s ease-in-out infinite;
+            margin-bottom: 2rem;
+        }
+        @keyframes logo-float-3d {
+            0%, 100% { transform: translateY(0) rotateY(0deg); }
+            50% { transform: translateY(-10px) rotateY(15deg); }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 4rem 5%;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -2px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .access-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 5rem;
+        }
+
+        .access-item {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .access-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .access-item i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .access-item h3 {
+            font-size: 1rem;
+            font-family: 'Space Grotesk', sans-serif;
+            margin-bottom: 0.5rem;
+        }
+
+        .access-item p {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        .steps-container {
+            position: relative;
+        }
+
+        .step-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 2.5rem;
+            align-items: flex-start;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--primary);
+        }
+
+        .step-num {
+            background: var(--primary);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.8rem;
+            flex-shrink: 0;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .step-content h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .step-content p {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1rem;
+        }
+
+        .checklist i {
+            color: #25D366;
+            font-size: 1.2rem;
+        }
+
+        .footer-cta {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 4rem;
+            background: linear-gradient(to bottom, transparent, rgba(99, 102, 241, 0.05));
+            border-radius: 40px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 1.2rem 2.5rem;
+            border-radius: 16px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: 0.3s;
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            background: #4f46e5;
+        }
+
+        @media (max-width: 768px) {
+            .step-card { flex-direction: column; gap: 1.5rem; padding: 2rem; }
+            .header h1 { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="assets/logo.png" alt="GenerArise" class="logo-3d">
+            <h1>Bienvenido a la Era de GenerArise</h1>
+            <p>Has activado tu infraestructura de crecimiento. Sigue estos pasos para conectar tu negocio a nuestra IA.</p>
+        </div>
+
+        <div class="access-grid">
+            <div class="access-item">
+                <i class="fas fa-store"></i>
+                <h3>Vidriera IA</h3>
+                <p>Tu catálogo inteligente online.</p>
+            </div>
+            <div class="access-item">
+                <i class="fas fa-robot"></i>
+                <h3>Agente Alex</h3>
+                <p>Atención 24/7 en WhatsApp.</p>
+            </div>
+            <div class="access-item">
+                <i class="fas fa-users"></i>
+                <h3>Lead Hub</h3>
+                <p>Tu base de clientes potenciales.</p>
+            </div>
+            <div class="access-item">
+                <i class="fas fa-magic"></i>
+                <h3>Studio AI</h3>
+                <p>Contenido diario para redes.</p>
+            </div>
+        </div>
+
+        <div class="steps-container">
+            <!-- PASO 1 -->
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <h2>Vinculación de WhatsApp</h2>
+                    <p>Necesitamos conectar tu número para que nuestra IA pueda interactuar con tus clientes y prospectos.</p>
+                    <div class="detailed-steps">
+                        <strong>Pasos en tu celular:</strong>
+                        <ul class="checklist">
+                            <li><i class="fas fa-chevron-right"></i> Abre WhatsApp en tu dispositivo móvil.</li>
+                            <li><i class="fas fa-chevron-right"></i> Toca en <strong>Configuración</strong> (iOS) o en los <strong>tres puntos</strong> (Android).</li>
+                            <li><i class="fas fa-chevron-right"></i> Selecciona <strong>Dispositivos vinculados</strong>.</li>
+                            <li><i class="fas fa-chevron-right"></i> Toca en <strong>Vincular un dispositivo</strong>.</li>
+                            <li><i class="fas fa-chevron-right"></i> Escanea el código QR que te enviaremos por chat.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 2 -->
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <h2>Autorización de Redes</h2>
+                    <p>Configura tus perfiles de Meta para que la IA publique contenido automáticamente.</p>
+                    <div class="detailed-steps">
+                        <strong>Configuración en Facebook:</strong>
+                        <ul class="checklist">
+                            <li><i class="fas fa-chevron-right"></i> Ve a tu <strong>Fan Page</strong> de Facebook desde una PC.</li>
+                            <li><i class="fas fa-chevron-right"></i> Entra en <strong>Configuración</strong> > <strong>Cuentas vinculadas</strong>.</li>
+                            <li><i class="fas fa-chevron-right"></i> Selecciona <strong>Instagram</strong> y haz clic en <strong>Conectar cuenta</strong>.</li>
+                            <li><i class="fas fa-chevron-right"></i> Sigue los pasos para loguearte y dar permisos de publicación.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 3 -->
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <h2>Carga de Catálogo y Datos</h2>
+                    <p>Enséñale a la IA qué vendes para que pueda responder preguntas técnicas y armar tu vidriera.</p>
+                    <div class="detailed-steps">
+                        <strong>Prepara tu información:</strong>
+                        <ul class="checklist">
+                            <li><i class="fas fa-chevron-right"></i> Crea un <strong>Excel o Google Sheet</strong> con: Nombre del producto, Precio y Descripción.</li>
+                            <li><i class="fas fa-chevron-right"></i> Sube las fotos de tus productos a un <strong>Google Drive público</strong>.</li>
+                            <li><i class="fas fa-chevron-right"></i> Define tu "Tono de Voz": ¿Quieres que Alex sea serio, divertido o técnico?</li>
+                            <li><i class="fas fa-chevron-right"></i> Envía el link de tu carpeta de Drive a nuestro soporte.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 4 -->
+            <div class="step-card">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                    <h2>Validación y Lanzamiento</h2>
+                    <p>Haremos una prueba final antes de que el motor empiece a trabajar en horario comercial.</p>
+                    <div class="detailed-steps">
+                        <ul class="checklist">
+                            <li><i class="fas fa-chevron-right"></i> Te enviaremos un link de prueba de tu <strong>Vidriera Inteligente</strong>.</li>
+                            <li><i class="fas fa-chevron-right"></i> Haremos un chat de prueba con Alex para validar que sepa tus precios.</li>
+                            <li><i class="fas fa-chevron-right"></i> ¡Listo! El sistema se activará en el próximo ciclo de 09:00 AM.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-cta">
+            <h3 style="margin-bottom: 2rem; font-family: 'Space Grotesk', sans-serif;">¿Todo listo para empezar?</h3>
+            <a href="https://wa.me/5491178287901?text=Hola!%20He%20completado%20el%20pago.%20¿Me%20envías%20mi%20código%20QR%20para%20empezar?" class="btn">Solicitar mi Código QR</a>
+        </div>
+    </div>
+</body>
+</html>

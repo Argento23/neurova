@@ -1,0 +1,415 @@
+{
+    "name": "HUNTER_WORLD_CUP_2026_MultiChannel",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "hours",
+                            "triggerAtHour": 10
+                        }
+                    ]
+                }
+            },
+            "id": "schedule",
+            "name": "Cron Diario (10am)",
+            "type": "n8n-nodes-base.cron",
+            "typeVersion": 1,
+            "position": [
+                240,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// --- WORLD CUP 2026 STRATEGY ---\nconst hostCities = [\n  \"Miami, FL, USA\",\n  \"Mexico City, Mexico\",\n  \"Dallas, TX, USA\",\n  \"Vancouver, BC, Canada\",\n  \"Toronto, ON, Canada\",\n  \"New York / New Jersey, USA\"\n];\n\nconst hospitalityNiches = [\n  \"Luxury Hotels\",\n  \"Boutique Hotels\",\n  \"Hotel Management Groups\"\n];\n\nconst city = hostCities[Math.floor(Math.random() * hostCities.length)];\nconst niche = hospitalityNiches[Math.floor(Math.random() * hospitalityNiches.length)];\n\nreturn {\n  search_term: niche,\n  location: city\n};"
+            },
+            "id": "config",
+            "name": "CONFIG MUNDIAL",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                460,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://serpapi.com/search.json",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "queryAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "api_key",
+                            "value": "9be0d43581dc9220232e9a2819f308c303a32082a1e62f97c9c87b75dfde8d72"
+                        },
+                        {
+                            "name": "engine",
+                            "value": "google_maps"
+                        },
+                        {
+                            "name": "q",
+                            "value": "={{ $json.search_term + ' in ' + $json.location }}"
+                        },
+                        {
+                            "name": "num",
+                            "value": "5"
+                        }
+                    ]
+                }
+            },
+            "id": "serp",
+            "name": "Google Maps",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                680,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "={{ $json.local_results ? 'local_results' : 'place_results' }}"
+            },
+            "id": "split_leads",
+            "name": "Dividir Leads",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 3,
+            "position": [
+                900,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "lookup",
+                "documentId": {
+                    "__rl": true,
+                    "value": "",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "Listado",
+                    "mode": "name"
+                },
+                "lookupColumn": "Hotel Name",
+                "lookupValue": "={{ $json.title }}",
+                "options": {
+                    "returnEmptyIfNoMatch": true
+                }
+            },
+            "id": "gs-lookup",
+            "name": "Verificar en BBDD",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.1,
+            "position": [
+                1100,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{ $json['Hotel Name'] }}",
+                            "operation": "isEmpty"
+                        }
+                    ]
+                }
+            },
+            "id": "check-exists",
+            "name": "¿Ya Contactado?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                1300,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "amount": 10,
+                "unit": "seconds"
+            },
+            "id": "wait-id",
+            "name": "Wait (Anti-Rate Limit)",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1.1,
+            "position": [
+                1500,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "model": "llama-3.1-8b-instant"
+            },
+            "id": "groq",
+            "name": "Groq Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                1250,
+                620
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "return $input.all().map(item => {\n  const text = item.json.text || '';\n  let cleanJson = text;\n  const firstBrace = cleanJson.indexOf('{');\n  const lastBrace = cleanJson.lastIndexOf('}');\n  if (firstBrace !== -1 && lastBrace !== -1) {\n    cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);\n  }\n  const fallback = { phone: '', email: '', wa_msg: 'Error JSON', email_body: '', email_subject: '', telegram_alert: 'Error JSON' };\n  try {\n    const parsed = JSON.parse(cleanJson);\n    let result = parsed;\n    if (parsed && typeof parsed === 'object') {\n      if (parsed.__structured__output && parsed.__structured__output.__structured__output__object) {\n        result = parsed.__structured__output.__structured__output__object;\n      }\n    }\n    if (typeof result !== 'object' || result === null || Array.isArray(result)) {\n      result = fallback;\n    }\n    return { json: { ...item.json, ...result } };\n  } catch(e) {\n    return { json: { ...item.json, ...fallback } };\n  }\n});"
+            },
+            "id": "parse-logic",
+            "name": "Parse JSON Seguro",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1950,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "Argenterio",
+                "options_message": {
+                    "number": "={{ $json.phone }}",
+                    "textMessage": {
+                        "text": "={{ $json.wa_msg }}"
+                    }
+                }
+            },
+            "id": "evolution",
+            "name": "WhatsApp (Evolution)",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                2000,
+                300
+            ],
+            "onError": "continue",
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "Argenterio"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "message",
+                "options": {
+                    "subject": "={{ $json.email_subject }}"
+                },
+                "email": "={{ $json.email }}",
+                "body": "={{ $json.email_body }}"
+            },
+            "id": "gmail",
+            "name": "Gmail (Propuesta)",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2,
+            "position": [
+                2000,
+                500
+            ],
+            "onError": "continue",
+            "credentials": {
+                "gmailOAuth2Api": {
+                    "id": "gmail-id",
+                    "name": "Gmail account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "chatId": "TU_ID_NUMERICO_AQUÍ",
+                "text": "={{ $json.telegram_alert }}"
+            },
+            "id": "telegram",
+            "name": "Telegram Alert",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.1,
+            "position": [
+                2000,
+                700
+            ],
+            "onError": "continue",
+            "credentials": {
+                "telegramApi": {
+                    "id": "telegram-id",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "Listado",
+                    "mode": "name"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Hotel Name": "={{ $json.title }}",
+                        "Ciudad": "={{ $('CONFIG MUNDIAL').item.json.location }}",
+                        "Phone": "={{ $json.phone }}",
+                        "Email": "={{ $json.email }}",
+                        "Status": "Propuesta Enviada"
+                    }
+                },
+                "options": {}
+            },
+            "id": "gs-write",
+            "name": "Guardar Lead",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.1,
+            "position": [
+                2200,
+                900
+            ]
+        }
+    ],
+    "connections": {
+        "schedule": {
+            "main": [
+                [
+                    {
+                        "node": "config",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "config": {
+            "main": [
+                [
+                    {
+                        "node": "serp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "serp": {
+            "main": [
+                [
+                    {
+                        "node": "split_leads",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "split_leads": {
+            "main": [
+                [
+                    {
+                        "node": "gs-lookup",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "gs-lookup": {
+            "main": [
+                [
+                    {
+                        "node": "¿Ya Contactado?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "¿Ya Contactado?": {
+            "main": [
+                [
+                    {
+                        "node": "wait-id",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "wait-id": {
+            "main": [
+                [
+                    {
+                        "node": "ai",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "groq": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "ai",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "ai": {
+            "main": [
+                [
+                    {
+                        "node": "Parse JSON Seguro",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse JSON Seguro": {
+            "main": [
+                [
+                    {
+                        "node": "evolution",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "gmail",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "telegram",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Guardar Lead",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

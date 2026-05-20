@@ -1,0 +1,437 @@
+{
+    "name": "Product Hunter V1 - Google Shopping Text Analysis (Stable)",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "hours",
+                            "hoursInterval": 1
+                        }
+                    ]
+                }
+            },
+            "id": "schedule",
+            "name": "Cron Daily",
+            "type": "n8n-nodes-base.cron",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {},
+            "id": "start",
+            "name": "Manual Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                100,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// Lista de Nichos Ganadores\nconst niches = [\n  \"gadgets de cocina virales\",\n  \"accesorios para gatos novedosos\",\n  \"gadgets para autos tiktok\",\n  \"productos de belleza coreana virales\",\n  \"herramientas caseras ingeniosas\",\n  \"juguetes educativos para niños novedosos\",\n  \"accesorios de escritorio aesthetic\"\n];\n\n// Elegir uno al azar\nconst random = niches[Math.floor(Math.random() * niches.length)];\n\nreturn { query: random, location: \"United States\" };"
+            },
+            "id": "random_niche",
+            "name": "Elegir Nicho Random",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                300,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "sheetId": {
+                    "__rl": true,
+                    "value": "1gKy... (Pegar ID de tu Hoja Aqui)",
+                    "mode": "id"
+                },
+                "range": "Sheet1!F:F",
+                "options": {
+                    "valueRenderOption": "FORMATTED_VALUE"
+                }
+            },
+            "id": "read_sheet",
+            "name": "Leer Links Existentes",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                520,
+                300
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "zwdmBzveCXv4B3Ec",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "url": "https://serpapi.com/search.json",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "queryAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "api_key",
+                            "value": "9be0d43581dc9220232e9a2819f308c303a32082a1e62f97c9c87b75dfde8d72"
+                        },
+                        {
+                            "name": "engine",
+                            "value": "google_shopping"
+                        },
+                        {
+                            "name": "q",
+                            "value": "={{ $('Elegir Nicho Random').item.json.query }}"
+                        },
+                        {
+                            "name": "location",
+                            "value": "={{ $('Elegir Nicho Random').item.json.location }}"
+                        },
+                        {
+                            "name": "num",
+                            "value": "100"
+                        }
+                    ]
+                }
+            },
+            "id": "serp",
+            "name": "Google Shopping",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                520,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "shopping_results"
+            },
+            "id": "split",
+            "name": "Dividir Items",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 3,
+            "position": [
+                720,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// Obtener links ya guardados\nconst existingLinks = $('Leer Links Existentes').all().map(x => x.json.Link);\n\n// Filtrar el item actual\nconst currentLink = $input.item.json.product_link;\nconst currentImg = $input.item.json.thumbnail;\n\n// Si ya existe o no tiene imagen, descartar\nif (existingLinks.includes(currentLink) || !currentImg) {\n  return []; // Item vacio se filtra\n}\n\nreturn $input.item;"
+            },
+            "id": "dedup",
+            "name": "Filtrar Duplicados",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                920,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "batchSize": 1
+            },
+            "id": "loop",
+            "name": "Loop",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 2,
+            "position": [
+                1120,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "model": "gemini-1.5-flash-latest"
+            },
+            "id": "gemini_model",
+            "name": "Gemini Flash Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+            "typeVersion": 1,
+            "position": [
+                1460,
+                720
+            ],
+            "credentials": {
+                "googlePalmApi": {
+                    "id": "geminiApiKey",
+                    "name": "Google Gemini(PaLM) account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "CONTEXTO:\nEres un Comprador Experto de E-commerce Dropshipping.\n\nPRODUCTO:\nTitulo: {{ $json.title }}\nPrecio: {{ $json.price }}\nTienda: {{ $json.source }}\nURL Imagen: {{ $json.thumbnail }}\n\nTAREA:\nBasándote en el Título y Precio, analiza la VIABILIDAD de este producto para Dropshipping.\n\nCRITERIOS:\n1. Factor WOW (¿El título sugiere algo novedoso?).\n2. Soluciona un problema real.\n3. Precio competitivo.\n\nOUTPUT JSON:\n{\n  \"score\": 0-10,\n  \"reason\": \"Breve explicacion\",\n  \"viral_potential\": \"High/Med/Low\"\n}\n\nResponde SOLO con el JSON.",
+                "hasOutputParser": false
+            },
+            "id": "ai_analysis",
+            "name": "Analizar Producto",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1460,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const ai_raw = $input.item.json.text || '{}';\nlet ai_data = {};\ntry {\n  const clean = ai_raw.replace(/```json/g, '').replace(/```/g, '').trim();\n  ai_data = JSON.parse(clean);\n} catch (e) {\n  ai_data = { score: 0, reason: \"Error parsing JSON\", viral_potential: \"Low\" };\n}\n\n// Recuperar datos originales del producto (desde el Loop)\nconst product = $('Loop').item.json;\n\n// MERGE: Producto + Analisis IA\nreturn {\n  ...product,\n  ...ai_data,\n  // Crear campos especificos para Google Sheets\n  Title: product.title,\n  Price: product.price,\n  Score: ai_data.score,\n  Viral: ai_data.viral_potential,\n  Reason: ai_data.reason,\n  Link: product.product_link\n};"
+            },
+            "id": "parse_json",
+            "name": "Parsear JSON",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1700,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "number": [
+                        {
+                            "value1": "={{ $json.score }}",
+                            "operation": "larger",
+                            "value2": 6
+                        }
+                    ]
+                }
+            },
+            "id": "filter",
+            "name": "Solo Winners",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                1950,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "authentication": "googleSheetsOAuth2Api",
+                "operation": "append",
+                "sheetId": {
+                    "__rl": true,
+                    "value": "1gKy... (Pegar ID de tu Hoja Aqui)",
+                    "mode": "id"
+                },
+                "range": "Sheet1!A:F",
+                "options": {
+                    "valueInputOption": "USER_ENTERED"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Title": "={{ $json.Title }}",
+                        "Price": "={{ $json.Price }}",
+                        "Score": "={{ $json.Score }}",
+                        "Viral": "={{ $json.Viral }}",
+                        "Reason": "={{ $json.Reason }}",
+                        "Link": "={{ $json.Link }}"
+                    }
+                }
+            },
+            "id": "save_sheet",
+            "name": "Guardar Winner",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                2200,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "zwdmBzveCXv4B3Ec",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {},
+            "id": "merge_loop",
+            "name": "Cerrar Loop",
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 2,
+            "position": [
+                2450,
+                500
+            ]
+        }
+    ],
+    "connections": {
+        "Cron Daily": {
+            "main": [
+                [
+                    {
+                        "node": "Elegir Nicho Random",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Elegir Nicho Random",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Elegir Nicho Random": {
+            "main": [
+                [
+                    {
+                        "node": "Leer Links Existentes",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Leer Links Existentes": {
+            "main": [
+                [
+                    {
+                        "node": "Google Shopping",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Shopping": {
+            "main": [
+                [
+                    {
+                        "node": "Dividir Items",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Dividir Items": {
+            "main": [
+                [
+                    {
+                        "node": "Filtrar Duplicados",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtrar Duplicados": {
+            "main": [
+                [
+                    {
+                        "node": "Loop",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop": {
+            "main": [
+                [
+                    {
+                        "node": "Analizar Producto",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Gemini Flash Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Analizar Producto",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Analizar Producto": {
+            "main": [
+                [
+                    {
+                        "node": "Parsear JSON",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parsear JSON": {
+            "main": [
+                [
+                    {
+                        "node": "Solo Winners",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Solo Winners": {
+            "main": [
+                [
+                    {
+                        "node": "Guardar Winner",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Cerrar Loop",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Guardar Winner": {
+            "main": [
+                [
+                    {
+                        "node": "Cerrar Loop",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Cerrar Loop": {
+            "main": [
+                [
+                    {
+                        "node": "Loop",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

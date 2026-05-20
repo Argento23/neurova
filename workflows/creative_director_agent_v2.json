@@ -1,0 +1,124 @@
+{
+    "name": "Agente Director Creativo Simple",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "manual-trigger",
+            "name": "Cuando se pulsa Ejecutar",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                240,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "topic",
+                            "value": "Campaña para un software de IA que automatiza ventas B2B",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-input",
+            "name": "Definir Tema",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                460,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "modelId": "gpt-4o",
+                "messages": {
+                    "values": [
+                        {
+                            "content": "=Actúa como un Director Creativo experto.\nGenera los assets creativos para el siguiente tema: \"{{ $json.topic }}\".\n\nDevuelve la respuesta EXCLUSIVAMENTE como un JSON válido (sin bloques de código markdown ```json ... ```) con la siguiente estructura:\n\n{\n  \"titulo\": \"Título de la campaña\",\n  \"prompt_imagen\": \"Descripción visual extremadamente detallada para generar un banner en DALL-E 3, en inglés, estilo fotorealista o cyberpunk corporativo\",\n  \"texto_instagram\": \"El copy para el post\",\n  \"guion_video\": \"Un guion corto para un presentador\"\n}",
+                            "role": "user"
+                        }
+                    ]
+                },
+                "jsonOutput": true
+            },
+            "id": "openai-chat",
+            "name": "Generar Idea (GPT-4)",
+            "type": "n8n-nodes-base.openai",
+            "typeVersion": 1,
+            "position": [
+                680,
+                300
+            ],
+            "credentials": {
+                "openaiApi": {
+                    "id": "YOUR_CREDENTIAL_ID",
+                    "name": "OpenAI account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "image",
+                "prompt": "={{ $json.message.content.prompt_imagen }}",
+                "n": 1,
+                "size": "1024x1024",
+                "responseFormat": "url"
+            },
+            "id": "openai-image",
+            "name": "Crear Banner (DALE-3)",
+            "type": "n8n-nodes-base.openai",
+            "typeVersion": 1,
+            "position": [
+                900,
+                300
+            ],
+            "credentials": {
+                "openaiApi": {
+                    "id": "YOUR_CREDENTIAL_ID",
+                    "name": "OpenAI account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Cuando se pulsa Ejecutar": {
+            "main": [
+                [
+                    {
+                        "node": "Definir Tema",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Definir Tema": {
+            "main": [
+                [
+                    {
+                        "node": "Generar Idea (GPT-4)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generar Idea (GPT-4)": {
+            "main": [
+                [
+                    {
+                        "node": "Crear Banner (DALE-3)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

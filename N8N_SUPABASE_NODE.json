@@ -1,0 +1,31 @@
+[
+    {
+        "parameters": {
+            "operation": "insert",
+            "table": "agency_clients",
+            "columns": [
+                "name",
+                "email",
+                "phone",
+                "company",
+                "status",
+                "notes"
+            ],
+            "options": {}
+        },
+        "id": "supabase-agency-node",
+        "name": "Supabase - Nuevo Lead Panel",
+        "type": "n8n-nodes-base.supabase",
+        "typeVersion": 1,
+        "position": [
+            1000,
+            400
+        ],
+        "credentials": {
+            "supabaseApiCustom": {
+                "id": "TU_ID_DE_CREDENCIAL_AQUI",
+                "name": "Supabase Neurova"
+            }
+        }
+    }
+]

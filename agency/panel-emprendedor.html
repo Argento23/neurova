@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel - Emprendedor Solidario (Neurova OS)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --secondary: #f59e0b;
+            --bg: #0b0b10;
+            --bg-card: #15151e;
+            --text: #f0f0f5;
+            --border: rgba(255,255,255,0.08);
+            --danger: #ef4444;
+            --success: #10b981;
+            --premium: linear-gradient(135deg, #f59e0b, #fbbf24);
+            --glass: rgba(255,255,255,0.03);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Outfit',sans-serif; }
+        body { background:var(--bg); color:var(--text); display: flex; min-height: 100vh; overflow: hidden; }
+        
+        /* Sidebar */
+        aside {
+            width: 280px; background: var(--bg-card); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; padding: 2rem 1.2rem; height: 100vh;
+        }
+        .logo { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 2.5rem; }
+        .logo span { color: var(--primary); }
+        
+        nav { flex: 1; }
+        .nav-label { font-size: 0.65rem; color: #555; text-transform: uppercase; letter-spacing: 1.5px; margin: 1.5rem 0 0.8rem 0.5rem; }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border-radius: 12px;
+            color: #888; text-decoration: none; margin-bottom: 0.3rem; transition: 0.3s; cursor: pointer; font-size: 0.9rem;
+        }
+        .nav-item:hover, .nav-item.active { background: var(--glass); color: var(--text); border: 1px solid var(--border); }
+        .nav-item i { width: 18px; font-size: 1.1rem; }
+        .nav-item .badge { margin-left: auto; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; background: var(--primary); color: #fff; }
+        
+        .user-plan {
+            background: var(--glass); border: 1px solid var(--border); padding: 1.2rem; border-radius: 16px; margin-top: auto;
+        }
+        .plan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .plan-name { font-weight: 700; color: var(--secondary); font-size: 0.75rem; text-transform: uppercase; }
+        
+        /* Main */
+        main { flex: 1; padding: 2rem 4%; overflow-y: auto; height: 100vh; background: radial-gradient(circle at top right, rgba(99,102,241,0.05), transparent); }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
+        
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 2rem; margin-bottom: 2rem; position: relative; overflow: hidden; }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--primary); opacity: 0; transition: 0.3s; }
+        .card:hover::before { opacity: 1; }
+        
+        .card h2 { margin-bottom: 1.5rem; font-size: 1.5rem; font-family: 'Space Grotesk', sans-serif; display: flex; align-items: center; gap: 12px; }
+        
+        /* Premium Features Grid */
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .tool-card {
+            background: var(--glass); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem;
+            transition: 0.3s; cursor: pointer; position: relative;
+        }
+        .tool-card:hover { border-color: var(--primary); transform: translateY(-5px); background: rgba(99,102,241,0.05); }
+        .tool-header { display: flex; align-items: center; gap: 15px; margin-bottom: 1rem; }
+        .tool-icon { width: 45px; height: 45px; border-radius: 12px; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--primary-light); }
+        .tool-status { font-size: 0.7rem; padding: 2px 8px; border-radius: 20px; margin-left: auto; }
+        .status-on { background: rgba(16,185,129,0.1); color: var(--success); }
+        .status-off { background: rgba(255,255,255,0.05); color: #777; }
+        
+        /* Stats */
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; text-align: center; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; margin: 0.5rem 0; font-family: 'Space Grotesk', sans-serif; }
+        .stat-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; }
+        th { padding: 1rem; text-align: left; color: #555; font-size: 0.75rem; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        td { padding: 1.2rem 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        .p-img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; }
+        
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: #aaa; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 0.9rem; border-radius: 12px; border: 1px solid var(--border);
+            background: #0b0b10; color: white; outline: none; transition: 0.3s;
+        }
+        .form-group input:focus { border-color: var(--primary); }
+
+        .btn {
+            background: var(--primary); color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 12px;
+            cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s;
+        }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        
+        .toast {
+            position: fixed; bottom: 20px; right: 20px; background: var(--success); color: white;
+            padding: 1rem 2rem; border-radius: 15px; display: none; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        
+        #auth-section { max-width: 400px; margin: 12vh auto; width: 100%; padding: 2rem; }
+        .hidden { display: none !important; }
+        .locked { filter: grayscale(1); opacity: 0.5; cursor: not-allowed !important; }
+        .locked::after { content: '🔒'; position: absolute; top: 15px; right: 15px; font-size: 0.8rem; }
+
+        /* AI Chat Box Simulation */
+        .ai-chat { background: #000; border-radius: 12px; padding: 1rem; margin-top: 1rem; font-family: monospace; font-size: 0.85rem; color: #10b981; max-height: 150px; overflow-y: auto; }
+        .ai-line { margin-bottom: 5px; }
+        .ai-line.user { color: #818cf8; }
+    </style>
+</head>
+<body>
+
+    <!-- Loading -->
+    <div id="loading" style="display:flex;align-items:center;justify-content:center;height:100vh;width:100%;position:fixed;inset:0;z-index:999;background:var(--bg);">
+        <div style="text-align:center;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;margin-bottom:1rem;">NEUROVA <span style="color:var(--primary)">OS</span></div>
+            <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;color:var(--primary);"></i>
+        </div>
+    </div>
+
+    <!-- Auth -->
+    <div id="auth-section" class="hidden">
+        <div class="card" style="text-align: center; border-top: 5px solid var(--primary);">
+            <div class="logo" style="margin-bottom: 1.5rem;">NEUROVA <span>SOLIDARIA</span></div>
+            <h2 id="auth-title" style="justify-content: center; font-size: 1.2rem;">Panel de Emprendedor</h2>
+            <form id="authForm" style="text-align: left; margin-top: 1.5rem;">
+                <div class="form-group"><label>Email</label><input type="email" id="authEmail" required></div>
+                <div class="form-group"><label>Contraseña</label><input type="password" id="authPassword" required minlength="6"></div>
+                <button type="submit" id="authBtn" class="btn" style="width: 100%; justify-content: center;">Ingresar al Ecosistema</button>
+            </form>
+            <p onclick="toggleAuthMode()" style="margin-top: 1.5rem; font-size: 0.8rem; color: #555; cursor: pointer;">¿No tenés cuenta? Registrate gratis</p>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="hidden">
+        <div class="logo">NEUROVA <span>OS</span></div>
+        <nav>
+            <div class="nav-label">Core</div>
+            <div class="nav-item active" onclick="showSection('dashboard')"><i class="fas fa-th-large"></i> Dashboard</div>
+            <div class="nav-item" onclick="showSection('inventory')"><i class="fas fa-boxes"></i> Inventario</div>
+            
+            <div class="nav-label">Crecimiento (n8n + AI)</div>
+            <div class="nav-item" onclick="showSection('assistant')"><i class="fas fa-robot"></i> Asistente Alex <span class="badge">n8n</span></div>
+            <div class="nav-item" onclick="showSection('factory')"><i class="fas fa-magic"></i> Content Factory</div>
+            <div class="nav-item" onclick="showSection('leads')"><i class="fas fa-radar"></i> Leads Sniper <span class="badge" style="background:var(--secondary);">HOT</span></div>
+            
+            <div class="nav-label">Configuración</div>
+            <div class="nav-item" onclick="showSection('profile')"><i class="fas fa-store"></i> Perfil Tienda</div>
+            
+            <div class="nav-label">Marketplace</div>
+            <div class="nav-item" onclick="showSection('services')"><i class="fas fa-shopping-cart"></i> Servicios Adicionales</div>
+        </nav>
+        
+        <div class="user-plan">
+            <div class="plan-header">
+                <div class="plan-name" id="display-plan">Plan Iniciador</div>
+                <i class="fas fa-info-circle" style="font-size: 0.8rem; color: #555;"></i>
+            </div>
+            <button class="btn btn-premium btn-sm" style="width: 100%; font-size: 0.7rem;" onclick="showUpgrade()">Mejorar a Crecimiento</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="main-content" class="hidden">
+        <header>
+            <h1 id="section-title">Panel de Control</h1>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <div style="text-align: right; margin-right: 1rem;">
+                    <div id="user-email" style="font-size: 0.85rem; font-weight: 600;"></div>
+                    <div style="font-size: 0.65rem; color: #555;">ID: NEURO-8829</div>
+                </div>
+                <button onclick="logout()" class="btn btn-outline btn-sm">Salir</button>
+            </div>
+        </header>
+
+        <!-- Section: Dashboard Overview -->
+        <div id="section-dashboard">
+            <div class="stats-row">
+                <div class="stat-card"><div class="stat-label">Visitas Tienda</div><div class="stat-value">1,284</div></div>
+                <div class="stat-card"><div class="stat-label">Leads Hoy</div><div class="stat-value" style="color:var(--secondary)">12</div></div>
+                <div class="stat-card"><div class="stat-label">Respuestas IA</div><div class="stat-value">423</div></div>
+                <div class="stat-card"><div class="stat-label">Conversión</div><div class="stat-value">8.4%</div></div>
+            </div>
+
+            <div class="tools-grid">
+                <div class="tool-card" onclick="showSection('assistant')">
+                    <div class="tool-header">
+                        <div class="tool-icon"><i class="fas fa-robot"></i></div>
+                        <div>
+                            <div style="font-weight: 700;">Alex Assistant</div>
+                            <div style="font-size: 0.7rem; color: #777;">Respuestas Automáticas WhatsApp</div>
+                        </div>
+                        <span class="tool-status status-on">Activo</span>
+                    </div>
+                </div>
+                <div class="tool-card locked">
+                    <div class="tool-header">
+                        <div class="tool-icon"><i class="fas fa-bullhorn"></i></div>
+                        <div>
+                            <div style="font-weight: 700;">AdSniper Engine</div>
+                            <div style="font-size: 0.7rem; color: #777;">Publicidad Automatizada</div>
+                        </div>
+                        <span class="tool-status status-off">Inactivo</span>
+                    </div>
+                </div>
+                <div class="tool-card" onclick="showSection('leads')">
+                    <div class="tool-header">
+                        <div class="tool-icon"><i class="fas fa-search-location"></i></div>
+                        <div>
+                            <div style="font-weight: 700;">Leads Discovery</div>
+                            <div style="font-size: 0.7rem; color: #777;">Búsqueda de clientes locales</div>
+                        </div>
+                        <span class="tool-status status-on">Sincronizando</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Inventory -->
+        <div id="section-inventory" class="hidden">
+            <div class="card">
+                <h2 id="form-title"><i class="fas fa-plus-circle"></i> Agregar a mi Catálogo</h2>
+                <form id="productForm">
+                    <input type="hidden" id="editId">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1rem;">
+                        <div class="form-group"><label>Nombre</label><input type="text" id="pName" required></div>
+                        <div class="form-group"><label>Precio ($)</label><input type="number" id="pPrice" required></div>
+                        <div class="form-group"><label>Tipo</label><select id="pType"><option value="product">📦 Producto</option><option value="service">🛠️ Servicio</option></select></div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem;">
+                        <div class="form-group"><label>Categoría</label><select id="pCat"><option>Alimentos</option><option>Moda</option><option>Hogar</option><option>Belleza</option><option>Artesanías</option><option>Cuidado Personal</option><option>Indumentaria</option><option>Servicios Profesionales</option><option>Reparaciones</option><option>Clases y Talleres</option><option>Eventos y Espacios</option><option>Salud y Bienestar</option><option>Otro</option></select></div>
+                        <div class="form-group">
+                            <label>Imagen del Producto</label>
+                            <div style="display:flex;flex-direction:column;gap:0.6rem;">
+                                <label for="pImgFile" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:0.7rem 1rem;border:1.5px dashed rgba(99,102,241,0.5);border-radius:10px;color:#818cf8;font-size:0.8rem;transition:0.2s;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='rgba(99,102,241,0.5)'">
+                                    <i class="fas fa-cloud-upload-alt"></i> Subir desde dispositivo
+                                    <input type="file" id="pImgFile" accept="image/*" style="display:none" onchange="previewImage(this)">
+                                </label>
+                                <div style="text-align:center;font-size:0.7rem;color:#555;">— o usar URL —</div>
+                                <input type="url" id="pImg" placeholder="https://..." style="font-size:0.8rem;">
+                                <img id="pImgPreview" src="" alt="" style="display:none;width:100%;max-height:120px;object-fit:cover;border-radius:10px;border:1px solid rgba(255,255,255,0.1);">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group"><label>Descripción para la IA (Alex la usará para vender)</label><textarea id="pDesc" rows="2" required></textarea></div>
+                    <div style="display:flex;gap:0.8rem;align-items:center;">
+                        <button type="submit" class="btn" id="pSubmit"><i class="fas fa-store"></i> Publicar en Tienda</button>
+                        <button type="button" class="btn" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.3);color:#f59e0b;" onclick="publishToSocial()" id="pPublishBtn" disabled title="Guardá primero el producto para publicarlo en redes"><i class="fas fa-share-alt"></i> Publicar en Redes</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card">
+                <table id="productsTable"></table>
+            </div>
+        </div>
+
+        <!-- Section: Alex Assistant (AI) -->
+        <div id="section-assistant" class="hidden">
+            <div class="card">
+                <h2><i class="fas fa-robot"></i> Alex AI Sales Assistant</h2>
+                <div style="display: flex; gap: 2rem;">
+                    <div style="flex: 1;">
+                        <p style="color: #aaa; margin-bottom: 1.5rem;">Alex responde automáticamente a tus clientes en WhatsApp e Instagram usando la información de tus productos.</p>
+                        <div class="form-group">
+                            <label>Estado del Agente</label>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="color: var(--success); font-weight: 700;">ACTIVO</span>
+                                <button class="btn btn-outline btn-sm">Pausar</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Tono de Voz</label>
+                            <select><option>Amigable y Cercano</option><option>Profesional y Directo</option><option>Persuasivo (Vendedor)</option></select>
+                        </div>
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.7rem; color: #555;">Última Conversación (Simulada)</label>
+                        <div class="ai-chat">
+                            <div class="ai-line user">Cliente: Hola! Tenés stock de las velas?</div>
+                            <div class="ai-line">Alex: Hola! Sí, tenemos stock de las Velas de Soja Aromáticas. Salen $1.800 y son 100% naturales. ¿Te gustaría que te reserve una?</div>
+                            <div class="ai-line user">Cliente: Dale, qué aromas tenés?</div>
+                            <div class="ai-line">Alex: Tenemos Lavanda, Vainilla y Sándalo. Son riquísimas!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Leads (Sniper) -->
+        <div id="section-leads" class="hidden">
+            <div class="card">
+                <h2><i class="fas fa-radar"></i> Leads Discovery Sniper</h2>
+                <div style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 12px; margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: 700;">Buscando clientes para: <span style="color: var(--primary-light);">Alimentos, Hogar</span></div>
+                            <div style="font-size: 0.75rem; color: #777;">Radio de acción: 10km a la redonda</div>
+                        </div>
+                        <button class="btn btn-sm btn-premium"><i class="fas fa-sync"></i> Escanear Ahora</button>
+                    </div>
+                </div>
+                <table>
+                    <thead><tr><th>Lead</th><th>Origen</th><th>Interés</th><th>Acción</th></tr></thead>
+                    <tbody>
+                        <tr><td>@maria_artes</td><td>Instagram</td><td>Regalos artesanales</td><td><button class="btn btn-sm">Contactar</button></td></tr>
+                        <tr><td>+54 9 11 2345-XXXX</td><td>WhatsApp</td><td>Mermeladas orgánicas</td><td><button class="btn btn-sm">Contactar</button></td></tr>
+                        <tr><td>Juan Pérez (Local)</td><td>Google Maps</td><td>Proveedores locales</td><td><button class="btn btn-sm">Contactar</button></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section: Content Factory (Adsíntesis) -->
+        <div id="section-factory" class="hidden">
+
+            <!-- ADSÍNTESIS -->
+            <div class="card" style="border-top: 3px solid var(--secondary);">
+                <h2><i class="fas fa-bullhorn" style="color:var(--secondary);"></i> Adsíntesis — Generador de Anuncios IA</h2>
+                <p style="color:#aaa;margin-bottom:1.5rem;font-size:0.9rem;">Generá textos publicitarios y creativos para tus productos con un solo clic.</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+                    <div class="form-group">
+                        <label>Seleccioná un producto</label>
+                        <select id="adsProduct" style="width:100%;padding:0.8rem;border-radius:10px;border:1px solid var(--border);background:#0b0b10;color:white;"><option value="">— Elegí un producto —</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de anuncio</label>
+                        <select id="adsType" style="width:100%;padding:0.8rem;border-radius:10px;border:1px solid var(--border);background:#0b0b10;color:white;">
+                            <option value="instagram">📸 Post Instagram</option>
+                            <option value="story">⚡ Story / Reel (gancho)</option>
+                            <option value="whatsapp">💬 Estado WhatsApp</option>
+                            <option value="facebook">📘 Post Facebook</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn" onclick="generateAd()" style="background:linear-gradient(135deg,var(--secondary),#f97316);border:none;margin-bottom:1.5rem;"><i class="fas fa-wand-magic-sparkles"></i> Generar Anuncio con IA</button>
+                <div id="adsOutput" style="display:none;background:#000;border-radius:12px;padding:1.2rem;border:1px solid rgba(245,158,11,0.2);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;">
+                        <span style="font-size:0.7rem;color:#f59e0b;text-transform:uppercase;letter-spacing:1px;">✨ Anuncio generado</span>
+                        <button onclick="copyAd()" class="btn" style="padding:4px 10px;font-size:0.7rem;"><i class="fas fa-copy"></i> Copiar</button>
+                    </div>
+                    <p id="adsText" style="color:#e0e0e0;font-size:0.9rem;line-height:1.7;white-space:pre-wrap;"></p>
+                </div>
+            </div>
+
+            <!-- CONTENT GENERATOR + SOCIAL PUBLISHING -->
+            <div class="card" style="border-top: 3px solid var(--primary);">
+                <h2><i class="fas fa-share-nodes" style="color:var(--primary-light);"></i> Content Factory — Publicación Automática en Redes</h2>
+                <p style="color:#aaa;margin-bottom:1.5rem;font-size:0.9rem;">Publicá tus productos y contenido directamente en Facebook e Instagram.</p>
+
+                <!-- Selector de producto a publicar -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                    <div class="form-group">
+                        <label>Producto a publicar</label>
+                        <select id="pubProduct" style="width:100%;padding:0.8rem;border-radius:10px;border:1px solid var(--border);background:#0b0b10;color:white;"><option value="">— Elegí un producto —</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Redes a publicar</label>
+                        <div style="display:flex;gap:1rem;margin-top:0.5rem;">
+                            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.85rem;"><input type="checkbox" id="pubFB" checked> <i class="fab fa-facebook" style="color:#1877F2;"></i> Facebook</label>
+                            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.85rem;"><input type="checkbox" id="pubIG" checked> <i class="fab fa-instagram" style="color:#E1306C;"></i> Instagram</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Caption (editable)</label>
+                    <textarea id="pubCaption" rows="3" placeholder="Escribí o generá el texto del post..." style="width:100%;padding:0.9rem;border-radius:10px;border:1px solid var(--border);background:#0b0b10;color:white;"></textarea>
+                </div>
+
+                <div style="display:flex;gap:0.8rem;align-items:center;flex-wrap:wrap;">
+                    <button class="btn" onclick="generateCaption()" style="background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.4);color:#818cf8;"><i class="fas fa-robot"></i> Generar Caption con IA</button>
+                    <button class="btn" onclick="publishNow()" style="background:linear-gradient(135deg,#1877F2,#E1306C);border:none;"><i class="fas fa-paper-plane"></i> Publicar Ahora</button>
+                    <span id="pubStatus" style="font-size:0.8rem;color:#888;"></span>
+                </div>
+
+                <!-- Historial de publicaciones -->
+                <div style="margin-top:2rem;">
+                    <div style="font-size:0.75rem;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:1rem;">📅 Últimas publicaciones</div>
+                    <div id="pubHistory" style="display:flex;flex-direction:column;gap:0.5rem;">
+                        <div style="padding:0.8rem;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;">
+                            <div style="font-size:0.8rem;"><i class="fab fa-facebook" style="color:#1877F2;"></i> <i class="fab fa-instagram" style="color:#E1306C;"></i> <span style="margin-left:6px;">Mermelada Artesanal — Alimentos</span></div>
+                            <span style="font-size:0.7rem;color:var(--success);">✅ Publicado</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Perfil Tienda -->
+        <div id="section-profile" class="hidden">
+            <!-- Link a mi tienda -->
+            <div class="card" style="border-top: 3px solid var(--secondary); padding: 1.2rem 2rem; display: flex; justify-content: space-between; align-items: center;">
+                <div><strong>🔗 Tu Tienda Pública:</strong> <a id="profStoreLink" href="#" target="_blank" style="color: var(--primary-light); text-decoration: none;">Cargando...</a></div>
+                <button class="btn btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('profStoreLink').href);showToast('📋 Link copiado!')"><i class="fas fa-copy"></i> Copiar</button>
+            </div>
+            <div class="card" style="border-top: 3px solid #10b981;">
+                <h2><i class="fas fa-store" style="color: #10b981;"></i> Configuración de Tienda Digital</h2>
+                <p style="color:#aaa;margin-bottom:1.5rem;font-size:0.9rem;">Completá la información de tu negocio para activar tu tienda y las publicaciones automáticas.</p>
+                
+                <form id="profileForm">
+                    <!-- Info General -->
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary-light);"><i class="fas fa-info-circle"></i> Información General</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group"><label>Nombre del Negocio</label><input type="text" id="profName" required></div>
+                            <div class="form-group"><label>WhatsApp de Contacto (con código de país)</label><input type="text" id="profPhone" placeholder="54911..." required></div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group"><label>Ciudad / Localidad</label><input type="text" id="profCity" placeholder="Ej: Neuquén"></div>
+                            <div class="form-group"><label>Rubro Principal</label><input type="text" id="profCatFocus" placeholder="Ej: Alimentos artesanales"></div>
+                        </div>
+                        <div class="form-group"><label>Descripción Breve (¿Qué vendés?)</label><textarea id="profDesc" rows="2"></textarea></div>
+                        <div class="form-group"><label>Slogan / Tagline (aparece en tu tienda)</label><input type="text" id="profTagline" placeholder="Ej: Sabores que cuentan historias"></div>
+                    </div>
+
+                    <!-- Identidad Visual -->
+                    <div style="margin-bottom: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: #ec4899;"><i class="fas fa-palette"></i> Identidad Visual de tu Tienda</h3>
+                        <p style="font-size: 0.8rem; color: #888; margin-bottom: 1rem;">Personalizá cómo se ve tu tienda para tus clientes.</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 120px; gap: 1rem;">
+                            <div class="form-group"><label>URL de tu Logo</label><input type="url" id="profLogo" placeholder="https://..."></div>
+                            <div class="form-group"><label>URL de Banner (imagen ancha)</label><input type="url" id="profBanner" placeholder="https://..."></div>
+                            <div class="form-group"><label>Color de Marca</label><input type="color" id="profColor" value="#6366f1" style="height:42px;padding:4px;cursor:pointer;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Medios de Pago -->
+                    <div style="margin-bottom: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--success);"><i class="fas fa-money-bill-wave"></i> Link de Pago Automático</h3>
+                        <p style="font-size: 0.8rem; color: #888; margin-bottom: 1rem;">Ingresá tu link de MercadoPago, PayPal o link de WhatsApp para cobrar los productos.</p>
+                        <div class="form-group"><label>Link de Pago (MercadoPago / PayPal)</label><input type="url" id="profPayment" placeholder="https://link.mercadopago.com.ar/..."></div>
+                    </div>
+
+                    <!-- Integración Redes -->
+                    <div style="margin-bottom: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--secondary);"><i class="fas fa-share-nodes"></i> Activación de Content Factory</h3>
+                        <p style="font-size: 0.8rem; color: #888; margin-bottom: 1rem;">Completá estos datos para que nuestro sistema pueda publicar automáticamente por vos.</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group"><label>Usuario de Instagram (Ej: @mi_tienda)</label><input type="text" id="profIG" placeholder="@"></div>
+                            <div class="form-group"><label>URL de Página de Facebook</label><input type="url" id="profFB" placeholder="https://facebook.com/..."></div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" id="profSubmit" style="width: 100%; justify-content: center; background: #10b981;"><i class="fas fa-save"></i> Guardar Configuración</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Section: Servicios Adicionales (Marketplace) -->
+        <div id="section-services" class="hidden">
+            <div class="card" style="border-top: 3px solid var(--secondary);">
+                <h2><i class="fas fa-shopping-cart" style="color:var(--secondary);"></i> Tienda de Mejoras & Servicios IA</h2>
+                <p style="color:#aaa;margin-bottom:2rem;font-size:0.9rem;">Potenciá tu Stand Virtual añadiendo herramientas de Inteligencia Artificial avanzadas. El pago se realiza por única vez o suscripción manual mediante MercadoPago o Transferencia Bancaria.</p>
+                
+                <div class="tools-grid">
+                    <!-- Servicio 1: Generador de Contenido y Publicador -->
+                    <div class="tool-card" style="border-color: rgba(99,102,241,0.3);">
+                        <div class="tool-header">
+                            <div class="tool-icon" style="background: rgba(99,102,241,0.1); color: var(--primary);"><i class="fas fa-share-nodes"></i></div>
+                            <div>
+                                <div style="font-weight: 700;">Content Factory Pro</div>
+                                <div style="font-size: 0.7rem; color: #777;">Generador y Publicador</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 1rem; line-height: 1.5;">La IA redacta tus posteos con técnicas de venta persuasivas y los publica automáticamente en Instagram y Facebook sin que muevas un dedo.</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.1rem; color: var(--text);">$15.000 <span style="font-size: 0.6rem; color: #777; font-weight: 400;">/mes</span></div>
+                            <button class="btn btn-sm" onclick="solicitarServicio('Content Factory Pro', '15000')" style="padding: 0.5rem 1rem; font-size: 0.75rem;">Solicitar</button>
+                        </div>
+                    </div>
+
+                    <!-- Servicio 2: Generador de Creativos -->
+                    <div class="tool-card" style="border-color: rgba(245,158,11,0.3);">
+                        <div class="tool-header">
+                            <div class="tool-icon" style="background: rgba(245,158,11,0.1); color: var(--secondary);"><i class="fas fa-paint-brush"></i></div>
+                            <div>
+                                <div style="font-weight: 700;">Creador Visual IA</div>
+                                <div style="font-size: 0.7rem; color: #777;">Imágenes y Creativos</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 1rem; line-height: 1.5;">Transformá fotos simples de tus productos en creativos profesionales de estudio. Generación ilimitada de imágenes para tus anuncios y catálogo.</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.1rem; color: var(--text);">$20.000 <span style="font-size: 0.6rem; color: #777; font-weight: 400;">/mes</span></div>
+                            <button class="btn btn-sm" onclick="solicitarServicio('Creador Visual IA', '20000')" style="padding: 0.5rem 1rem; font-size: 0.75rem; background: var(--secondary); color: #000;">Solicitar</button>
+                        </div>
+                    </div>
+
+                    <!-- Servicio 3: Búsqueda de Leads -->
+                    <div class="tool-card" style="border-color: rgba(239,68,68,0.3);">
+                        <div class="tool-header">
+                            <div class="tool-icon" style="background: rgba(239,68,68,0.1); color: var(--danger);"><i class="fas fa-radar"></i></div>
+                            <div>
+                                <div style="font-weight: 700;">Leads Sniper B2B</div>
+                                <div style="font-size: 0.7rem; color: #777;">Búsqueda de clientes</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 1rem; line-height: 1.5;">Dejá de buscar clientes a mano. El sistema escanea tu zona o industria y te extrae los contactos (WhatsApp, Email) de negocios que necesitan tu producto.</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.1rem; color: var(--text);">$30.000 <span style="font-size: 0.6rem; color: #777; font-weight: 400;">/pack de 500</span></div>
+                            <button class="btn btn-sm" onclick="solicitarServicio('Leads Sniper B2B', '30000')" style="padding: 0.5rem 1rem; font-size: 0.75rem; background: var(--danger);">Solicitar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal de Pago Manual -->
+    <div id="paymentModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+        <div class="card" style="width: 100%; max-width: 450px; background: #111118; border: 1px solid var(--border); position: relative;">
+            <button onclick="document.getElementById('paymentModal').style.display='none'" style="position:absolute; top:15px; right:15px; background:none; border:none; color:#888; cursor:pointer; font-size:1.2rem;"><i class="fas fa-times"></i></button>
+            <h2 style="font-size: 1.2rem; margin-bottom: 1rem;"><i class="fas fa-receipt" style="color:var(--secondary);"></i> Solicitud de Mejora</h2>
+            <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 1.5rem;">Estás a un paso de activar <strong id="modalServiceName" style="color: white;">---</strong>.</p>
+            
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
+                <div style="font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">Total a transferir:</div>
+                <div style="font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; color: var(--success);">$<span id="modalServicePrice">0</span></div>
+            </div>
+
+            <div style="font-size: 0.85rem; color: #ccc; margin-bottom: 1.5rem; line-height: 1.6;">
+                <p style="margin-bottom: 0.5rem;">Para habilitar el servicio, realizá la transferencia por MercadoPago al siguiente Alias:</p>
+                <div style="background: #000; padding: 0.8rem; border-radius: 8px; font-family: monospace; font-size: 1rem; color: var(--primary-light); text-align: center; margin-bottom: 0.5rem; border: 1px dashed var(--primary-light); cursor: pointer;" onclick="navigator.clipboard.writeText('neurova.mp'); showToast('Alias copiado!');">
+                    neurova.mp
+                </div>
+                <p style="font-size: 0.75rem; color: #777; text-align: center;">(Hacé clic para copiar)</p>
+            </div>
+
+            <button class="btn" style="width: 100%; justify-content: center; background: var(--success);" onclick="confirmarPago()">Ya realicé la transferencia</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const SUPABASE_URL = 'https://gjfsylpbxxfvponhgmhz.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdqZnN5bHBieHhmdnBvbmhnbWh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NTUwNTgsImV4cCI6MjA4ODMzMTA1OH0.cXkLvik7fHeBX1ecuw0v5RAu1UdHNghQHTmSB4QW3Dw';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let user = null;
+        let profile = null;
+        let isLogin = true;
+
+        async function init() {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if(session) { await handleAuth(session.user); }
+                else { hideLoading(); document.getElementById('auth-section').classList.remove('hidden'); }
+            } catch(err) {
+                console.error('Init error:', err);
+                hideLoading(); document.getElementById('auth-section').classList.remove('hidden');
+            }
+        }
+
+        function hideLoading() {
+            const el = document.getElementById('loading');
+            if(el) el.style.display = 'none';
+        }
+
+        async function handleAuth(u) {
+            user = u;
+            hideLoading();
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('sidebar').classList.remove('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            document.getElementById('user-email').innerText = user.email;
+            await loadProfile();
+        }
+
+        function toggleAuthMode() { isLogin = !isLogin; document.getElementById('auth-title').innerText = isLogin ? 'Iniciar Sesión' : 'Registrarse'; }
+
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const res = isLogin ? await supabaseClient.auth.signInWithPassword({ email, password }) : await supabaseClient.auth.signUp({ email, password });
+            if(res.error) alert(res.error.message); else handleAuth(res.data.user);
+        });
+
+        async function logout() { await supabaseClient.auth.signOut(); location.reload(); }
+
+        async function loadProfile() {
+            let { data } = await supabaseClient.from('entrepreneurs').select('*').eq('clerk_user_id', user.id).maybeSingle();
+            if(!data) {
+                // Auto-create profile for new Supabase Auth users
+                const { data: newProfile, error } = await supabaseClient.from('entrepreneurs').insert([{
+                    clerk_user_id: user.id,
+                    business_name: user.email.split('@')[0],
+                    whatsapp_number: '5491100000000'
+                }]).select().single();
+                if(!error) data = newProfile;
+            }
+            if(data) {
+                profile = data;
+                document.getElementById('display-plan').innerText = `Plan Iniciador`;
+                
+                // Populate profile section fields
+                document.getElementById('profName').value = profile.business_name || '';
+                document.getElementById('profPhone').value = profile.whatsapp_number || '';
+                document.getElementById('profDesc').value = profile.description || '';
+                document.getElementById('profPayment').value = profile.payment_link || '';
+                document.getElementById('profIG').value = profile.instagram_handle || '';
+                document.getElementById('profFB').value = profile.facebook_url || '';
+                // Branding fields
+                document.getElementById('profCity').value = profile.city || '';
+                document.getElementById('profCatFocus').value = profile.category_focus || '';
+                document.getElementById('profTagline').value = profile.tagline || '';
+                document.getElementById('profLogo').value = profile.logo_url || '';
+                document.getElementById('profBanner').value = profile.banner_url || '';
+                document.getElementById('profColor').value = profile.brand_color || '#6366f1';
+                // Store link
+                const slug = profile.slug || profile.id;
+                const link = document.getElementById('profStoreLink');
+                link.href = `storefront-demo.html?tienda=${slug}`;
+                link.textContent = `generarise.space/storefront-demo.html?tienda=${slug}`;
+
+                loadProducts();
+            }
+        }
+
+        function showSection(name) {
+            document.querySelectorAll('main > div').forEach(d => d.classList.add('hidden'));
+            document.getElementById(`section-${name}`).classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            const items = document.querySelectorAll('.nav-item');
+            items.forEach(item => { if(item.innerText.toLowerCase().includes(name.toLowerCase())) item.classList.add('active'); });
+            document.getElementById('section-title').innerText = name.toUpperCase();
+        }
+
+        async function loadProducts() {
+            const { data } = await supabaseClient.from('products').select('*').eq('entrepreneur_id', profile.id).order('created_at', {ascending:false});
+            const table = document.getElementById('productsTable');
+            table.innerHTML = `<thead><tr><th>Foto</th><th>Nombre</th><th>Tipo</th><th>Precio</th><th>Acciones</th></tr></thead><tbody>` + 
+                data?.map(p => `
+                <tr>
+                    <td><img src="${p.image_url}" class="p-img" onerror="this.src='https://via.placeholder.com/50'"></td>
+                    <td><div style="font-weight:600">${p.name}</div></td>
+                    <td><span style="font-size:0.7rem;padding:3px 8px;border-radius:6px;background:${p.type==='service'?'rgba(245,158,11,0.15);color:#f59e0b':'rgba(99,102,241,0.15);color:#818cf8'};">${p.type==='service'?'Servicio':'Producto'}</span></td>
+                    <td>$${p.price.toLocaleString()}</td>
+                    <td>
+                        <button class="btn btn-outline btn-sm" onclick="editProduct('${p.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('') + `</tbody>`;
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const bizName = document.getElementById('profName').value;
+            const pUpdate = {
+                business_name: bizName,
+                whatsapp_number: document.getElementById('profPhone').value,
+                description: document.getElementById('profDesc').value,
+                payment_link: document.getElementById('profPayment').value,
+                instagram_handle: document.getElementById('profIG').value,
+                facebook_url: document.getElementById('profFB').value,
+                city: document.getElementById('profCity').value,
+                category_focus: document.getElementById('profCatFocus').value,
+                tagline: document.getElementById('profTagline').value,
+                logo_url: document.getElementById('profLogo').value,
+                banner_url: document.getElementById('profBanner').value,
+                brand_color: document.getElementById('profColor').value,
+                slug: bizName.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'')
+            };
+            const { data, error } = await supabaseClient.from('entrepreneurs')
+                .update(pUpdate)
+                .eq('id', profile.id)
+                .select().single();
+            
+            if(!error) {
+                profile = data;
+                showToast('✅ Perfil guardado correctamente');
+            } else {
+                showToast('❌ Error: ' + error.message);
+            }
+        });
+
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+
+            // Handle image: file upload takes priority over URL
+            let imageUrl = document.getElementById('pImg').value;
+            const fileInput = document.getElementById('pImgFile');
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const ext = file.name.split('.').pop();
+                const fileName = `products/${profile.id}_${Date.now()}.${ext}`;
+                const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                    .from('product-images')
+                    .upload(fileName, file, { upsert: true, contentType: file.type });
+                if (!uploadError) {
+                    const { data: { publicUrl } } = supabaseClient.storage.from('product-images').getPublicUrl(fileName);
+                    imageUrl = publicUrl;
+                } else {
+                    // Fallback: use base64 data URL for display (no storage bucket)
+                    imageUrl = await fileToBase64(file);
+                }
+            }
+
+            const p = {
+                entrepreneur_id: profile.id,
+                name: document.getElementById('pName').value,
+                price: document.getElementById('pPrice').value,
+                category: document.getElementById('pCat').value,
+                type: document.getElementById('pType').value,
+                image_url: imageUrl,
+                description: document.getElementById('pDesc').value
+            };
+            const { data: saved, error } = id
+                ? await supabaseClient.from('products').update(p).eq('id', id).select().single()
+                : await supabaseClient.from('products').insert([p]).select().single();
+            if(!error) {
+                lastSavedProduct = saved;
+                showToast('✅ Sincronizado con Neurova OS');
+                document.getElementById('pPublishBtn').disabled = false;
+                resetForm();
+                loadProducts();
+                populateProductDropdowns();
+            } else {
+                showToast('❌ Error: ' + error.message);
+            }
+        });
+
+        function fileToBase64(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function previewImage(input) {
+            const preview = document.getElementById('pImgPreview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    document.getElementById('pImg').value = ''; // Clear URL if file selected
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display='none', 3000); }
+        function showUpgrade() { alert('¡Consulte con su asesor de Neurova para subir de plan!'); }
+
+        async function editProduct(id) {
+            const { data } = await supabaseClient.from('products').select('*').eq('id', id).single();
+            if(!data) return;
+            document.getElementById('editId').value = data.id;
+            document.getElementById('pName').value = data.name;
+            document.getElementById('pPrice').value = data.price;
+            document.getElementById('pCat').value = data.category;
+            document.getElementById('pImg').value = data.image_url || '';
+            document.getElementById('pDesc').value = data.description || '';
+            document.getElementById('form-title').innerHTML = '<i class="fas fa-edit"></i> Editando Producto';
+            document.getElementById('pSubmit').innerHTML = 'Actualizar Producto';
+            showSection('inventory');
+        }
+
+        async function deleteProduct(id) {
+            if(!confirm('¿Eliminar este producto?')) return;
+            const { error } = await supabaseClient.from('products').delete().eq('id', id);
+            if(!error) { showToast('🗑️ Producto eliminado'); loadProducts(); }
+        }
+
+        function resetForm() {
+            document.getElementById('editId').value = '';
+            document.getElementById('productForm').reset();
+            document.getElementById('form-title').innerHTML = '<i class="fas fa-plus-circle"></i> Agregar a mi Catálogo';
+            document.getElementById('pSubmit').innerHTML = 'Publicar en Tienda';
+        }
+
+        let lastSavedProduct = null;
+        let cachedProducts = [];
+
+        // ── Populate product dropdowns in Factory section ──
+        function populateProductDropdowns() {
+            if (!cachedProducts.length) return;
+            const opts = cachedProducts.map(p => `<option value="${p.id}" data-name="${p.name}" data-desc="${p.description||''}" data-price="${p.price}" data-cat="${p.category}">${p.name} — $${p.price?.toLocaleString()}</option>`).join('');
+            ['adsProduct','pubProduct'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.innerHTML = '<option value="">— Elegí un producto —</option>' + opts;
+            });
+        }
+
+        // Override loadProducts to also cache
+        const _origLoadProducts = loadProducts;
+        async function loadProducts() {
+            const { data } = await supabaseClient.from('products').select('*').eq('entrepreneur_id', profile.id).order('created_at', {ascending:false});
+            cachedProducts = data || [];
+            const table = document.getElementById('productsTable');
+            table.innerHTML = `<thead><tr><th>Foto</th><th>Producto</th><th>Precio</th><th>Acciones</th></tr></thead><tbody>` +
+                cachedProducts.map(p => `
+                <tr>
+                    <td><img src="${p.image_url}" class="p-img" onerror="this.src='https://via.placeholder.com/50'"></td>
+                    <td><div style="font-weight:600">${p.name}</div></td>
+                    <td>$${p.price.toLocaleString()}</td>
+                    <td>
+                        <button class="btn btn-outline btn-sm" onclick="editProduct('${p.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('') + `</tbody>`;
+            populateProductDropdowns();
+        }
+
+        // ── ADSÍNTESIS — Generador de Anuncios ──
+        const ADS_TEMPLATES = {
+            instagram: (p) => `✨ ${p.name.toUpperCase()} ✨\n\n${p.description || 'Un producto increíble para vos.'}\n\n💰 Precio: $${parseInt(p.price).toLocaleString()}\n\n👆 Escribinos para reservar el tuyo!\n\n#emprendedor #tiendaonline #${(p.category||'').replace(/\s/g,'')} #compralocal #argentina`,
+            story: (p) => `🔥 MIRÁ ESTO\n\n${p.name}\nSolo $${parseInt(p.price).toLocaleString()}\n\n➡️ Swipe up o mandanos un mensaje\n\n⏰ Stock limitado!`,
+            whatsapp: (p) => `Hola! 👋 Te comparto mi último producto:\n\n🛍️ *${p.name}*\n💬 ${p.description || ''}\n💵 Precio: *$${parseInt(p.price).toLocaleString()}*\n\nEscribime para más info o para reservar! 😊`,
+            facebook: (p) => `🛒 ¡Nuevo en mi tienda!\n\n${p.name} — ${p.category}\n\n${p.description || ''}\n\nPrecio: $${parseInt(p.price).toLocaleString()} 💚\n\n👇 Comentá o enviá un mensaje para más información. ¡Envíos disponibles!`
+        };
+
+        function generateAd() {
+            const sel = document.getElementById('adsProduct');
+            const opt = sel.options[sel.selectedIndex];
+            if (!opt || !opt.value) { showToast('⚠️ Elegí un producto primero'); return; }
+            const p = { name: opt.dataset.name, description: opt.dataset.desc, price: opt.dataset.price, category: opt.dataset.cat };
+            const type = document.getElementById('adsType').value;
+            const text = ADS_TEMPLATES[type] ? ADS_TEMPLATES[type](p) : ADS_TEMPLATES.instagram(p);
+            document.getElementById('adsText').innerText = text;
+            document.getElementById('adsOutput').style.display = 'block';
+            showToast('✨ Anuncio generado');
+        }
+
+        function copyAd() {
+            const text = document.getElementById('adsText').innerText;
+            navigator.clipboard.writeText(text).then(() => showToast('📋 Copiado al portapapeles'));
+        }
+
+        // ── CONTENT FACTORY — Social Publishing ──
+        function generateCaption() {
+            const sel = document.getElementById('pubProduct');
+            const opt = sel.options[sel.selectedIndex];
+            if (!opt || !opt.value) { showToast('⚠️ Elegí un producto primero'); return; }
+            const p = { name: opt.dataset.name, description: opt.dataset.desc, price: opt.dataset.price, category: opt.dataset.cat };
+            const caption = ADS_TEMPLATES.instagram(p);
+            document.getElementById('pubCaption').value = caption;
+            showToast('🤖 Caption generado con IA');
+        }
+
+        async function publishNow() {
+            const caption = document.getElementById('pubCaption').value;
+            const fb = document.getElementById('pubFB').checked;
+            const ig = document.getElementById('pubIG').checked;
+            if (!caption.trim()) { showToast('⚠️ Escribí o generá un caption'); return; }
+            if (!fb && !ig) { showToast('⚠️ Seleccioná al menos una red'); return; }
+            const status = document.getElementById('pubStatus');
+            status.innerText = '⏳ Publicando...';
+            const networks = [fb && 'Facebook', ig && 'Instagram'].filter(Boolean).join(' + ');
+            // Webhook a n8n si está configurado
+            try {
+                await fetch('https://n8n.generarise.space/webhook/publish-social', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ caption, facebook: fb, instagram: ig, entrepreneur: profile?.business_name || user?.email })
+                });
+                status.innerText = `✅ Publicado en ${networks}`;
+                showToast(`📤 Publicado en ${networks}`);
+                const entry = `<div style="padding:0.8rem;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;"><div style="font-size:0.8rem;">${fb ? '<i class="fab fa-facebook" style="color:#1877F2;"></i>' : ''} ${ig ? '<i class="fab fa-instagram" style="color:#E1306C;"></i>' : ''} <span style="margin-left:6px;">${caption.substring(0,50)}...</span></div><span style="font-size:0.7rem;color:var(--success);">✅ Publicado</span></div>`;
+                document.getElementById('pubHistory').insertAdjacentHTML('afterbegin', entry);
+            } catch(err) {
+                status.innerText = '⚠️ Webhook no disponible (revisá n8n)';
+                showToast('⚠️ Publicación manual requerida');
+            }
+        }
+
+        function publishToSocial() {
+            showSection('factory');
+            if (lastSavedProduct) {
+                setTimeout(() => {
+                    const sel = document.getElementById('pubProduct');
+                    if(sel) sel.value = lastSavedProduct.id;
+                    generateCaption();
+                }, 100);
+            }
+        }
+
+        // ── Pago Manual (Marketplace) ──
+        let pendingService = '';
+        function solicitarServicio(nombre, precio) {
+            pendingService = nombre;
+            document.getElementById('modalServiceName').innerText = nombre;
+            document.getElementById('modalServicePrice').innerText = parseInt(precio).toLocaleString('es-AR');
+            document.getElementById('paymentModal').style.display = 'flex';
+        }
+
+        function confirmarPago() {
+            document.getElementById('paymentModal').style.display = 'none';
+            showToast('✅ Solicitud enviada. Activaremos el servicio al confirmar la transferencia.');
+            // Aquí se enviaría un webhook a n8n notificando que el usuario solicita la activación.
+            try {
+                fetch('https://n8n.generarise.space/webhook/solicitud-servicio', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: user?.email,
+                        business: profile?.business_name,
+                        servicio: pendingService
+                    })
+                });
+            } catch(e) {}
+        }
+
+        init();
+    </script>
+</body>
+</html>

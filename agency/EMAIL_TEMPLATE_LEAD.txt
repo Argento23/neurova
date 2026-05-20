@@ -1,0 +1,27 @@
+**Asunto:** Soluciones IA para optimizar {{json.body.message}} en {{json.body.company}}
+
+Estimado/a {{json.body.name}},
+
+Gracias por contactar a **GenerArise AI** y por compartir su interés. He revisado la información que nos proporcionó, incluyendo su rol como {{json.body.role}} en **{{json.body.company}}**, y entiendo que su principal desafío reside en: **{{json.body.message}}**.
+
+He dedicado un momento a revisar el sitio web de {{json.body.company}} para comprender mejor su contexto. Comprendo la relevancia de abordar directamente la cuestión de {{json.body.message}} para su operación diaria.
+
+En **GenerArise AI**, nos especializamos en diseñar e implementar soluciones de inteligencia artificial que atacan directamente este tipo de problemas. A través de la aplicación estratégica de IA, podemos desarrollar sistemas (desde Chatbots hasta Agentes Autónomos) que no solo alivien la carga generada por tareas repetitivas, sino que también transformen esta área en una ventaja competitiva.
+
+Para explorar cómo nuestras soluciones pueden generar un impacto tangible en {{json.body.company}} y, específicamente, resolver su desafío actual, me gustaría invitarle a una breve sesión de descubrimiento de 15 minutos.
+
+En esta conversación, profundizaremos en sus necesidades y le mostraré cómo la IA se integra en su flujo de trabajo actual sin fricción.
+
+Podemos agendar esta sesión de forma directa y sin demoras. Por favor, seleccione el horario que mejor se adapte a su agenda en el siguiente enlace:
+
+👉 [LINK_CALENDARIO] 
+
+(oO ingrese manualmente a:
+https://cal.com/gustavo-a.-dornhofer-nqjqos/auditoria-ia-gratuita-free-ai-audit-kostenloses-ki-audit
+
+Atentamente,
+
+Gustavo Dornhofer
+Director Comercial
+**GenerArise AI**
+*Potenciado por agentes.space*

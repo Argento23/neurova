@@ -1,0 +1,169 @@
+{
+    "name": "Shopify AdSniper AI - Wealth Multiplier V7 (PROXY BYPASS + STRICT PROMPT)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "shopify-adsniper",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "id": "webhook",
+            "name": "AdSniper_Trigger",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "={{ $json.body.product_url }}",
+                "options": {
+                    "redirect": {
+                        "redirect": true
+                    }
+                },
+                "headerParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "User-Agent",
+                            "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+                        },
+                        {
+                            "name": "Accept",
+                            "value": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+                        }
+                    ]
+                }
+            },
+            "id": "scrape",
+            "name": "Scrape Product",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                450,
+                300
+            ],
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "jsCode": "// Robust Extraction Logic (Regex + Proxy Support)\nconst item = $input.item.json;\nconst html = item.data || '';\nlet body = {};\n\nconst possibleNodeNames = ['AdSniper_Trigger', 'Webhook', 'webhook'];\nfor (const name of possibleNodeNames) {\n    try {\n        const nodeData = $(name).item.json;\n        if (nodeData && nodeData.body) {\n            body = nodeData.body;\n            break;\n        }\n    } catch (e) {}\n}\n\nlet url = body.product_url || '';\n\n// --- PROXY BYPASS LOGIC ---\nlet title = body.scraped_title || 'Producto Desconocido';\nlet description = body.scraped_description || 'Sin descripción disponible.';\nlet price = 'Consultar';\nlet image = body.scraped_image || '';\n\nif ((title === 'Producto Desconocido' || description.length < 20) && html && html.length > 100) {\n    const titleMatch = html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i);\n    if (titleMatch) title = titleMatch[1].replace(/\\s+/g, ' ').trim();\n    \n    const ogDesc = html.match(/<meta[^>]*property=[\"']og:description[\"'][^>]*content=[\"']([\\s\\S]*?)[\"']/i);\n    if (ogDesc) description = ogDesc[1];\n\n    const ogMatch = html.match(/<meta[^>]*property=[\"']og:image[\"'][^>]*content=[\"']([\\s\\S]*?)[\"']/i);\n    if (ogMatch) image = ogMatch[1];\n}\n\nif (image && image.startsWith('//')) image = 'https:' + image;\n\nreturn {\n  product_url: url,\n  title: title,\n  price: price,\n  description: description.substring(0, 3000),\n  main_image: image\n};"
+            },
+            "id": "normalize",
+            "name": "Extract & Normalize",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                700,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "model": "llama-3.3-70b-versatile"
+            },
+            "id": "groq_model",
+            "name": "Groq Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                950,
+                500
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=SYSTEM ROLE:\nYou are AdSniper, an expert copywriter.\nExecution language: {{ $json.body.language === 'en' ? 'ENGLISH' : 'SPANISH' }}.\n\nINPUT DATA (Use this STRICTLY):\nPRODUCT NAME: {{ $json.title }}\nPRODUCT DESCRIPTION: {{ $json.description }}\n\nTASK:\nGenerate 3 Ads (Logic, Emotional, Scarcity) in {{ $json.body.language === 'en' ? 'ENGLISH' : 'SPANISH' }}.\n\nCRITICAL INSTRUCTIONS:\n1. YOU MUST MENTION THE PRODUCT NAME ({{ $json.title }}) IN AT LEAST ONE HEADLINE.\n2. DO NOT WRITE GENERIC ADS. Reference specific details from the description.\n3. If the description is empty, use the Product Name to invent plausible details.\n4. Return ONLY the JSON array.\n\nJSON Output:\n[\n  { \"type\": \"Logic\", \"headline\": \"...\", \"primary_text\": \"...\", \"image_prompt\": \"...\" }\n]",
+                "hasOutputParser": true
+            },
+            "id": "ai_generator",
+            "name": "AdSniper AI Generator",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                950,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const ads = $('AdSniper AI Generator').item.json.output || [];\nlet brand = {};\nconst possibleNodeNames = ['AdSniper_Trigger', 'Webhook', 'webhook'];\nfor (const name of possibleNodeNames) {\n    try {\n        const nodeData = $(name).item.json;\n        if (nodeData && nodeData.body && nodeData.body.brand) {\n            brand = nodeData.body.brand;\n            break;\n        }\n    } catch (e) {}\n}\nreturn {\n    ads: ads,\n    brand: brand\n};\n"
+            },
+            "id": "format_output",
+            "name": "Format Output",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1200,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "AdSniper_Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Scrape Product",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Scrape Product": {
+            "main": [
+                [
+                    {
+                        "node": "Extract & Normalize",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract & Normalize": {
+            "main": [
+                [
+                    {
+                        "node": "AdSniper AI Generator",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Model": {
+            "ai_language_model": [
+                [
+                    {
+                        "node": "AdSniper AI Generator",
+                        "type": "ai_language_model",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AdSniper AI Generator": {
+            "main": [
+                [
+                    {
+                        "node": "Format Output",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

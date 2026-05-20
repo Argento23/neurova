@@ -1,0 +1,295 @@
+{
+    "name": "Autonomous Sales Agent v4 (Throttled)",
+    "nodes": [
+        {
+            "parameters": {},
+            "name": "Start Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                0,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "values": {
+                    "string": [
+                        {
+                            "name": "search_term",
+                            "value": "Inmobiliarias"
+                        },
+                        {
+                            "name": "location",
+                            "value": "Buenos Aires, Argentina"
+                        },
+                        {
+                            "name": "target_audience",
+                            "value": "Empresas que necesiten automatización con IA"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Definir Busqueda",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 1,
+            "position": [
+                220,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://serpapi.com/search.json",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "queryAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "api_key",
+                            "value": "9be0d43581dc9220232e9a2819f308c303a32082a1e62f97c9c87b75dfde8d72"
+                        },
+                        {
+                            "name": "engine",
+                            "value": "google_maps"
+                        },
+                        {
+                            "name": "q",
+                            "value": "={{ $json[\"search_term\"] + \" en \" + $json[\"location\"] }}"
+                        },
+                        {
+                            "name": "type",
+                            "value": "search"
+                        },
+                        {
+                            "name": "num",
+                            "value": "20"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "SerpApi - Maps Scraper",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                460,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "local_results",
+                "options": {}
+            },
+            "name": "Separar Resultados",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 1,
+            "position": [
+                680,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "batchSize": 1,
+                "options": {}
+            },
+            "name": "Freno de Mano (Loop)",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 2,
+            "position": [
+                900,
+                300
+            ],
+            "notesInFlow": true,
+            "notes": "Procesa 1 por 1 para no saturar a la IA."
+        },
+        {
+            "parameters": {
+                "modelName": "models/gemini-1.5-flash",
+                "options": {}
+            },
+            "name": "Google Gemini Chat Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+            "typeVersion": 1,
+            "position": [
+                1150,
+                550
+            ],
+            "credentials": {
+                "googlePalmApi": {
+                    "id": "YOUR_GEMINI_CREDENTIAL_ID",
+                    "name": "Google Gemini Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Analiza este negocio encontrado en Google Maps para ver si es un buen cliente potencial:\n\nNOMBRE: {{ $json.title }}\nWEB: {{ $json.website }}\nTELEFONO: {{ $json.phone }}\nRATING: {{ $json.rating }} ({{ $json.reviews }} reviews)\nDESCRIPCION: {{ $json.description }}\n\nCONTEXTO:\nBuscamos vender servicios a: {{ $('Definir Busqueda').item.json.target_audience }}.\n\nTAREA:\n1. Califica de 1 a 10 si es un buen lead (Score).\n2. Escribe una breve razón.\n3. Genera un asunto de email personalizado mencionando su nombre o rating.\n\nFORMATO JSON:\n{ \"score\": 8, \"reason\": \"xxx\", \"email_subject\": \"xxx\" }",
+                "hasOutputParser": true
+            },
+            "name": "Gemini - Calificar Lead",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1150,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+                    "mode": "list"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "Hoja 1",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Fecha": "={{ $now.toISO() }}",
+                        "Empresa": "={{ $('Freno de Mano (Loop)').item.json.title }}",
+                        "Web": "={{ $('Freno de Mano (Loop)').item.json.website }}",
+                        "Telefono": "={{ $('Freno de Mano (Loop)').item.json.phone }}",
+                        "Score IA": "={{ $json.score }}",
+                        "Razon": "={{ $json.reason }}",
+                        "Asunto Email": "={{ $json.email_subject }}"
+                    }
+                },
+                "options": {}
+            },
+            "name": "Guardar en Google Sheets",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                1400,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "amount": 5,
+                "unit": "seconds"
+            },
+            "name": "Esperar 5s",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                1650,
+                300
+            ],
+            "notesInFlow": true,
+            "notes": "Pausa necesaria para evitar Error 429 de Google."
+        }
+    ],
+    "connections": {
+        "Start Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Definir Busqueda",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Definir Busqueda": {
+            "main": [
+                [
+                    {
+                        "node": "SerpApi - Maps Scraper",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "SerpApi - Maps Scraper": {
+            "main": [
+                [
+                    {
+                        "node": "Separar Resultados",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Separar Resultados": {
+            "main": [
+                [
+                    {
+                        "node": "Freno de Mano (Loop)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Freno de Mano (Loop)": {
+            "main": [
+                [
+                    {
+                        "node": "Gemini - Calificar Lead",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Gemini Chat Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Gemini - Calificar Lead",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Gemini - Calificar Lead": {
+            "main": [
+                [
+                    {
+                        "node": "Guardar en Google Sheets",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Guardar en Google Sheets": {
+            "main": [
+                [
+                    {
+                        "node": "Esperar 5s",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Esperar 5s": {
+            "main": [
+                [
+                    {
+                        "node": "Freno de Mano (Loop)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

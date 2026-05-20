@@ -1,0 +1,683 @@
+{
+    "name": "Chatbot Gym/Fitness - Membership & Classes Assistant",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "whatsapp-gym",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "id": "webhook",
+            "name": "Webhook WhatsApp",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                240,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "from",
+                            "name": "from",
+                            "value": "={{ $json.body.data.key.remoteJid }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "message",
+                            "name": "message",
+                            "value": "={{ $json.body.data.message.conversation || $json.body.data.message.extendedTextMessage.text }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "phone",
+                            "name": "phone",
+                            "value": "={{ $json.from.replace('@s.whatsapp.net', '') }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "extract",
+            "name": "Extraer Mensaje",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                460,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "nombre_gym",
+                            "name": "nombre_gym",
+                            "value": "NOMBRE_GYM",
+                            "type": "string"
+                        },
+                        {
+                            "id": "ubicacion",
+                            "name": "ubicacion",
+                            "value": "Palermo, CABA",
+                            "type": "string"
+                        },
+                        {
+                            "id": "horarios",
+                            "name": "horarios",
+                            "value": "Lun-Vie 6-22hs, Sáb-Dom 8-20hs",
+                            "type": "string"
+                        },
+                        {
+                            "id": "plan_basico",
+                            "name": "plan_basico",
+                            "value": "$8,500/mes - Gym libre",
+                            "type": "string"
+                        },
+                        {
+                            "id": "plan_intermedio",
+                            "name": "plan_intermedio",
+                            "value": "$12,500/mes - Gym + clases grupales",
+                            "type": "string"
+                        },
+                        {
+                            "id": "plan_premium",
+                            "name": "plan_premium",
+                            "value": "$18,500/mes - Gym + clases + entrenador personal",
+                            "type": "string"
+                        },
+                        {
+                            "id": "clase_prueba",
+                            "name": "clase_prueba",
+                            "value": "GRATIS (primera vez)",
+                            "type": "string"
+                        },
+                        {
+                            "id": "clases_disponibles",
+                            "name": "clases_disponibles",
+                            "value": "Spinning, Funcional, Yoga, Pilates, Crossfit, Zumba",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "config",
+            "name": "CONFIG",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                680,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.message.toLowerCase() }}",
+                            "rightValue": "precio|plan|cuánto|costo|membresia|mensualidad",
+                            "operator": {
+                                "type": "string",
+                                "operation": "regex"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_pricing",
+            "name": "Pregunta Precios?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                680,
+                250
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "response",
+                            "name": "response",
+                            "value": "=💪 PLANES {{ $('CONFIG').item.json.nombre_gym }}\n\n1️⃣ BÁSICO: {{ $('CONFIG').item.json.plan_basico }}\n2️⃣ INTERMEDIO: {{ $('CONFIG').item.json.plan_intermedio }}\n3️⃣ PREMIUM: {{ $('CONFIG').item.json.plan_premium }}\n\n🎁 Primera clase GRATIS!\n\n¿Querés agendar tu clase de prueba?",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "pricing_response",
+            "name": "Enviar Pricing",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                900,
+                150
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.message.toLowerCase() }}",
+                            "rightValue": "prueba|gratis|probar|primera|clase gratis|demo",
+                            "operator": {
+                                "type": "string",
+                                "operation": "regex"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_trial",
+            "name": "Quiere Clase Prueba?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                900,
+                350
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq1",
+            "name": "Groq Trial",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                1120,
+                470
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Mensaje: {{ $('Extraer Mensaje').item.json.message }}\n\nClases disponibles: {{ $('CONFIG').item.json.clases_disponibles }}\n\nExtrae del mensaje:\n- Nombre de la persona\n- Clase de interés (si menciona)\n- Día/horario preferido (si menciona)\n\nResponde JSON:\n{\n  \"nombre\": \"nombre o 'no especificado'\",\n  \"clase\": \"clase preferida o 'cualquiera'\",\n  \"dia\": \"día/horario o 'flexible'\"\n}\n\nSolo JSON:",
+                "hasOutputParser": true
+            },
+            "id": "extract_trial",
+            "name": "Extraer Info Trial",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1340,
+                250
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const trial = JSON.parse($input.item.json.output);\nconst faltantes = [];\n\nif (!trial.nombre || trial.nombre === 'no especificado') faltantes.push('nombre');\n\nreturn [{\n  json: {\n    ...trial,\n    completo: faltantes.length === 0,\n    faltantes: faltantes.join(', ')\n  }\n}];"
+            },
+            "id": "check_trial",
+            "name": "Verificar Datos",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1560,
+                250
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.completo }}",
+                            "rightValue": "true",
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "trial_complete",
+            "name": "Datos Completos?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1780,
+                250
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "response",
+                            "name": "response",
+                            "value": "=✅ Perfecto {{ $json.nombre }}!\n\n🎁 Tu clase de prueba GRATIS está casi lista.\n\nClase: {{ $json.clase }}\nPreferencia: {{ $json.dia }}\n\nTe contactamos en 1 hora para confirmar horario exacto.\n\n📍 {{ $('CONFIG').item.json.ubicacion }}\n⏰ {{ $('CONFIG').item.json.horarios }}\n\nTe esperamos! 💪",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "confirm_trial",
+            "name": "Confirmar Trial",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                2000,
+                150
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "response",
+                            "name": "response",
+                            "value": "=¡Genial! Para agendar tu clase GRATIS necesito:\n\n▸ Tu nombre\n▸ Qué clase te interesa ({{ $('CONFIG').item.json.clases_disponibles }})\n▸ Día y horario aproximado\n\n¿Me pasás esos datos? 😊",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "request_trial_data",
+            "name": "Pedir Datos Trial",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                2000,
+                350
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.message.toLowerCase() }}",
+                            "rightValue": "horario|clases|spinning|funcional|yoga|pilates|crossfit|zumba",
+                            "operator": {
+                                "type": "string",
+                                "operation": "regex"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_schedule",
+            "name": "Pregunta Horarios?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                900,
+                550
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "response",
+                            "name": "response",
+                            "value": "=📅 HORARIOS DE CLASES\n\n🚴 Spinning: Lun/Mie/Vie 7:00, 19:00\n💪 Funcional: Mar/Jue 18:30, Sáb 10:00\n🧘 Yoga: Lun/Mie 19:30, Dom 9:00\n🏋️ Crossfit: Mar/Jue/Sáb 8:00, 20:00\n🎵 Zumba: Lun/Vie 20:00\n\nHorarios gym: {{ $('CONFIG').item.json.horarios }}\n\n¿Querés reservar tu clase de prueba GRATIS?",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "schedule_response",
+            "name": "Enviar Horarios",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                1120,
+                550
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq2",
+            "name": "Groq General",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                900,
+                770
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres asistente de {{ $('CONFIG').item.json.nombre_gym }}.\n\nINFO:\n- Ubicación: {{ $('CONFIG').item.json.ubicacion }}\n- Horarios: {{ $('CONFIG').item.json.horarios }}\n- Planes: Básico ($8,500), Intermedio ($12,500), Premium ($18,500)\n- Clases: {{ $('CONFIG').item.json.clases_disponibles }}\n- Primera clase GRATIS\n\nConsulta: {{ $('Extraer Mensaje').item.json.message }}\n\nResponde amigable y motivador (máximo 3 líneas).\nSi preguntan precios, mencionar los 3 planes.\nSi preguntan horarios, invitar a clase de prueba gratis.\n\nRespuesta:",
+                "hasOutputParser": false
+            },
+            "id": "general_response",
+            "name": "Respuesta General",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1120,
+                700
+            ]
+        },
+        {
+            "parameters": {
+                "url": "=https://evolution-api.com/message/sendText/{{$('CONFIG').item.json.instance_name}}",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"number\": \"{{ $('Extraer Mensaje').item.json.phone }}\",\n  \"text\": \"{{ $json.response || $json.output }}\"\n}",
+                "options": {}
+            },
+            "id": "send_wp",
+            "name": "Enviar WhatsApp",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                2220,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_LOG_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "leads_gym",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Fecha": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+                        "Telefono": "={{ $('Extraer Mensaje').item.json.phone }}",
+                        "Mensaje": "={{ $('Extraer Mensaje').item.json.message }}",
+                        "Tipo": "={{ $json.is_trial ? 'Clase Prueba' : ($json.is_pricing ? 'Consulta Precio' : 'General') }}",
+                        "Nombre": "={{ $json.nombre || '' }}",
+                        "Clase_Interes": "={{ $json.clase || '' }}",
+                        "Estado": "={{ $json.completo ? 'Trial Agendado' : 'Info Enviada' }}"
+                    }
+                }
+            },
+            "id": "log",
+            "name": "Log Lead",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                2440,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\"success\": true}",
+                "options": {}
+            },
+            "id": "response",
+            "name": "Response OK",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                2660,
+                400
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Extraer Mensaje",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extraer Mensaje": {
+            "main": [
+                [
+                    {
+                        "node": "Pregunta Precios?",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "CONFIG",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "CONFIG": {
+            "main": [
+                [
+                    {
+                        "node": "Respuesta General",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Pregunta Precios?": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Pricing",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Quiere Clase Prueba?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar Pricing": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Quiere Clase Prueba?": {
+            "main": [
+                [
+                    {
+                        "node": "Extraer Info Trial",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Pregunta Horarios?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Trial": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Extraer Info Trial",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extraer Info Trial": {
+            "main": [
+                [
+                    {
+                        "node": "Verificar Datos",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Verificar Datos": {
+            "main": [
+                [
+                    {
+                        "node": "Datos Completos?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Datos Completos?": {
+            "main": [
+                [
+                    {
+                        "node": "Confirmar Trial",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Pedir Datos Trial",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Confirmar Trial": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Pedir Datos Trial": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Pregunta Horarios?": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Horarios",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Enviar Horarios": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq General": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Respuesta General",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Respuesta General": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Log Lead",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Log Lead": {
+            "main": [
+                [
+                    {
+                        "node": "Response OK",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "chatbot-gym-v1"
+}

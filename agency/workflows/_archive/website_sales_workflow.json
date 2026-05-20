@@ -1,0 +1,398 @@
+{
+    "name": "Website Development Sales Workflow",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "webhook-trigger",
+            "name": "Webhook - Lead Interesado",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ],
+            "webhookId": "lead-website"
+        },
+        {
+            "parameters": {
+                "content": "=# Nuevo Lead Interesado en Sitio Web 🎯\n\n**Nombre:** {{$json[\"nombre\"]}}\n**Empresa:** {{$json[\"empresa\"]}}\n**Email:** {{$json[\"email\"]}}\n**Teléfono:** {{$json[\"telefono\"]}}\n**Tipo de sitio:** {{$json[\"tipo_sitio\"]}}\n**Presupuesto estimado:** {{$json[\"presupuesto\"]}}\n**Mensaje:** {{$json[\"mensaje\"]}}\n\n---\n\n**Próximo paso:** Enviar propuesta personalizada",
+                "chatId": "TU_CHAT_ID_AQUI",
+                "additionalFields": {}
+            },
+            "id": "telegram-notification",
+            "name": "Notificar por Telegram",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1,
+            "position": [
+                450,
+                300
+            ],
+            "credentials": {
+                "telegramApi": {
+                    "id": "1",
+                    "name": "Telegram API"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "sheetId": "TU_SHEET_ID",
+                "range": "Leads!A:H",
+                "options": {}
+            },
+            "id": "google-sheets-append",
+            "name": "Guardar en Google Sheets",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 3,
+            "position": [
+                450,
+                450
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "2",
+                    "name": "Google Sheets"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "values": {
+                    "string": [
+                        {
+                            "name": "fecha",
+                            "value": "={{$now.toFormat('yyyy-MM-dd HH:mm')}}"
+                        },
+                        {
+                            "name": "tipo_propuesta",
+                            "value": "={{ $json[\"presupuesto\"] >= 1500 ? 'Premium AI' : $json[\"presupuesto\"] >= 700 ? 'Pro' : 'Básico' }}"
+                        },
+                        {
+                            "name": "precio_sugerido",
+                            "value": "={{ $json[\"presupuesto\"] >= 1500 ? '$2000' : $json[\"presupuesto\"] >= 700 ? '$800' : '$400' }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-proposal-type",
+            "name": "Determinar Tipo de Propuesta",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 2,
+            "position": [
+                650,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{$json[\"tipo_propuesta\"]}}",
+                            "value2": "Premium AI"
+                        }
+                    ]
+                }
+            },
+            "id": "if-premium",
+            "name": "¿Es Premium AI?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                850,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "model": "gemini-1.5-pro",
+                "options": {
+                    "temperature": 0.7
+                },
+                "text": "=Eres un vendedor experto de desarrollo web. Crea una propuesta personalizada para:\n\n**Cliente:** {{$json[\"nombre\"]}} de {{$json[\"empresa\"]}}\n**Necesidad:** {{$json[\"mensaje\"]}}\n**Presupuesto:** {{$json[\"presupuesto\"]}}\n**Paquete:** {{$json[\"tipo_propuesta\"]}}\n\nGenera un email profesional que incluya:\n1. Saludo personalizado\n2. Resumen de su necesidad\n3. Características del paquete {{$json[\"tipo_propuesta\"]}}\n4. Precio: {{$json[\"precio_sugerido\"]}}\n5. 3 beneficios clave para su negocio\n6. Call to action para agendar reunión\n\nTono: profesional pero cercano. Formato: HTML para email."
+            },
+            "id": "ai-generate-proposal-premium",
+            "name": "IA: Generar Propuesta Premium",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+            "typeVersion": 1,
+            "position": [
+                1050,
+                200
+            ],
+            "credentials": {
+                "googleGeminiOAuth2Api": {
+                    "id": "3",
+                    "name": "Google Gemini AI"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "model": "gemini-1.5-flash",
+                "options": {
+                    "temperature": 0.7
+                },
+                "text": "=Eres un vendedor de desarrollo web. Crea una propuesta simple para:\n\n**Cliente:** {{$json[\"nombre\"]}}\n**Necesidad:** Landing page básica\n**Paquete:** {{$json[\"tipo_propuesta\"]}}\n**Precio:** {{$json[\"precio_sugerido\"]}}\n\nEmail breve con:\n1. Saludo\n2. Qué incluye el paquete {{$json[\"tipo_propuesta\"]}}\n3. Precio\n4. Call to action\n\nFormato: HTML simple"
+            },
+            "id": "ai-generate-proposal-basic",
+            "name": "IA: Generar Propuesta Básica/Pro",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+            "typeVersion": 1,
+            "position": [
+                1050,
+                400
+            ],
+            "credentials": {
+                "googleGeminiOAuth2Api": {
+                    "id": "3",
+                    "name": "Google Gemini AI"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "fromEmail": "tu-email@generarise.com",
+                "toEmail": "={{$json[\"email\"]}}",
+                "subject": "=Propuesta {{$json[\"tipo_propuesta\"]}} para {{$json[\"empresa\"]}}",
+                "emailType": "html",
+                "message": "={{$json[\"output\"]}}",
+                "options": {}
+            },
+            "id": "send-email",
+            "name": "Enviar Propuesta por Email",
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 2,
+            "position": [
+                1250,
+                300
+            ],
+            "credentials": {
+                "smtp": {
+                    "id": "4",
+                    "name": "SMTP"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "number": [
+                        {
+                            "value1": "={{$json[\"presupuesto\"]}}",
+                            "operation": "largerEqual",
+                            "value2": 1500
+                        }
+                    ]
+                }
+            },
+            "id": "if-high-value",
+            "name": "¿Lead de Alto Valor?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                1450,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "authentication": "oAuth2",
+                "select": "channel",
+                "channelId": {
+                    "__rl": true,
+                    "value": "TU_CHANNEL_ID",
+                    "mode": "list"
+                },
+                "text": "={{$json[\"nombre\"]}} ({{$json[\"empresa\"]}}) - Interesado en {{$json[\"tipo_propuesta\"]}}",
+                "otherOptions": {}
+            },
+            "id": "slack-high-value",
+            "name": "Notificar Slack - Lead Premium",
+            "type": "n8n-nodes-base.slack",
+            "typeVersion": 2.1,
+            "position": [
+                1650,
+                200
+            ],
+            "credentials": {
+                "slackOAuth2Api": {
+                    "id": "5",
+                    "name": "Slack"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "create",
+                "calendarId": {
+                    "__rl": true,
+                    "value": "primary",
+                    "mode": "list"
+                },
+                "start": "={{$now.plus({days: 3}).toISO()}}",
+                "end": "={{$now.plus({days: 3, hours: 1}).toISO()}}",
+                "summary": "=Follow-up: {{$json[\"empresa\"]}}",
+                "description": "=Hacer seguimiento de propuesta {{$json[\"tipo_propuesta\"]}} enviada a {{$json[\"nombre\"]}}\n\nEmail: {{$json[\"email\"]}}\nTeléfono: {{$json[\"telefono\"]}}",
+                "options": {}
+            },
+            "id": "calendar-followup",
+            "name": "Agendar Follow-up en Calendar",
+            "type": "n8n-nodes-base.googleCalendar",
+            "typeVersion": 1,
+            "position": [
+                1650,
+                400
+            ],
+            "credentials": {
+                "googleCalendarOAuth2Api": {
+                    "id": "6",
+                    "name": "Google Calendar"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "phoneNumber": "={{$json[\"telefono\"]}}",
+                "message": "=Hola {{$json[\"nombre\"]}}! 👋\n\nTe envié la propuesta {{$json[\"tipo_propuesta\"]}} para {{$json[\"empresa\"]}} a tu email.\n\n¿Tenés alguna duda que pueda resolver ahora?\n\n- GenerArise Agency",
+                "options": {}
+            },
+            "id": "whatsapp-confirmation",
+            "name": "WhatsApp - Confirmación",
+            "type": "n8n-nodes-base.whatsapp",
+            "typeVersion": 1,
+            "position": [
+                1450,
+                450
+            ],
+            "credentials": {
+                "whatsappApi": {
+                    "id": "7",
+                    "name": "WhatsApp Business API"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook - Lead Interesado": {
+            "main": [
+                [
+                    {
+                        "node": "Notificar por Telegram",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Guardar en Google Sheets",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Determinar Tipo de Propuesta",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Determinar Tipo de Propuesta": {
+            "main": [
+                [
+                    {
+                        "node": "¿Es Premium AI?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "¿Es Premium AI?": {
+            "main": [
+                [
+                    {
+                        "node": "IA: Generar Propuesta Premium",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "IA: Generar Propuesta Básica/Pro",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IA: Generar Propuesta Premium": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Propuesta por Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IA: Generar Propuesta Básica/Pro": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Propuesta por Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar Propuesta por Email": {
+            "main": [
+                [
+                    {
+                        "node": "¿Lead de Alto Valor?",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "WhatsApp - Confirmación",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "¿Lead de Alto Valor?": {
+            "main": [
+                [
+                    {
+                        "node": "Notificar Slack - Lead Premium",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Agendar Follow-up en Calendar",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "pinData": {
+        "Webhook - Lead Interesado": [
+            {
+                "json": {
+                    "nombre": "Juan Pérez",
+                    "empresa": "Panadería La Esquina",
+                    "email": "juan@laesquina.com",
+                    "telefono": "+5491145678900",
+                    "tipo_sitio": "E-commerce con catálogo",
+                    "presupuesto": 1800,
+                    "mensaje": "Necesito un sitio para vender online mis productos. Quiero algo moderno con carrito de compras."
+                }
+            }
+        ]
+    }
+}

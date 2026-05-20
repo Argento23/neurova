@@ -1,0 +1,132 @@
+{
+    "name": "Vapi WhatsApp Bridge - ULTRABOLT",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "vapi-whatsapp-bridge",
+                "options": {},
+                "responseMode": "responseNode"
+            },
+            "id": "webhook-id",
+            "name": "Vapi Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "phone-id",
+                            "name": "phone",
+                            "value": "={{ $('Vapi Webhook').item.json.body?.message?.toolCalls?.[0]?.function?.arguments?.phone || $('Vapi Webhook').item.json.body?.phone || \"5491112345678\" }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "msg-id",
+                            "name": "message",
+                            "value": "={{ $('Vapi Webhook').item.json.body?.message?.toolCalls?.[0]?.function?.arguments?.message || $('Vapi Webhook').item.json.body?.message || \"Hola! En breve te contacto.\" }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "call-id",
+                            "name": "toolCallId",
+                            "value": "={{ $('Vapi Webhook').item.json.body?.message?.toolCalls?.[0]?.id || \"test-id\" }}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-node-id",
+            "name": "Prepare Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                350,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "GenerArise",
+                "options_message": {
+                    "number": "={{ $('Prepare Data').item.json.phone }}",
+                    "textMessage": {
+                        "text": "={{ $('Prepare Data').item.json.message }}"
+                    }
+                }
+            },
+            "id": "evo-id",
+            "name": "Evolution API",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                600,
+                300
+            ],
+            "continueOnFail": true,
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $('Prepare Data').item.json.toolCallId }}\",\n      \"result\": \"WhatsApp enviado correctamente.\"\n    }\n  ]\n}"
+            },
+            "id": "respond-id",
+            "name": "Respond to Vapi",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.1,
+            "position": [
+                850,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Vapi Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Data": {
+            "main": [
+                [
+                    {
+                        "node": "Evolution API",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Evolution API": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Vapi",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

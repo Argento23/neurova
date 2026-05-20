@@ -1,0 +1,514 @@
+{
+    "name": "Chatbot Estudio Contable - AI Accounting Assistant",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "whatsapp-contadores",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "id": "webhook",
+            "name": "Webhook WhatsApp",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                240,
+                400
+            ],
+            "webhookId": "whatsapp-contadores"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "from",
+                            "name": "from",
+                            "value": "={{ $json.body.data.key.remoteJid }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "message",
+                            "name": "message",
+                            "value": "={{ $json.body.data.message.conversation || $json.body.data.message.extendedTextMessage.text }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "phone",
+                            "name": "phone",
+                            "value": "={{ $json.from.replace('@s.whatsapp.net', '') }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "extract_data",
+            "name": "Extraer Mensaje",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                460,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.message.toLowerCase() }}",
+                            "rightValue": "vencimiento|afip|presentación|mañana|hoy|urgente",
+                            "operator": {
+                                "type": "string",
+                                "operation": "regex"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_deadline",
+            "name": "Es Vencimiento?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                680,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const today = new Date();\nconst day = today.getDate();\nconst month = today.getMonth() + 1;\n\n// Vencimientos AFIP comunes\nconst deadlines = {\n  'IVA': day >= 16 && day <= 21 ? 'PRÓXIMO' : 'OK',\n  'Ganancias': day >= 10 && day <= 15 ? 'PRÓXIMO' : 'OK',\n  'Monotributo': day >= 17 && day <= 20 ? 'PRÓXIMO' : 'OK',\n  'Autónomos': day >= 10 && day <= 12 ? 'PRÓXIMO' : 'OK'\n};\n\nlet urgentDeadlines = [];\nfor (const [tax, status] of Object.entries(deadlines)) {\n  if (status === 'PRÓXIMO') {\n    urgentDeadlines.push(tax);\n  }\n}\n\nreturn [{\n  json: {\n    ...items[0].json,\n    urgent_deadlines: urgentDeadlines.join(', ') || 'Ninguno',\n    has_urgent: urgentDeadlines.length > 0\n  }\n}];"
+            },
+            "id": "check_afip",
+            "name": "Verificar Vencimientos AFIP",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                900,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "estudio_nombre",
+                            "name": "estudio_nombre",
+                            "value": "NOMBRE_ESTUDIO_CONTABLE",
+                            "type": "string"
+                        },
+                        {
+                            "id": "servicios",
+                            "name": "servicios",
+                            "value": "Liquidación sueldos, AFIP, Monotributo, Responsable Inscripto, Autónomos, Balances, Asesoramiento impositivo",
+                            "type": "string"
+                        },
+                        {
+                            "id": "horario",
+                            "name": "horario",
+                            "value": "Lunes a Viernes 9-18hs",
+                            "type": "string"
+                        },
+                        {
+                            "id": "ubicacion",
+                            "name": "ubicacion",
+                            "value": "Av. Cabildo 2500, CABA",
+                            "type": "string"
+                        },
+                        {
+                            "id": "precios",
+                            "name": "precios",
+                            "value": "Monotributo: $12,000/mes\nResponsable Inscripto: desde $25,000/mes\nLiquidación sueldos: $3,000 por empleado/mes\nAutónomos: $8,000/mes\nDeclaraciones juradas: desde $15,000",
+                            "type": "string"
+                        },
+                        {
+                            "id": "faqs",
+                            "name": "faqs",
+                            "value": "VENCIMIENTOS PRINCIPALES:\n- IVA: 16-21 de cada mes (según CUIT)\n- Ganancias: 10-15 (trimestral)\n- Monotributo: 17-20 de cada mes\n- Autónomos: 10-12 de cada mes\n\nDOCUMENTACIÓN NECESARIA:\n- Monotributo: facturas, comprobantes\n- IIBB: formularios, movimientos bancarios\n- Sueldos: novedades empleados, licencias\n\nFORMAS DE PAGO:\n- Efectivo, transferencia, Mercado Pago\n- Débito automático disponible\n\nCONSULTAS:\n- Primera consulta: SIN CARGO\n- Respondemos hasta 24hs después",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "config",
+            "name": "CONFIG",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                680,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq_model",
+            "name": "Groq AI Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                900,
+                620
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres el asistente de {{$('CONFIG').item.json.estudio_nombre}}, estudio contable.\n\nSERVICIOS:\n{{$('CONFIG').item.json.servicios}}\n\nHORARIO:\n{{$('CONFIG').item.json.horario}}\n\nPRECIOS:\n{{$('CONFIG').item.json.precios}}\n\nINFO ÚTIL:\n{{$('CONFIG').item.json.faqs}}\n\nCONSULTA DEL CLIENTE:\n{{ $('Extraer Mensaje').item.json.message }}\n\nINSTRUCCIONES:\n1. Responde de forma clara y directa\n2. Para vencimientos AFIP: dar fechas exactas\n3. Para precios: dar rangos + recomendar presupuesto personalizado\n4. Para trámites: explicar documentación necesaria\n5. Si preguntan algo técnico complejo: ofrecer consulta con contador\n6. Máximo 4 líneas\n7. Tono: profesional y servicil\n8. Si mencionan \"vencimiento\", \"AFIP\", \"urgente\": priorizar y dar info precisa\n\nEjemplos:\n- \"¿Cuándo vence monotributo?\" → Fecha exacta + recordatorio\n- \"Cuánto sale?\" → Precio servicio específico + consulta gratis\n- \"Necesito facturar\" → Preguntar régimen + docs necesarias\n\nRespuesta:",
+                "hasOutputParser": false
+            },
+            "id": "ai_agent",
+            "name": "AI Accounting Assistant",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                900,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.has_urgent }}",
+                            "rightValue": "true",
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "has_deadline_soon",
+            "name": "Vencimiento Próximo?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1120,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "enhanced_response",
+                            "name": "enhanced_response",
+                            "value": "={{ $('AI Accounting Assistant').item.json.output }}\n\n⚠️ RECORDATORIO: Vencimientos próximos → {{ $('Verificar Vencimientos AFIP').item.json.urgent_deadlines }}\n\nContactanos YA si necesitás ayuda con presentaciones.",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "add_deadline_warning",
+            "name": "Agregar Alerta Vencimiento",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                1340,
+                100
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.output.toLowerCase() }}",
+                            "rightValue": "presupuesto|precio|cuánto|contratar",
+                            "operator": {
+                                "type": "string",
+                                "operation": "regex"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "wants_quote",
+            "name": "Quiere Presupuesto?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1120,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "with_contact",
+                            "name": "with_contact",
+                            "value": "={{ $('AI Accounting Assistant').item.json.output }}\n\n📞 Contactanos:\nWhatsApp: +54 11 1234-5678\nEmail: contacto@estudio.com.ar\n\nPrimera consulta SIN CARGO 💚",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "add_contact",
+            "name": "Agregar Contacto",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                1340,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "=https://evolution-api.com/message/sendText/{{$('CONFIG').item.json.instance_name}}",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"number\": \"{{ $('Extraer Mensaje').item.json.phone }}\",\n  \"text\": \"{{ $json.enhanced_response || $json.with_contact || $json.output }}\"\n}",
+                "options": {}
+            },
+            "id": "send_whatsapp",
+            "name": "Enviar WhatsApp",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1560,
+                400
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_EVOLUTION_API_KEY",
+                    "name": "Evolution API"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "consultas_clientes",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Fecha": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+                        "Telefono": "={{ $('Extraer Mensaje').item.json.phone }}",
+                        "Consulta": "={{ $('Extraer Mensaje').item.json.message }}",
+                        "Respuesta": "={{ $('Enviar WhatsApp').item.json.text }}",
+                        "Tema_Vencimiento": "={{ $json.is_deadline || 'false' }}",
+                        "Quiere_Presupuesto": "={{ $json.wants_quote || 'false' }}"
+                    }
+                }
+            },
+            "id": "log_conversation",
+            "name": "Log Consulta",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                1780,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\"success\": true, \"processed\": true}",
+                "options": {}
+            },
+            "id": "response",
+            "name": "Response OK",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                2000,
+                400
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Extraer Mensaje",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extraer Mensaje": {
+            "main": [
+                [
+                    {
+                        "node": "Es Vencimiento?",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "CONFIG",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Es Vencimiento?": {
+            "main": [
+                [
+                    {
+                        "node": "Verificar Vencimientos AFIP",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Verificar Vencimientos AFIP": {
+            "main": [
+                [
+                    {
+                        "node": "Vencimiento Próximo?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "CONFIG": {
+            "main": [
+                [
+                    {
+                        "node": "AI Accounting Assistant",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq AI Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Accounting Assistant",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Accounting Assistant": {
+            "main": [
+                [
+                    {
+                        "node": "Quiere Presupuesto?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Vencimiento Próximo?": {
+            "main": [
+                [
+                    {
+                        "node": "Agregar Alerta Vencimiento",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Agregar Alerta Vencimiento": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Quiere Presupuesto?": {
+            "main": [
+                [
+                    {
+                        "node": "Agregar Contacto",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Agregar Contacto": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Log Consulta",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Log Consulta": {
+            "main": [
+                [
+                    {
+                        "node": "Response OK",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "chatbot-contadores-v1"
+}

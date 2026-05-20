@@ -1,0 +1,127 @@
+{
+    "name": "Shopify AdSniper AI - V8 HYBRID (Backend Scraper + Backend Images)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "shopify-adsniper-v8",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "id": "webhook",
+            "name": "AdSniper_Trigger_V8",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// HYBRID PROCESSING V8\n// 1. Accepts scraped data from Backend (route.ts)\n// 2. Skips n8n Scraping (which fails on Cloudflare)\n// 3. Generates Copy & Prompts with Groq\n\nconst body = $input.item.json.body || {};\n\n// Prefer Backend Scraped Data\nlet title = body.scraped_title || body.product_title || 'Producto Desconocido';\nlet description = body.scraped_description || 'Sin descripción disponible.';\nlet url = body.product_url || '';\nlet lang = body.language || 'es';\nlet count = body.count || 3; // Support dynamic count\n\n// Fallback: If backend didn't scrape good data, we could scrape here, but we trust backend more.\n// We strictly format for AI.\n\nreturn {\n  product_url: url,\n  title: title,\n  description: description.substring(0, 5000),\n  language: lang,\n  count: count\n};\n"
+            },
+            "id": "prepare_data",
+            "name": "Prepare Data (No Scrape)",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "model": "llama-3.3-70b-versatile"
+            },
+            "id": "groq_model",
+            "name": "Groq Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                750,
+                500
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=SYSTEM ROLE:\nYou are AdSniper, an EXPERT Meta Ads copywriter and creative director. You craft HIGH-CONVERTING, PERSUASIVE ad copy that drives action.\n\nExecution language: {{ $json.language === 'en' ? 'ENGLISH' : 'SPANISH' }}.\n\nINPUT DATA:\nPRODUCT: {{ $json.title }}\nDETAILS: {{ $json.description }}\nADS TO GENERATE: {{ $json.count || 3 }}\n\nTASK:\nGenerate {{ $json.count || 3 }} UNIQUE, CREATIVE ad variations using different persuasion frameworks.\n\nFRAMEWORKS TO USE:\n- AIDA (Attention, Interest, Desire, Action)\n- PAS (Problem, Agitation, Solution)\n- Social Proof (Testimonials, Reviews, Viral)\n- Storytelling (Narrative, Transformation)\n- FOMO (Fear of Missing Out, Urgency, Scarcity)\n\nGUIDELINES FOR COPY:\n1. ✅ MENTION THE PRODUCT NAME ({{ $json.title }}) prominently\n2. ✅ Use SPECIFIC details from description\n3. ✅ Include 2-4 emojis strategically\n4. ✅ Create URGENCY and FOMO\n5. ✅ Focus on BENEFITS, not features\n6. ✅ Use power words & sensory language\n7. ✅ Add line breaks (\\n\\n) for readability\n8. ✅ Headline: Max 40 chars, attention-grabbing\n9. ✅ Primary text: 80-120 words, persuasive, benefit-focused\n\nGUIDELINES FOR IMAGE PROMPTS:\n- Write HIGHLY DETAILED visual descriptions\n- Include: style, mood, composition, lighting, colors\n- Example: \"{{ $json.title }} on marble surface, soft natural lighting, minimalist aesthetic, pastel pink & gold tones, 8k, professional product photography, shallow depth of field\"\n\nOUTPUT FORMAT (JSON ARRAY):\n[\n  {\n    \"type\": \"Framework Name (e.g., AIDA, PAS, Social Proof)\",\n    \"headline\": \"Attention-grabbing headline with emojis\",\n    \"primary_text\": \"Compelling body copy with strategic emojis, line breaks, benefits-focused, 80-120 words. Create urgency and FOMO.\",\n    \"image_prompt\": \"Detailed visual description: product setting, lighting, style, mood, colors, 8k, professional photography\"\n  }\n]\n\nCRITICAL: Each ad MUST feel UNIQUE and creative. NO generic copy. NO repetition. PREMIUM quality only.",
+                "hasOutputParser": true
+            },
+            "id": "ai_generator",
+            "name": "AdSniper AI Generator",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                750,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const ads = $('AdSniper AI Generator').item.json.output || [];\nreturn {\n    ads: ads\n};\n"
+            },
+            "id": "format_output",
+            "name": "Format Output",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1000,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "AdSniper_Trigger_V8": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Data (No Scrape)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Data (No Scrape)": {
+            "main": [
+                [
+                    {
+                        "node": "AdSniper AI Generator",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AdSniper AI Generator",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AdSniper AI Generator": {
+            "main": [
+                [
+                    {
+                        "node": "Format Output",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

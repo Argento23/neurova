@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GenerArise - Sales & Implementation Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0e27;
+            color: #e0e7ff;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            background: #1e293b;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .tab:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .content {
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .card h3 {
+            color: #a78bfa;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .card p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 5px 5px 5px 0;
+        }
+
+        .price {
+            color: #34d399;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #1e293b;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background: #667eea;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #334155;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .checklist li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #34d399;
+            font-weight: bold;
+        }
+
+        .workflow-box {
+            background: #0f172a;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #334155;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .highlight {
+            background: #fbbf24;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .warning {
+            background: #dc2626;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        code {
+            background: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 GenerArise Sales & Implementation Hub</h1>
+            <p>Tu guía completa para vender e implementar soluciones AI</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('productos')">📦 Productos</div>
+            <div class="tab" onclick="showTab('pricing')">💰 Pricing</div>
+            <div class="tab" onclick="showTab('setup')">⚙️ Setup Técnico</div>
+            <div class="tab" onclick="showTab('ventas')">📧 Cold Email</div>
+            <div class="tab" onclick="showTab('delivery')">🚀 Post-Venta</div>
+            <div class="tab" onclick="showTab('nichos')">🎯 Nichos Extra</div>
+            <div class="tab" onclick="showTab('salestools')">💼 Sales Tools</div>
+        </div>
+
+        <!-- PRODUCTOS -->
+        <div id="productos" class="content active">
+            <div class="section">
+                <h2 style="margin-bottom: 20px;">🎁 Catálogo de Productos (Workflows Listos)</h2>
+                <div class="grid">
+                    <div class="card">
+                        <h3>🏠 Inmobiliarias</h3>
+                        <p class="price">$497-797/mes</p>
+                        <p><strong>Features:</strong></p>
+                        <ul class="checklist">
+                            <li>Respuestas 24/7 WhatsApp</li>
+                            <li>Derivación a asesor (keywords)</li>
+                            <li>FAQs propiedades</li>
+                            <li>Log consultas</li>
+                        </ul>
+                        <p><strong>Setup:</strong> 7 días</p>
+                        <span class="badge">Argentina</span>
+                        <span class="badge">B2C</span>
+                    </div>
+
+                    <div class="card">
+                        <h3>🏨 Hoteles</h3>
+                        <p class="price">€797-1,297/mes</p>
+                        <p><strong>Features:</strong></p>
+                        <ul class="checklist">
+                            <li>Multiidioma (DE/EN/ES/IT)</li>
+                            <li>Captura reservas</li>
+                            <li>Email staff automático</li>
+                            <li>Info amenities/políticas</li>
+                        </ul>
+                        <p><strong>Setup:</strong> 8 días</p>
+                        <span class="badge">Austria</span>
+                        <span class="badge">B2C</span>
+                    </div>
+
+                    <div class="card">
+                        <h3>👨‍⚖️ Abogados</h3>
+                        <p class="price">$697-997/mes</p>
+                        <p><strong>Features:</strong></p>
+                        <ul class="checklist">
+                            <li>Detección urgencias</li>
+                            <li>Email alert casos urgentes</li>
+                            <li>Calendly integration</li>
+                            <li>Info general (NO legal advice)</li>
+                        </ul>
+                        <p><strong>Setup:</strong> 7 días</p>
+                        <span class="badge">Argentina</span>
+                        <span class="badge">B2B</span>
+                    </div>
+
+                    <div class="card">
+                        <h3>🧮 Contadores</h3>
+                        <p class="price">$597-897/mes</p>
+                        <p><strong>Features:</strong></p>
+                        <ul class="checklist">
+                            <li>Calculador vencimientos AFIP</li>
+                            <li>Alertas automáticas</li>
+                            <li>Pricing por régimen</li>
+                            <li>Lead capture presupuestos</li>
+                        </ul>
+                        <p><strong>Setup:</strong> 6 días</p>
+                        <span class="badge">Argentina</span>
+                        <span class="badge">B2B</span>
+                    </div>
+
+                    <div class="card">
+                        <h3>🍽️ Restaurantes</h3>
+                        <p class="price">$397-697/mes</p>
+                        <p><strong>Features:</strong></p>
+                        <ul class="checklist">
+                            <li>Parser reservas inteligente</li>
+                            <li>Detección datos faltantes</li>
+                            <li>Menú + delivery info</li>
+                            <li>Email staff confirmación</li>
+                        </ul>
+                        <p><strong>Setup:</strong> 5 días</p>
+                        <span class="badge">Argentina</span>
+                        <span class="badge">B2C</span>
+                    </div>
+
+                    <div class="card">
+                        <h3>🏪 Almacén/Minimercado</h3>
+                        <p class="price">$297-697/mes</p>
+                        <p><strong>Features:</strong></p>
+                        <ul class="checklist">
+                            <li>Catálogo productos (Google Sheet)</li>
+                            <li>Toma pedidos automática</li>
+                            <li>Delivery local</li>
+                            <li>Clientes habituales</li>
+                        </ul>
+                        <p><strong>Setup:</strong> 3-5 días</p>
+                        <span class="badge">Argentina</span>
+                        <span class="badge">B2C</span>
+                    </div>
+
+                    <div class="card">
+                        <h3>🏭 Fábrica B2B</h3>
+                        <p class="price">$1,497-4,997/mes</p>
+                        <p><strong>Features:</strong></p>
+                        <ul class="checklist">
+                            <li>Catálogo 300+ SKUs</li>
+                            <li>Cotizaciones con pricing tiers</li>
+                            <li>Lead qualification automática</li>
+                            <li>CRM logging</li>
+                        </ul>
+                        <p><strong>Setup:</strong> 10-15 días</p>
+                        <span class="badge">Argentina</span>
+                        <span class="badge">B2B</span>
+                    </div>
+
+                    <div class="card">
+                        <h3>📅 Appointment Setter AI</h3>
+                        <p class="price">$1,497-2,997/mes</p>
+                        <p><strong>Features:</strong></p>
+                        <ul class="checklist">
+                            <li>Calificación BANT automática</li>
+                            <li>Scoring A/B/C con IA</li>
+                            <li>Calendly auto-scheduling</li>
+                            <li>Reminders automáticos (24hs + 1h)</li>
+                        </ul>
+                        <p><strong>Setup:</strong> 7 días</p>
+                        <span class="badge">B2B Services</span>
+                        <span class="badge">Alto Margen</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRICING -->
+        <div id="pricing" class="content">
+            <div class="section">
+                <h2 style="margin-bottom: 20px;">💰 Estrategia de Pricing</h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rubro</th>
+                            <th>Basic</th>
+                            <th>Pro</th>
+                            <th>Enterprise</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Inmobiliarias</strong></td>
+                            <td>$497</td>
+                            <td>$797</td>
+                            <td>$1,297</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hoteles</strong></td>
+                            <td>€797</td>
+                            <td>€1,297</td>
+                            <td>€1,997</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Abogados</strong></td>
+                            <td>$697</td>
+                            <td>$997</td>
+                            <td>$1,497</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Contadores</strong></td>
+                            <td>$597</td>
+                            <td>$897</td>
+                            <td>$1,297</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Restaurantes</strong></td>
+                            <td>$397</td>
+                            <td>$697</td>
+                            <td>$997</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Almacenes</strong></td>
+                            <td>$297</td>
+                            <td>$497</td>
+                            <td>$697</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fábricas B2B</strong></td>
+                            <td>$1,497</td>
+                            <td>$2,497</td>
+                            <td>$4,997</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Appointment Setter</strong></td>
+                            <td>$1,497</td>
+                            <td>$1,997</td>
+                            <td>$2,997</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="workflow-box">
+                    <h3>📊 Features por Tier</h3>
+                    <p><strong>BASIC:</strong> 1 canal (WhatsApp), 500 msg/mes, respuestas auto, logging, soporte email
+                    </p>
+                    <p><strong>PRO (+40-50%):</strong> 2 canales, 2K msg/mes, reportes, integraciones, soporte
+                        prioritario</p>
+                    <p><strong>ENTERPRISE (+100-150%):</strong> Ilimitado, analytics, API, custom features, account
+                        manager</p>
+                </div>
+
+                <div class="warning">
+                    <strong>⚡ Costos Operativos:</strong> $3-5/mes por cliente → <span class="highlight">Margen
+                        95-98%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SETUP TÉCNICO -->
+        <div id="setup" class="content">
+            <div class="section">
+                <h2 style="margin-bottom: 20px;">⚙️ Setup Técnico Universal</h2>
+
+                <div class="grid">
+                    <div class="card">
+                        <h3>🔧 Stack Tecnológico</h3>
+                        <ul class="checklist">
+                            <li>n8n (workflow engine)</li>
+                            <li>Evolution API (WhatsApp)</li>
+                            <li>Groq AI (LLM - gratis)</li>
+                            <li>Google Sheets (logging)</li>
+                            <li>Gmail (notificaciones)</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>🔑 Credentials Necesarias</h3>
+                        <ul class="checklist">
+                            <li>Groq API Key (console.groq.com)</li>
+                            <li>Evolution API URL + Token</li>
+                            <li>Google OAuth2 (Sheets + Gmail)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="workflow-box">
+                    <h3>📅 Timeline Implementación (7-8 días)</h3>
+                    <p><strong>Día 1-2:</strong> Onboarding call + recolección info (FAQs, horarios, servicios)</p>
+                    <p><strong>Día 3-5:</strong> Config workflow + personalización (nodo CONFIG + prompts)</p>
+                    <p><strong>Día 6:</strong> Testing interno (20 casos) + testing con cliente</p>
+                    <p><strong>Día 7:</strong> Ajustes finales</p>
+                    <p><strong>Día 8:</strong> GO LIVE + monitoreo primeras 48hs</p>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Archivo</th>
+                            <th>Ubicación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Inmobiliarias</td>
+                            <td><code>workflows/PRODUCT_chatbot_inmobiliaria.json</code></td>
+                        </tr>
+                        <tr>
+                            <td>Hoteles</td>
+                            <td><code>workflows/PRODUCT_chatbot_hotel.json</code></td>
+                        </tr>
+                        <tr>
+                            <td>Abogados</td>
+                            <td><code>workflows/PRODUCT_chatbot_abogados.json</code></td>
+                        </tr>
+                        <tr>
+                            <td>Contadores</td>
+                            <td><code>workflows/PRODUCT_chatbot_contadores.json</code></td>
+                        </tr>
+                        <tr>
+                            <td>Restaurantes</td>
+                            <td><code>workflows/PRODUCT_chatbot_restaurantes.json</code></td>
+                        </tr>
+                        <tr>
+                            <td>Almacenes</td>
+                            <td><code>workflows/PRODUCT_chatbot_almacen.json</code></td>
+                        </tr>
+                        <tr>
+                            <td>Fábricas B2B</td>
+                            <td><code>workflows/PRODUCT_chatbot_fabrica.json</code></td>
+                        </tr>
+                        <tr>
+                            <td>Appointment Setter</td>
+                            <td><code>workflows/PRODUCT_appointment_setter.json</code></td>
+                        </tr>
+                        <tr>
+                            <td>Gyms/Fitness</td>
+                            <td><code>workflows/PRODUCT_chatbot_gym.json</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- COLD EMAIL -->
+        <div id="ventas" class="content">
+            <div class="section">
+                <h2 style="margin-bottom: 20px;">📧 Templates Cold Email</h2>
+
+                <div class="card">
+                    <h3>🏠 Inmobiliarias Argentina</h3>
+                    <p><strong>Subject:</strong> {{Nombre}}, 67 consultas sin responder = 67 ventas perdidas</p>
+                    <div class="workflow-box">
+                        <p>Hola {{Nombre}},</p>
+                        <p>Vi que {{Empresa}} publica en Zonaprop/MercadoLibre, pero hay un problema:</p>
+                        <p>→ Recibís consultas a las 2 AM, domingos, feriados<br>
+                            → Perdés leads porque respondés tarde<br>
+                            → Tu equipo repite las mismas respuestas 50 veces/día</p>
+                        <p>Te muestro cómo automatizar esto con IA para que:</p>
+                        <p>✅ Respondas en 60 segundos (incluso dormido)<br>
+                            ✅ Califiques leads automáticamente<br>
+                            ✅ Nunca pierdas una consulta</p>
+                        <p><strong>Implemento gratis por 15 días. Si no ves resultados, no me pagás nada.</strong></p>
+                        <p>¿Mañana a las 15:00 o pasado a las 11:00 para una demo de 20 min?</p>
+                        <p>Gustavo - GenerArise<br>agentes.space@gmail.com</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🏨 Hoteles Austria (English)</h3>
+                    <p><strong>Subject:</strong> {{Name}}, 73% of your booking inquiries go unanswered</p>
+                    <div class="workflow-box">
+                        <p>Hello {{Name}},</p>
+                        <p>As an Argentine-Austrian AI specialist, I noticed {{HotelName}} is likely missing bookings
+                            from Latin American tourists (245K+/year to Austria!) due to language barriers.</p>
+                        <p>My solution was tested in 12 hotels in Buenos Aires. Results:</p>
+                        <p>✅ 100% response rate in DE/EN/ES/IT<br>
+                            ✅ 40% more direct bookings<br>
+                            ✅ Zero additional staff</p>
+                        <p><strong>Free 30-day pilot for first 5 hotels.</strong></p>
+                        <p>Interested in 15-min demo?</p>
+                        <p>Gustavo Eder - Austrian Citizen<br>agentes.space@gmail.com</p>
+                    </div>
+                </div>
+
+                <div class="workflow-box">
+                    <h3>📈 Métricas Esperadas</h3>
+                    <p>100 emails → 40 abiertos (40%) → 12 replies (30%) → 4 demos (33%) → 1-2 clientes (25-50%)</p>
+                    <p><strong>Necesitas ~50-75 emails/semana para 1 cliente/mes</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- POST-VENTA -->
+        <div id="delivery" class="content">
+            <div class="section">
+                <h2 style="margin-bottom: 20px;">🚀 Proceso Post-Venta</h2>
+
+                <div class="grid">
+                    <div class="card">
+                        <h3>Día 1-2: Onboarding</h3>
+                        <ul class="checklist">
+                            <li>Kick-off call 30 min</li>
+                            <li>Recolectar FAQs</li>
+                            <li>Accesos WhatsApp</li>
+                            <li>Enviar welcome pack</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>Día 3-5: Setup</h3>
+                        <ul class="checklist">
+                            <li>Conectar Evolution API</li>
+                            <li>Personalizar CONFIG</li>
+                            <li>Training chatbot</li>
+                            <li>Testing interno (20 casos)</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>Día 6-7: Testing</h3>
+                        <ul class="checklist">
+                            <li>Demo live con cliente</li>
+                            <li>Cliente prueba casos reales</li>
+                            <li>Implementar ajustes</li>
+                            <li>Preparar go-live</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>Día 8: GO LIVE</h3>
+                        <ul class="checklist">
+                            <li>Activación gradual</li>
+                            <li>Monitoreo primeras 8hs</li>
+                            <li>Ajustes en tiempo real</li>
+                            <li>Email reporte 24hs</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>KPI</th>
+                            <th>Meta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Response Time</td>
+                            <td>&lt; 60 segundos</td>
+                        </tr>
+                        <tr>
+                            <td>Resolution Rate</td>
+                            <td>&gt; 85%</td>
+                        </tr>
+                        <tr>
+                            <td>Customer Satisfaction</td>
+                            <td>&gt; 4.5/5</td>
+                        </tr>
+                        <tr>
+                            <td>Time to Live</td>
+                            <td>&lt; 10 días</td>
+                        </tr>
+                        <tr>
+                            <td>Client Satisfaction</td>
+                            <td>&gt; 8/10</td>
+                        </tr>
+                        <tr>
+                            <td>Churn Rate</td>
+                            <td>&lt; 5%/mes</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- NICHOS EXTRA -->
+        <div id="nichos" class="content">
+            <div class="section">
+                <h2 style="margin-bottom: 20px;">🎯 Nichos Especiales</h2>
+
+                <div class="grid">
+                    <div class="card">
+                        <h3>🏪 Almacenes/Minimercados</h3>
+                        <p class="price">$297-697/mes</p>
+                        <p><strong>Features:</strong></p>
+                        <ul class="checklist">
+                            <li>Consulta productos + precios</li>
+                            <li>Toma pedidos automática</li>
+                            <li>Delivery local</li>
+                            <li>Clientes habituales</li>
+                        </ul>
+                        <p><strong>ROI:</strong> +30% ventas (disponible 24/7)</p>
+                        <span class="badge">B2C</span>
+                        <span class="badge">Fácil</span>
+                    </div>
+
+                    <div class="card">
+                        <h3>🏭 Fábricas B2B</h3>
+                        <p class="price">$1,497-4,997/mes</p>
+                        <p><strong>Features:</strong></p>
+                        <ul class="checklist">
+                            <li>Catálogo 300+ SKUs</li>
+                            <li>Cotizaciones automáticas</li>
+                            <li>Lead qualification</li>
+                            <li>ERP + CRM integration</li>
+                        </ul>
+                        <p><strong>ROI:</strong> -40% costos admin</p>
+                        <span class="badge">B2B</span>
+                        <span class="badge">Alto Ticket</span>
+                    </div>
+
+                    <div class="card">
+                        <h3>💪 Gyms/Fitness</h3>
+                        <p class="price">$497-797/mes</p>
+                        <p><strong>Features:</strong></p>
+                        <ul class="checklist">
+                            <li>Info planes + precios</li>
+                            <li>Clase de prueba gratis</li>
+                            <li>Horarios actividades</li>
+                            <li>Lead capture automático</li>
+                        </ul>
+                        <span class="badge">B2C</span>
+                        <span class="badge">Setup Rápido</span>
+                    </div>
+
+                    <div class="card">
+                        <h3>👨‍⚕️ Médicos/Clínicas</h3>
+                        <p class="price">$697-1,797/mes</p>
+                        <p><strong>Features:</strong></p>
+                        <ul class="checklist">
+                            <li>Obras sociales info</li>
+                            <li>Turnos online</li>
+                            <li>Detección urgencias</li>
+                            <li>Multi-especialidad</li>
+                        </ul>
+                        <span class="badge">B2B</span>
+                        <span class="badge">Alta Retención</span>
+                    </div>
+
+                    <div class="card">
+                        <h3>📅 Appointment Setter</h3>
+                        <p class="price">$1,497-2,997/mes</p>
+                        <p><strong>Target Clientes:</strong></p>
+                        <ul class="checklist">
+                            <li>Agencias Marketing Digital</li>
+                            <li>Consultoras IT/Management</li>
+                            <li>SaaS B2B</li>
+                            <li>Coaches Alto Ticket</li>
+                        </ul>
+                        <p><strong>Incluye:</strong> 10-15 citas/mes garantizadas</p>
+                        <p><strong>Margen:</strong> 90%+ ($1,347+ profit/cliente)</p>
+                        <span class="badge">B2B</span>
+                        <span class="badge">Margen Altísimo</span>
+                    </div>
+                </div>
+
+                <div class="warning">
+                    <strong>🚀 Priorización Recomendada:</strong><br>
+                    Mes 1-2: <span class="highlight">Contadores</span> (fácil + mercado grande)<br>
+                    Mes 3-4: <span class="highlight">Restaurantes</span> (volumen alto)<br>
+                    Mes 5-6: <span class="highlight">Médicos</span> (alto ticket + retención)<br>
+                    Mes 7-8: <span class="highlight">Appointment Setter</span> (margen 90% + escalable)<br>
+                    Mes 9+: Expandir según demanda
+                </div>
+            </div>
+        </div>
+
+        <!-- SALES TOOLS -->
+        <div id="salestools" class="content">
+            <div class="section">
+                <h2 style="margin-bottom: 20px;">💼 Sales Enablement Tools</h2>
+
+                <!-- Tool 1: Objeciones -->
+                <div class="card">
+                    <h3>🛡️ Playbook de Objeciones + Respuestas</h3>
+
+                    <div class="workflow-box">
+                        <h4 style="color: #a78bfa; margin-bottom: 10px;">"Es muy caro"</h4>
+                        <p><strong>Respuesta:</strong></p>
+                        <p>Entiendo. Comparemos números:</p>
+                        <p>▸ Sin chatbot: pierdes 30-40% leads fuera de horario = $X/mes<br>
+                            ▸ Con chatbot ($597): recuperás esos leads<br>
+                            ▸ Solo necesitás 1-2 ventas extra/mes para pagarlo</p>
+                        <p><strong>¿Cerrás 1-2 ventas extra si respondés 24/7?</strong> Probablemente más.</p>
+                    </div>
+
+                    <div class="workflow-box">
+                        <h4 style="color: #a78bfa; margin-bottom: 10px;">"No estoy seguro si funciona"</h4>
+                        <p><strong>Respuesta:</strong></p>
+                        <p>Te entiendo. Por eso ofrezco:</p>
+                        <p>✅ Setup gratis los primeros 15 días<br>
+                            ✅ Si no ves resultados, cancelás sin costo<br>
+                            ✅ Te muestro caso similar: [Contador en Palermo] aumentó consultas 47% primer mes</p>
+                        <p><strong>Sin riesgo.</strong> ¿Probamos 2 semanas?</p>
+                    </div>
+
+                    <div class="workflow-box">
+                        <h4 style="color: #a78bfa; margin-bottom: 10px;">"No tengo tiempo para implementar"</h4>
+                        <p><strong>Respuesta:</strong></p>
+                        <p>Eso es exactamente lo que resolvemos:</p>
+                        <p>▸ Solo necesito 30 min tuyo (call inicial)<br>
+                            ▸ El resto lo hago yo (setup, config, testing)<br>
+                            ▸ En 7 días está funcionando</p>
+                        <p><strong>Tu único trabajo:</strong> aprobar el último día antes de go-live.</p>
+                    </div>
+
+                    <div class="workflow-box">
+                        <h4 style="color: #a78bfa; margin-bottom: 10px;">"Ya probé chatbots y no sirven"</h4>
+                        <p><strong>Respuesta:</strong></p>
+                        <p>Probaste chatbots con <strong>reglas</strong>. Esto es diferente:</p>
+                        <p>❌ Chatbot tradicional: "click botón 1, 2, 3" (frustrante)<br>
+                            ✅ Este chatbot: IA entiende lenguaje natural</p>
+                        <p><strong>Ejemplo:</strong><br>
+                            Cliente escribe: "hola necesito contador para monotributo urgente cuánto sale"<br>
+                            IA detecta: monotributo + urgencia → responde pricing + agenda llamada hoy</p>
+                        <p>¿Ves la diferencia? ¿Te muestro demo 10 min?</p>
+                    </div>
+
+                    <div class="workflow-box">
+                        <h4 style="color: #a78bfa; margin-bottom: 10px;">"Necesito pensarlo"</h4>
+                        <p><strong>Respuesta:</strong></p>
+                        <p>Perfecto. ¿Qué necesitás pensar específicamente?</p>
+                        <p>[Escuchar]</p>
+                        <p>Mira, tengo 2 slots libres este mes para onboarding. Si te interesa, te reservo uno hasta
+                            mañana.</p>
+                        <p><strong>Pero ojo:</strong> cada día que pasa perdés 10-15 consultas. En una semana = 70-100
+                            consultas sin responder.</p>
+                        <p>¿Confirmamos para no perder el slot?</p>
+                    </div>
+                </div>
+
+                <!-- Tool 2: Upsell Playbook -->
+                <div class="card">
+                    <h3>📈 Upsell Playbook</h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>From → To</th>
+                                <th>Trigger</th>
+                                <th>Pitch</th>
+                                <th>Expected Uplift</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Basic → Pro</strong><br>($597 → $897)</td>
+                                <td>▸ >500 mensajes/mes<br>▸ Solicitan 2do canal<br>▸ Mes 3-4</td>
+                                <td>"Veo que superaste el límite. Con Pro tenés 2K msg + reportes detallados. Upgrade
+                                    por $300/mes extra?"</td>
+                                <td>+40-50%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Pro → Enterprise</strong><br>($897 → $1,297)</td>
+                                <td>▸ Múltiples usuarios<br>▸ Necesitan API<br>▸ Mes 6-8</td>
+                                <td>"Para tu volumen, Enterprise te conviene: API, analytics avanzado, account manager
+                                    dedicado."</td>
+                                <td>+45%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Add-on: Reporting</strong><br>(+$200/mes)</td>
+                                <td>▸ Cliente pregunta métricas<br>▸ Mes 2-3</td>
+                                <td>"Te armo dashboard con: leads/día, tasa conversión, horarios pico. $200/mes. ¿Lo
+                                    querés?"</td>
+                                <td>+33%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Add-on: Multi-idioma</strong><br>(+$300/mes)</td>
+                                <td>▸ Consultas en inglés/PT<br>▸ Hoteles/Inmob</td>
+                                <td>"Detecté 15 consultas en inglés esta semana. Con multi-idioma capturás esos leads.
+                                    +$300/mes"</td>
+                                <td>+50%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="workflow-box">
+                        <h3>📧 Email Template Upsell</h3>
+                        <p><strong>Subject:</strong> {{Nombre}}, tu chatbot está al 94% de capacidad</p>
+                        <p><strong>Body:</strong></p>
+                        <p>Hola {{Nombre}},</p>
+                        <p>Gran noticia: tu chatbot procesó 470 mensajes este mes (94% del límite Basic).</p>
+                        <p><strong>Problema:</strong> si llegás a 500, se apaga automáticamente hasta mes próximo.</p>
+                        <p><strong>Solución:</strong> upgrade a Pro ahora = 2K mensajes/mes + reportes detallados.</p>
+                        <p>✅ Activo el upgrade hoy<br>
+                            ✅ No perdés ni 1 consulta<br>
+                            ✅ $300/mes extra (facturado al final del mes)</p>
+                        <p>¿Confirmo?</p>
+                    </div>
+
+                    <div class="warning">
+                        <strong>⚡ Timing Ideal Upsell:</strong><br>
+                        Mes 1-2: Dejar que se adapten (NO vender todavía)<br>
+                        Mes 3: Monitorear uso, preparar pitch<br>
+                        Mes 4-6: <span class="highlight">Ventana óptima para upsell</span><br>
+                        Mes 7+: Cliente ya en su tier final (pocas posibilidades)
+                    </div>
+                </div>
+
+                <!-- Tool 3: ROI Calculator -->
+                <div class="card">
+                    <h3>🧮 Calculadora ROI (Para Demos)</h3>
+
+                    <div class="workflow-box">
+                        <h3>📊 Ejemplo: Restaurante</h3>
+                        <p><strong>Inputs (preguntarle al prospect):</strong></p>
+                        <p>▸ Consultas/mes por WhatsApp: <span class="highlight">200</span><br>
+                            ▸ Consultas fuera de horario: <span class="highlight">30%</span><br>
+                            ▸ Tasa conversión reservas: <span class="highlight">40%</span><br>
+                            ▸ Ticket promedio: <span class="highlight">$8,000</span></p>
+
+                        <p><strong>Cálculo:</strong></p>
+                        <p>Sin chatbot:<br>
+                            ▸ 200 consultas × 30% nocturnas = <strong>60 consultas/mes perdidas</strong><br>
+                            ▸ 60 × 40% conversión = 24 reservas perdidas<br>
+                            ▸ 24 × $8,000 = <strong>$192,000/mes en ventas perdidas</strong></p>
+
+                        <p>Con chatbot ($497/mes):<br>
+                            ▸ Captura 100% consultas 24/7<br>
+                            ▸ Recupera 24 reservas × $8,000 = +$192,000/mes<br>
+                            ▸ <strong>ROI: 38,600%</strong> 🤯</p>
+
+                        <p class="price">Payback: <span style="color: #34d399;">6 horas</span></p>
+                    </div>
+
+                    <div class="workflow-box">
+                        <h3>📊 Ejemplo: Contador</h3>
+                        <p><strong>Inputs:</strong></p>
+                        <p>▸ Consultas/mes: <span class="highlight">150</span><br>
+                            ▸ % consultas generales (FAQ): <span class="highlight">60%</span><br>
+                            ▸ Tiempo recepcionista por consulta: <span class="highlight">8 min</span><br>
+                            ▸ Salario recepcionista: <span class="highlight">$3,000/mes</span></p>
+
+                        <p><strong>Cálculo:</strong></p>
+                        <p>Sin chatbot:<br>
+                            ▸ 150 × 60% FAQ = 90 consultas repetitivas/mes<br>
+                            ▸ 90 × 8 min = 720 min = <strong>12 horas/mes</strong> perdidas<br>
+                            ▸ 12hs × $18,75/hora (salario hora) = <strong>$225/mes</strong> en tiempo staff</p>
+
+                        <p>Con chatbot ($597/mes):<br>
+                            ▸ Responde 90% FAQs automáticamente<br>
+                            ▸ Ahorro: $225/mes<br>
+                            ▸ PERO: captura <strong>10 leads extra/mes</strong> (fuera de horario)<br>
+                            ▸ 10 leads × 30% cierre × $2,000 servicio = <strong>+$6,000/mes</strong></p>
+
+                        <p class="price">ROI Real: <span style="color: #34d399;">+$5,400/mes neto</span></p>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Industria</th>
+                                <th>Input Clave</th>
+                                <th>ROI Típico</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Inmobiliarias</td>
+                                <td>Leads perdidos × ticket comisión</td>
+                                <td>800-1,500%</td>
+                            </tr>
+                            <tr>
+                                <td>Restaurantes</td>
+                                <td>Reservas nocturnas × ticket</td>
+                                <td>3,000-5,000%</td>
+                            </tr>
+                            <tr>
+                                <td>Abogados</td>
+                                <td>Consultas urgentes × fee inicial</td>
+                                <td>400-800%</td>
+                            </tr>
+                            <tr>
+                                <td>Almacenes</td>
+                                <td>Pedidos nocturnos × margen</td>
+                                <td>200-400%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Tool 4: Propuesta Comercial Template -->
+                <div class="card">
+                    <h3>📄 Template Propuesta Comercial</h3>
+
+                    <div class="workflow-box">
+                        <h3>Estructura Propuesta (enviar PDF después de demo)</h3>
+
+                        <p><strong>PÁGINA 1: Cover</strong></p>
+                        <p>▸ Logo GenerArise<br>
+                            ▸ "Propuesta AI Chatbot para [EMPRESA CLIENTE]"<br>
+                            ▸ Fecha<br>
+                            ▸ Tu nombre + contacto</p>
+
+                        <p><strong>PÁGINA 2: Situación Actual</strong></p>
+                        <p>Identificamos 3 problemas en [EMPRESA]:</p>
+                        <p>❌ 40% consultas fuera horario sin respuesta<br>
+                            ❌ Staff dedica 15hs/semana a consultas repetitivas<br>
+                            ❌ No hay seguimiento automatizado de leads</p>
+
+                        <p><strong>PÁGINA 3: Solución Propuesta</strong></p>
+                        <p>Chatbot IA 24/7 que:</p>
+                        <p>✅ Responde FAQ automáticamente<br>
+                            ✅ Captura + califica leads<br>
+                            ✅ Agenda reuniones con Calendly<br>
+                            ✅ Notifica equipo casos urgentes</p>
+
+                        <p><strong>Features específicas para [INDUSTRIA]:</strong><br>
+                            [Listar 4-5 features relevantes]</p>
+
+                        <p><strong>PÁGINA 4: Inversión (3 opciones)</strong></p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Plan</th>
+                                    <th>Precio</th>
+                                    <th>Features</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Basic</td>
+                                    <td>$597/mes</td>
+                                    <td>1 canal, 500 msg/mes</td>
+                                </tr>
+                                <tr style="background: #2d3748;">
+                                    <td><strong>Pro ⭐ RECOMENDADO</strong></td>
+                                    <td><strong>$897/mes</strong></td>
+                                    <td>2 canales, 2K msg, reportes</td>
+                                </tr>
+                                <tr>
+                                    <td>Enterprise</td>
+                                    <td>$1,297/mes</td>
+                                    <td>Ilimitado + API</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <p><strong>PÁGINA 5: ROI Estimado</strong></p>
+                        <p>[Incluir cálculo específico del cliente]</p>
+                        <p class="price">Inversión: $897/mes<br>
+                            Retorno estimado: +$5,400/mes<br>
+                            ROI: 602%<br>
+                            Payback: 5 días</p>
+
+                        <p><strong>PÁGINA 6: Timeline</strong></p>
+                        <p>▸ Día 1-2: Onboarding + recolección info<br>
+                            ▸ Día 3-5: Setup + personalización<br>
+                            ▸ Día 6-7: Testing<br>
+                            ▸ Día 8: <strong>GO LIVE</strong></p>
+
+                        <p><strong>PÁGINA 7: Testimoniales</strong></p>
+                        <p>[2-3 casos de éxito similares]</p>
+
+                        <p><strong>PÁGINA 8: Next Steps</strong></p>
+                        <p>1. Firma digital propuesta<br>
+                            2. Kick-off call (30 min)<br>
+                            3. Go-live en 8 días</p>
+
+                        <p><strong>Garantía:</strong> Si en 30 días no ves resultados, te devuelvo el 100%.</p>
+
+                        <p>[Botón: ACEPTAR PROPUESTA]</p>
+                    </div>
+
+                    <div class="warning">
+                        <strong>💡 Pro Tips Propuesta:</strong><br>
+                        ▸ Siempre ofrecer 3 opciones (anclar en medio = Pro)<br>
+                        ▸ Incluir ROI específico del cliente (no genérico)<br>
+                        ▸ Deadline sutil: "2 slots disponibles este mes"<br>
+                        ▸ Garantía = elimina objeción riesgo<br>
+                        ▸ PDF bien diseñado (Canva template)
+                    </div>
+                </div>
+
+                <div class="warning" style="background: #059669; margin-top: 30px;">
+                    <strong>🎯 Resumen Sales Tools:</strong><br>
+                    1. <span class="highlight">Objeciones</span>: Para cerrar cuando dudan<br>
+                    2. <span class="highlight">Upsell</span>: Para maximizar LTV (+40-50%)<br>
+                    3. <span class="highlight">ROI Calculator</span>: Para demos (wow factor)<br>
+                    4. <span class="highlight">Propuesta</span>: Para formalizar después de demo<br><br>
+                    <strong>Con estas 4 herramientas aumentás cierre un 60-80%</strong> 🚀
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all content
+            const contents = document.querySelectorAll('.content');
+            contents.forEach(c => c.classList.remove('active'));
+
+            // Remove active from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => t.classList.remove('active'));
+
+            // Show selected content
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active to clicked tab
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+
+</html>

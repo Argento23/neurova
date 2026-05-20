@@ -1,0 +1,132 @@
+{
+    "name": "Argenterio - Fulfillment V12 (CONVERSIÓN)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "mp-ipn-argenterio",
+                "options": {}
+            },
+            "name": "Webhook MP (IPN)",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                300
+            ],
+            "webhookId": "mp-ipn-argenterio"
+        },
+        {
+            "parameters": {
+                "modelName": "models/llama-3.3-70b-versatile",
+                "options": {}
+            },
+            "name": "Groq Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                220,
+                520
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_ID",
+                    "name": "Groq Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres el Analista Principal de Argenterio. Genera un REPORTE ESTRATÉGICO COMPLETO basado en la compra de $9 USD.\n\nESTRUCTURA DEL REPORTE:\n1. Análisis Profundo de los datos del cliente (Recibidos en el pago).\n2. Plan de Acción de 3 pasos para el Mundial 2026.\n3. Justificación de por qué necesitan implementar a Stefan (IA) para asegurar la eficiencia operativa.\n\nEscribe de forma profesional y directa. Máximo 4 párrafos."
+            },
+            "name": "AI Full Report Generator",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                220,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "senderEmail": "reports@argenterio.com",
+                "toEmail": "={{ $json.payer_email }}",
+                "subject": "📁 Tu Informe de Eficiencia Operativa",
+                "htmlContent": "=<!-- Pega aquí el contenido de EMAIL_INFORME_FINAL_SHIELD.html -->"
+            },
+            "name": "Email Entrega Final",
+            "type": "n8n-nodes-base.sendInBlue",
+            "typeVersion": 2,
+            "position": [
+                500,
+                300
+            ],
+            "credentials": {
+                "sendInBlueApi": {
+                    "id": "YOUR_BREVO_ID",
+                    "name": "Brevo API"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "chatId": "TU_CHAT_ID_TELEGRAM",
+                "text": "🎯 ¡CONVERSIÓN ARGENTERIO!\n\nEmail: {{ $json.payer_email }}\nMonto: $9.00 USD\n\nStatus: Informe Estratégico entregado. Prepárate para la sesión."
+            },
+            "name": "Telegram Gustavo",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                500,
+                500
+            ],
+            "credentials": {
+                "telegramApi": {
+                    "id": "YOUR_TELEGRAM_ID",
+                    "name": "Telegram Bot"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook MP (IPN)": {
+            "main": [
+                [
+                    {
+                        "node": "AI Full Report Generator",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Full Report Generator",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Full Report Generator": {
+            "main": [
+                [
+                    {
+                        "node": "Email Entrega Final",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Telegram Gustavo",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

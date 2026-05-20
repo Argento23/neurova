@@ -1,0 +1,615 @@
+{
+    "name": "GenerArise - Social Media Publisher (Multi-Platform v2)",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "hours",
+                            "hoursInterval": 3
+                        }
+                    ]
+                }
+            },
+            "id": "cron",
+            "name": "Cron Cada 3 Horas",
+            "type": "n8n-nodes-base.cron",
+            "typeVersion": 1,
+            "position": [
+                240,
+                400
+            ]
+        },
+        {
+            "parameters": {},
+            "id": "manual",
+            "name": "Manual Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                240,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "read",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "content_calendar",
+                    "mode": "list"
+                }
+            },
+            "id": "read_calendar",
+            "name": "Leer Calendario",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                460,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.Estado }}",
+                            "rightValue": "Listo",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        },
+                        {
+                            "leftValue": "={{ new Date($json.Fecha + ' ' + $json['Hora Publicación']).getTime() }}",
+                            "rightValue": "={{ $now.toMillis() }}",
+                            "operator": {
+                                "type": "number",
+                                "operation": "lte"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "filter_ready",
+            "name": "Filtrar Posts Listos",
+            "type": "n8n-nodes-base.filter",
+            "typeVersion": 2,
+            "position": [
+                680,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "caption_full",
+                            "name": "caption_full",
+                            "value": "={{ $json.Caption + '\\n\\n' + $json.Hashtags }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "image_url",
+                            "name": "image_url",
+                            "value": "={{ $json.Imagen_URL }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "redes",
+                            "name": "redes",
+                            "value": "={{ $json['Red Social'].split('|') }}",
+                            "type": "array"
+                        }
+                    ]
+                }
+            },
+            "id": "prep_data",
+            "name": "Preparar Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                900,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "redes",
+                "options": {}
+            },
+            "id": "split_networks",
+            "name": "Dividir por Red",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 3,
+            "position": [
+                1120,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.redes }}",
+                            "rightValue": "Instagram",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_instagram",
+            "name": "Es Instagram?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1340,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://graph.facebook.com/v19.0/YOUR_IG_USER_ID/media",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "oAuth2Api",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"image_url\": \"{{ $('Preparar Data').item.json.image_url }}\",\n  \"caption\": \"{{ $('Preparar Data').item.json.caption_full }}\",\n  \"access_token\": \"YOUR_META_ACCESS_TOKEN\"\n}",
+                "options": {}
+            },
+            "id": "post_instagram",
+            "name": "Publicar Instagram",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1560,
+                100
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.redes }}",
+                            "rightValue": "Facebook",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_facebook",
+            "name": "Es Facebook?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1340,
+                350
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://graph.facebook.com/v19.0/YOUR_PAGE_ID/photos",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "oAuth2Api",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"url\": \"{{ $('Preparar Data').item.json.image_url }}\",\n  \"caption\": \"{{ $('Preparar Data').item.json.caption_full }}\",\n  \"access_token\": \"YOUR_META_ACCESS_TOKEN\"\n}",
+                "options": {}
+            },
+            "id": "post_facebook",
+            "name": "Publicar Facebook",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1560,
+                250
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.redes }}",
+                            "rightValue": "LinkedIn",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_linkedin",
+            "name": "Es LinkedIn?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1340,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://api.linkedin.com/v2/ugcPosts",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "oAuth2Api",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "X-Restli-Protocol-Version",
+                            "value": "2.0.0"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"author\": \"urn:li:organization:YOUR_COMPANY_ID\",\n  \"lifecycleState\": \"PUBLISHED\",\n  \"specificContent\": {\n    \"com.linkedin.ugc.ShareContent\": {\n      \"shareCommentary\": {\n        \"text\": \"{{ $('Preparar Data').item.json.caption_full }}\"\n      },\n      \"shareMediaCategory\": \"IMAGE\",\n      \"media\": [\n        {\n          \"status\": \"READY\",\n          \"media\": \"{{ $('Preparar Data').item.json.image_url }}\"\n        }\n      ]\n    }\n  },\n  \"visibility\": {\n    \"com.linkedin.ugc.MemberNetworkVisibility\": \"PUBLIC\"\n  }\n}",
+                "options": {}
+            },
+            "id": "post_linkedin",
+            "name": "Publicar LinkedIn",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1560,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.redes }}",
+                            "rightValue": "TikTok",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_tiktok",
+            "name": "Es TikTok?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1340,
+                650
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://open.tiktokapis.com/v2/post/publish/video/init/",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"post_info\": {\n    \"title\": \"{{ $('Preparar Data').item.json.Caption }}\",\n    \"privacy_level\": \"PUBLIC_TO_EVERYONE\",\n    \"disable_duet\": false,\n    \"disable_comment\": false,\n    \"disable_stitch\": false,\n    \"video_cover_timestamp_ms\": 1000\n  },\n  \"source_info\": {\n    \"source\": \"FILE_URL\",\n    \"video_url\": \"{{ $('Preparar Data').item.json.image_url }}\"\n  }\n}",
+                "options": {}
+            },
+            "id": "post_tiktok",
+            "name": "Publicar TikTok",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1560,
+                550
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_TIKTOK_CREDENTIAL_ID",
+                    "name": "TikTok API"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.redes }}",
+                            "rightValue": "X",
+                            "operator": {
+                                "type": "string",
+                                "operation": "contains"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_x",
+            "name": "Es X/Twitter?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1340,
+                800
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// PLACEHOLDER: Implementar con Phantom Buster o Playwright\n// Por ahora solo log\nconsole.log('Post X/Twitter:', $('Preparar Data').item.json.caption_full);\n\nreturn {\n  status: 'pending',\n  message: 'Implementar API X alternativa',\n  caption: $('Preparar Data').item.json.caption_full\n};"
+            },
+            "id": "post_x",
+            "name": "Publicar X (Pendiente)",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1560,
+                700
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "content_calendar",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Estado": "Publicado",
+                        "Fecha_Publicacion": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}"
+                    }
+                }
+            },
+            "id": "update_status",
+            "name": "Marcar como Publicado",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                1780,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Cron Cada 3 Horas": {
+            "main": [
+                [
+                    {
+                        "node": "Leer Calendario",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Leer Calendario",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Leer Calendario": {
+            "main": [
+                [
+                    {
+                        "node": "Filtrar Posts Listos",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtrar Posts Listos": {
+            "main": [
+                [
+                    {
+                        "node": "Preparar Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Preparar Data": {
+            "main": [
+                [
+                    {
+                        "node": "Dividir por Red",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Dividir por Red": {
+            "main": [
+                [
+                    {
+                        "node": "Es Instagram?",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Es Facebook?",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Es LinkedIn?",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Es TikTok?",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Es X/Twitter?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Es Instagram?": {
+            "main": [
+                [
+                    {
+                        "node": "Publicar Instagram",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Es Facebook?": {
+            "main": [
+                [
+                    {
+                        "node": "Publicar Facebook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Es LinkedIn?": {
+            "main": [
+                [
+                    {
+                        "node": "Publicar LinkedIn",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Es TikTok?": {
+            "main": [
+                [
+                    {
+                        "node": "Publicar TikTok",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Es X/Twitter?": {
+            "main": [
+                [
+                    {
+                        "node": "Publicar X (Pendiente)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Publicar Instagram": {
+            "main": [
+                [
+                    {
+                        "node": "Marcar como Publicado",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Publicar Facebook": {
+            "main": [
+                [
+                    {
+                        "node": "Marcar como Publicado",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Publicar LinkedIn": {
+            "main": [
+                [
+                    {
+                        "node": "Marcar como Publicado",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Publicar TikTok": {
+            "main": [
+                [
+                    {
+                        "node": "Marcar como Publicado",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Publicar X (Pendiente)": {
+            "main": [
+                [
+                    {
+                        "node": "Marcar como Publicado",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "cm-publisher-v2-complete"
+}

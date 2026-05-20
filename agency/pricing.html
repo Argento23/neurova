@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planes Neurova | Escala tu Negocio con IA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #ec4899;
+            --accent: #00ff41;
+            --bg: #050508;
+            --card-bg: rgba(255, 255, 255, 0.02);
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #ffffff;
+            --text-dim: rgba(255, 255, 255, 0.6);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .noise {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .gradient-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        header {
+            padding: 2rem 5%;
+            text-align: center;
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            margin-bottom: 3rem;
+            display: inline-block;
+            border-bottom: 1px solid var(--primary);
+            padding-bottom: 5px;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 0 5% 4rem;
+        }
+
+        .hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            letter-spacing: -2px;
+            background: linear-gradient(to right, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-dim);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .pricing-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            padding: 0 5% 6rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .price-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 3rem 2.5rem;
+            position: relative;
+            transition: 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .price-card:hover {
+            transform: translateY(-15px);
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.04);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        }
+
+        .price-card.featured {
+            border-color: var(--primary);
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.05) 0%, transparent 100%);
+        }
+
+        .price-card.featured::before {
+            content: 'RECOMENDADO';
+            position: absolute;
+            top: 20px; right: -30px;
+            background: var(--primary);
+            color: white;
+            padding: 5px 40px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            transform: rotate(45deg);
+        }
+
+        .card-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-header .price {
+            font-size: 3rem;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+        }
+
+        .price .currency { font-size: 1.5rem; color: var(--text-dim); }
+        .price .period { font-size: 1rem; color: var(--text-dim); font-weight: 400; }
+
+        .feature-list {
+            list-style: none;
+            margin-bottom: 3rem;
+            flex-grow: 1;
+        }
+
+        .feature-list li {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        .feature-list li i {
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .price-card.featured .feature-list li i {
+            color: var(--secondary);
+        }
+
+        .cta-btn {
+            display: block;
+            text-align: center;
+            padding: 1.2rem;
+            border-radius: 16px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: 0.3s;
+            border: 1px solid var(--border);
+            color: white;
+        }
+
+        .cta-btn.primary {
+            background: var(--primary);
+            border: none;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .cta-btn.primary:hover {
+            transform: scale(1.03);
+            background: #4f46e5;
+        }
+
+        .cta-btn.outline:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: white;
+        }
+
+        .faq {
+            padding: 4rem 5%;
+            max-width: 800px;
+            margin: 0 auto 6rem;
+        }
+
+        .faq h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .faq-item {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .faq-item h4 { margin-bottom: 0.5rem; color: var(--primary); }
+
+        footer {
+            padding: 4rem 5%;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            color: var(--text-dim);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.8rem; }
+            .pricing-container { padding: 0 20px 4rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="noise"></div>
+    <div class="gradient-bg"></div>
+
+    <header>
+        <div class="logo">NEUROVA ENGINE</div>
+    </header>
+
+    <section class="hero">
+        <h1>Invierte en tu <span style="color: var(--primary);">Libertad</span></h1>
+        <p>Elige el motor que mejor se adapte a tu etapa actual. Desde la presencia básica hasta la automatización total de ventas.</p>
+    </section>
+
+    <div class="pricing-container">
+        <!-- PLAN 1 -->
+        <div class="price-card">
+            <div class="card-header">
+                <h2>Plan Iniciador</h2>
+                <div class="price">
+                    <span class="currency">USD</span>
+                    <span>29</span>
+                    <span class="period">/mes</span>
+                </div>
+            </div>
+            <ul class="feature-list">
+                <li><i class="fas fa-check-circle"></i> Vidriera Digital (Storefront)</li>
+                <li><i class="fas fa-check-circle"></i> Catálogo de hasta 50 productos</li>
+                <li><i class="fas fa-check-circle"></i> Botón directo a WhatsApp</li>
+                <li><i class="fas fa-check-circle"></i> Hosting e Infraestructura incluídos</li>
+                <li><i class="fas fa-check-circle"></i> Soporte por Email</li>
+            </ul>
+            <a href="https://wa.me/5491178287901?text=Hola!%20Me%20interesa%20el%20Plan%20Iniciador" class="cta-btn outline">Empezar Ahora</a>
+        </div>
+
+        <!-- PLAN 2 -->
+        <div class="price-card featured">
+            <div class="card-header">
+                <h2>Plan Crecimiento</h2>
+                <div class="price">
+                    <span class="currency">USD</span>
+                    <span>79</span>
+                    <span class="period">/mes</span>
+                </div>
+            </div>
+            <ul class="feature-list">
+                <li><i class="fas fa-check-circle"></i> <strong>Todo lo del Plan Iniciador</strong></li>
+                <li><i class="fas fa-check-circle"></i> Generador de Contenido (Content Factory)</li>
+                <li><i class="fas fa-check-circle"></i> 15 Posts/Reels con IA al mes</li>
+                <li><i class="fas fa-check-circle"></i> Generador de Creativos (AdSniper)</li>
+                <li><i class="fas fa-check-circle"></i> Auditoría Mensual de Estrategia</li>
+            </ul>
+            <a href="https://wa.me/5491178287901?text=Hola!%20Me%20interesa%20el%20Plan%20Crecimiento" class="cta-btn primary">¡Quiero Escalar!</a>
+        </div>
+
+        <!-- PLAN 3 -->
+        <div class="price-card">
+            <div class="card-header">
+                <h2>Plan Dominación</h2>
+                <div class="price">
+                    <span class="currency">USD</span>
+                    <span>199</span>
+                    <span class="period">/mes</span>
+                </div>
+            </div>
+            <ul class="feature-list">
+                <li><i class="fas fa-check-circle"></i> <strong>Todo lo del Plan Crecimiento</strong></li>
+                <li><i class="fas fa-check-circle"></i> Buscador de Leads Ilimitado</li>
+                <li><i class="fas fa-check-circle"></i> Agente AI "Alex" para WhatsApp/IG</li>
+                <li><i class="fas fa-check-circle"></i> Automatización de Cierre de Ventas</li>
+                <li><i class="fas fa-check-circle"></i> Soporte Prioritario 24/7</li>
+            </ul>
+            <a href="https://wa.me/5491178287901?text=Hola!%20Me%20interesa%20el%20Plan%20Dominación" class="cta-btn outline">Hablar con un Experto</a>
+        </div>
+    </div>
+
+    <section class="faq">
+        <h3>Preguntas Frecuentes</h3>
+        <div class="faq-item">
+            <h4>¿Puedo cambiar de plan después?</h4>
+            <p>Sí, puedes subir o bajar de nivel en cualquier momento desde tu panel de control.</p>
+        </div>
+        <div class="faq-item">
+            <h4>¿Necesito conocimientos técnicos?</h4>
+            <p>Ninguno. Nosotros nos encargamos de toda la configuración. Tú solo recibes los mensajes y leads.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Neurova Engine | Desarrollado por GenerArise AI</p>
+    </footer>
+</body>
+</html>

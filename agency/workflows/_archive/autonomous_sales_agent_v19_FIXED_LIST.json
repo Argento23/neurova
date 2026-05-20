@@ -1,0 +1,569 @@
+{
+    "name": "Agente Ventas V19 - FIXED LIST",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "start-trigger",
+            "name": "Start Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                -9600,
+                340
+            ]
+        },
+        {
+            "parameters": {
+                "values": {
+                    "string": [
+                        {
+                            "name": "search_term",
+                            "value": "Inmobiliarias"
+                        },
+                        {
+                            "name": "location",
+                            "value": "Buenos Aires, Argentina"
+                        },
+                        {
+                            "name": "sheet_id",
+                            "value": "1b_nPYFDov3Rg2ljPQ6hRLwUhoSznfw5GmyneBqCNJWg"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "config-node",
+            "name": "CONFIGURACION",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 1,
+            "position": [
+                -9380,
+                340
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://serpapi.com/search.json",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "queryAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "api_key",
+                            "value": "9be0d43581dc9220232e9a2819f308c303a32082a1e62f97c9c87b75dfde8d72"
+                        },
+                        {
+                            "name": "engine",
+                            "value": "google_maps"
+                        },
+                        {
+                            "name": "q",
+                            "value": "={{ $json[\"search_term\"] + \" en \" + $json[\"location\"] }}"
+                        },
+                        {
+                            "name": "type",
+                            "value": "search"
+                        },
+                        {
+                            "name": "num",
+                            "value": "10"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "serp-api",
+            "name": "SerpApi - Maps Scraper",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -9160,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "documentId": {
+                    "__rl": true,
+                    "value": "1b_nPYFDov3Rg2ljPQ6hRLwUhoSznfw5GmyneBqCNJWg",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "gid=0",
+                    "mode": "list",
+                    "cachedResultName": "Hoja 1",
+                    "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1b_nPYFDov3Rg2ljPQ6hRLwUhoSznfw5GmyneBqCNJWg/edit#gid=0"
+                },
+                "options": {}
+            },
+            "id": "memory-loader",
+            "name": "Leer Historial (Sheets)",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                -9160,
+                500
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "zwdmBzveCXv4B3Ec",
+                    "name": "Google Sheets account"
+                }
+            },
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "mode": "removeKeyMatches",
+                "propertyInput1": "title",
+                "propertyInput2": "title"
+            },
+            "id": "merge-filter",
+            "name": "Filtro Anti-Repetidos",
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 3,
+            "position": [
+                -8720,
+                340
+            ]
+        },
+        {
+            "parameters": {
+                "batchSize": 1,
+                "options": {}
+            },
+            "id": "loop-node",
+            "name": "Loop (1 por 1)",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 2,
+            "position": [
+                -8500,
+                340
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "1b_nPYFDov3Rg2ljPQ6hRLwUhoSznfw5GmyneBqCNJWg",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "Hoja 1",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "title": "={{ $json.title }}",
+                        "status": "PROCESANDO...",
+                        "fecha": "={{ $now.toISO() }}"
+                    },
+                    "matchingColumns": [],
+                    "schema": [],
+                    "attemptToConvertTypes": false,
+                    "convertFieldsToString": false
+                },
+                "options": {}
+            },
+            "id": "log-start",
+            "name": "Log: INICIO PROCESO",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                -8280,
+                340
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "zwdmBzveCXv4B3Ec",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "url": "={{ $('Loop (1 por 1)').item.json.website }}",
+                "options": {
+                    "redirect": {
+                        "redirect": {
+                            "maxRedirects": 2
+                        }
+                    },
+                    "timeout": 4000
+                }
+            },
+            "id": "visit-website",
+            "name": "Visitar Web",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -8060,
+                340
+            ],
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "jsCode": "const html = $input.item.json.data || '';\nconst text = html.replace(/<[^>]*>?/gm, ' ');\nreturn { text_content: text.substring(0, 6000) };"
+            },
+            "id": "clean-html",
+            "name": "Limpiar HTML",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -7840,
+                340
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile",
+                "options": {}
+            },
+            "id": "groq-model",
+            "name": "Groq Chat Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                -7620,
+                560
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Analiza este prospecto:\n\n---\n{{ $json.text_content }}\n---\n\nDATOS WEB:\nNombre: {{ $('Loop (1 por 1)').item.json.title }}\n\nTAREA:\n1. Busca CELULAR/WHATSAPP (Prioridad 1). Si empieza con 11 o 15, agrega 549 antes.\n2. Busca EMAIL (Prioridad 2).\n3. Califica (1-10).\n4. Genera mensaje corto para WA y Asunto+Cuerpo para Email.\n\nJSON:\n{ \n  \"score\": 8, \n  \"whatsapp\": \"549...\", \n  \"email\": \"...\",\n  \"wa_msg\": \"...\",\n  \"email_subject\": \"...\",\n  \"email_body\": \"...\"\n}",
+                "hasOutputParser": true
+            },
+            "id": "ai-extractor",
+            "name": "IA - Extractor OMNI",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                -7620,
+                340
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "number": [
+                        {
+                            "value1": "={{ $json.score }}",
+                            "operation": "largerEqual",
+                            "value2": 6
+                        }
+                    ],
+                    "string": [
+                        {
+                            "value1": "={{ $json.whatsapp }}",
+                            "operation": "isNotEmpty"
+                        }
+                    ]
+                }
+            },
+            "id": "check-whatsapp",
+            "name": "Tiene WhatsApp?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                -7340,
+                340
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://TU-URL-EVOLUTION/message/sendText/TU-INSTANCIA",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "number",
+                            "value": "={{ $json.whatsapp }}"
+                        },
+                        {
+                            "name": "textMessage.text",
+                            "value": "={{ $json.wa_msg }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "whatsapp-sender",
+            "name": "Enviar WhatsApp",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -7060,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{ $json.email }}",
+                            "operation": "isNotEmpty"
+                        }
+                    ]
+                }
+            },
+            "id": "check-email",
+            "name": "Tiene Email?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                -7060,
+                480
+            ]
+        },
+        {
+            "parameters": {
+                "senderEmail": "gustavo@neurova.ai",
+                "toEmail": "={{ $json.email }}",
+                "subject": "={{ $json.email_subject }}",
+                "htmlContent": "={{ $json.email_body }}"
+            },
+            "id": "brevo-sender",
+            "name": "Enviar Email (Brevo)",
+            "type": "n8n-nodes-base.sendInBlue",
+            "typeVersion": 2,
+            "position": [
+                -6800,
+                480
+            ],
+            "credentials": {
+                "sendInBlueApi": {
+                    "id": "YOUR_BREVO_CREDENTIAL_ID",
+                    "name": "Brevo/Sendinblue"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "amount": 2,
+                "unit": "seconds"
+            },
+            "id": "wait-node",
+            "name": "Esperar",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                -6360,
+                340
+            ]
+        }
+    ],
+    "connections": {
+        "Start Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "CONFIGURACION",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "CONFIGURACION": {
+            "main": [
+                [
+                    {
+                        "node": "SerpApi - Maps Scraper",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Leer Historial (Sheets)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "SerpApi - Maps Scraper": {
+            "main": [
+                [
+                    {
+                        "node": "Filtro Anti-Repetidos",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Leer Historial (Sheets)": {
+            "main": [
+                [
+                    {
+                        "node": "Filtro Anti-Repetidos",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "Filtro Anti-Repetidos": {
+            "main": [
+                [
+                    {
+                        "node": "Loop (1 por 1)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop (1 por 1)": {
+            "main": [
+                [
+                    {
+                        "node": "Log: INICIO PROCESO",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Log: INICIO PROCESO": {
+            "main": [
+                [
+                    {
+                        "node": "Visitar Web",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Visitar Web": {
+            "main": [
+                [
+                    {
+                        "node": "Limpiar HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Limpiar HTML": {
+            "main": [
+                [
+                    {
+                        "node": "IA - Extractor OMNI",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "groq-model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "IA - Extractor OMNI",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IA - Extractor OMNI": {
+            "main": [
+                [
+                    {
+                        "node": "check-whatsapp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "check-whatsapp": {
+            "main": [
+                [
+                    {
+                        "node": "whatsapp-sender",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "check-email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "whatsapp-sender": {
+            "main": [
+                [
+                    {
+                        "node": "wait-node",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "check-email": {
+            "main": [
+                [
+                    {
+                        "node": "brevo-sender",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "wait-node",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "brevo-sender": {
+            "main": [
+                [
+                    {
+                        "node": "wait-node",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "wait-node": {
+            "main": [
+                [
+                    {
+                        "node": "Loop (1 por 1)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

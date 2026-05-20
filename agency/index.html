@@ -1,0 +1,1731 @@
+<!-- UPDATED: 2026-03-25 12:25 - Fix: Navigation novalidate -->
+<!DOCTYPE html>
+<html lang="es" data-lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GenerArise</title>
+    <meta name="description"
+        content="Especialistas en revenue y eficiencia. Transformamos leads en ventas y ruido en datos con Agentes de IA. Auditoría Estratégica disponible.">
+    <meta name="tiktok-developers-site-verification" content="pVBwCTatjyvCgGkRrlungVxWYwQHJ8wx" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Grotesk:wght@300;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css?v=2">
+    <style>
+        /* Prevent horizontal scroll */
+        html,
+        body {
+            overflow-x: hidden;
+            width: 100%;
+            position: relative;
+        }
+
+        /* Critical CSS for WhatsApp Button - Fallback */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            /* Reduced margin */
+            width: 55px;
+            /* Slightly smaller for mobile */
+            height: 55px;
+            background-color: #25d366;
+            color: white !important;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 28px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            z-index: 2147483647;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            /* Ensure it stays within viewport */
+            max-width: 100vw;
+        }
+
+        .whatsapp-float:hover {
+            background-color: #128c7e;
+        }
+
+        .whatsapp-pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid #25d366;
+            animation: whatsapp-pulse 2s infinite;
+            opacity: 0;
+        }
+
+        @keyframes whatsapp-pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(1.6);
+                opacity: 0;
+            }
+        }
+        .logo-icon-3d {
+            height: 45px;
+            width: auto;
+            filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.5));
+            animation: logo-float-3d 4s ease-in-out infinite;
+            transform-style: preserve-3d;
+        }
+        @keyframes logo-float-3d {
+            0%, 100% { transform: translateY(0) rotateY(0deg); }
+            50% { transform: translateY(-8px) rotateY(10deg); }
+        }
+    </style>
+    <link rel="related" href="https://mindhafen.generarise.space" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="apple-touch-icon" href="assets/logo.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="assets/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="assets/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="assets/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="assets/apple-icon-114x114.png">
+    <link rel="manifest" href="assets/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="assets/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+</head>
+
+<body>
+    <div class="noise-overlay"></div>
+    <div class="gradient-sphere sphere-1"></div>
+    <div class="gradient-sphere sphere-2"></div>
+
+    <nav class="navbar">
+        <div class="logo">
+            <img src="assets/logo.png" alt="GenerArise" class="logo-icon-3d">
+            <span class="logo-text">Gener<span class="text-accent">Arise</span></span>
+        </div>
+        <div class="nav-links">
+            <a href="#servicios" data-i18n="nav_services">Soluciones</a>
+            <a href="tienda.html" style="color: #6366f1; font-weight: 700;">Marketplace</a>
+            <a href="#metodo" data-i18n="nav_method">Método</a>
+            <div class="language-selector">
+                <button id="langToggle" class="lang-btn">
+                    <i class="fa-solid fa-globe"></i>
+                    <span id="currentLang">ES</span>
+                </button>
+            </div>
+            <a href="#contacto" class="cta-button small" data-i18n="nav_cta">Agenda Auditoría</a>
+        </div>
+    </nav>
+
+
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <div class="badge" data-i18n="hero_badge">Marketing & Sales Automation</div>
+                <h1>
+                    <span class="reveal-text" data-i18n="hero_title_1">Escala tu Revenue</span><br>
+                    <span class="reveal-text" data-i18n="hero_title_2">sin aumentar</span><br>
+                    <span class="reveal-text" data-i18n="hero_title_3">tus costos</span>
+                </h1>
+                <p class="subtitle">
+                    <span data-i18n="hero_subtitle_1">Implementamos</span> <strong data-i18n="hero_subtitle_2">Sistemas
+                        de Venta Automáticos</strong> <span data-i18n="hero_subtitle_3">y</span> <strong
+                        data-i18n="hero_subtitle_4">Agentes de IA</strong> <span data-i18n="hero_subtitle_5">que captan,
+                        califican y cierran leads 24/7.</span>
+                </p>
+                <div class="hero-buttons">
+                    <a href="#contacto" class="cta-button primary">
+                        <span data-i18n="hero_cta_primary">Diagnóstico Estratégico</span> <i
+                            class="fa-solid fa-arrow-right"></i>
+                    </a>
+                    <a href="tienda.html" class="cta-button secondary">
+                        Explorar Marketplace
+                    </a>
+                </div>
+                <!-- Alex Voice Demo CTA -->
+                <div class="alex-demo-banner" id="alexDemoBanner">
+                    <div class="alex-pulse-ring"></div>
+                    <i class="fa-solid fa-microphone"></i>
+                    <span data-i18n="hero_alex_cta">Probá nuestra IA ahora — Hablá con Alex en vivo</span>
+                    <i class="fa-solid fa-arrow-down" style="font-size: 0.75rem; opacity: 0.7;"></i>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <!-- Advanced Holographic Interface Animation -->
+                <div class="holo-container">
+                    <div class="logo-3d-wrapper">
+                        <!-- 3D Logo Layers (Isometric Stack) -->
+                        <div class="logo-layer layer-1">
+                            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20 4L36 12V28L20 36L4 28V12L20 4Z" stroke="#6366f1" stroke-width="1.5"
+                                    fill="rgba(99, 102, 241, 0.2)" />
+                                <path d="M20 12L28 16V24L20 28L12 24V16L20 12Z" stroke="#8b5cf6" stroke-width="1.5" />
+                            </svg>
+                        </div>
+                        <div class="logo-layer layer-2">
+                            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20 4L36 12V28L20 36L4 28V12L20 4Z" stroke="#a855f7" stroke-width="1.5"
+                                    fill="rgba(168, 85, 247, 0.1)" />
+                                <path d="M20 12L28 16V24L20 28L12 24V16L20 12Z" stroke="#d946ef" stroke-width="1.5" />
+                                <circle cx="20" cy="20" r="4" fill="#fff" />
+                            </svg>
+                        </div>
+                        <div class="logo-layer layer-3">
+                            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20 4L36 12V28L20 36L4 28V12L20 4Z" stroke="#ec4899" stroke-width="1.5"
+                                    fill="none" />
+                            </svg>
+                        </div>
+                        <div class="logo-glow-center"></div>
+                    </div>
+
+                    <div class="orbit-system">
+                        <div class="orbit-ring ring-1"></div>
+                        <div class="orbit-ring ring-2"></div>
+                        <div class="orbit-ring ring-3"></div>
+                    </div>
+
+                    <div class="holo-platform"></div>
+
+                    <!-- Floating Data Nodes -->
+                    <div class="floating-node node-1"><span>CRM</span></div>
+                    <div class="floating-node node-2"><span>Leads</span></div>
+                    <div class="floating-node node-3"><span>Sales</span></div>
+                </div>
+
+                <!-- Floating Data Cards -->
+                <div class="glass-card stat-card move-y">
+                    <div class="icon"><i class="fa-solid fa-robot"></i></div>
+                    <div class="text">
+                        <h4>Agente SDR</h4>
+                        <p>12 Citas Agendadas</p>
+                    </div>
+                </div>
+                <div class="glass-card stat-card move-x hidden-mobile">
+                    <div class="icon"><i class="fa-solid fa-chart-line"></i></div>
+                    <div class="text">
+                        <h4>Conversión</h4>
+                        <p>+340% ROI</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="servicios" class="services">
+            <h2 class="section-title" data-i18n="services_title">Ecosistema de Crecimiento</h2>
+            <div class="services-grid">
+                <!-- Servicio 1 -->
+                <div class="service-card">
+                    <div class="card-icon"><i class="fa-brands fa-whatsapp"></i></div>
+                    <h3 data-i18n="service1_title">Chat Funnels Inteligentes</h3>
+                    <p data-i18n="service1_desc">No más respuestas genéricas. Agendes que entienden contexto, califican
+                        leads y agendan citas directamente en tu calendario.</p>
+                    <ul class="feature-list">
+                        <li><i class="fa-solid fa-check"></i> <span data-i18n="service1_feat1">Scoring Automático</span>
+                        </li>
+                        <li><i class="fa-solid fa-check"></i> <span data-i18n="service1_feat2">Manejo de
+                                Objeciones</span></li>
+                        <li><i class="fa-solid fa-check"></i> <span data-i18n="service1_feat3">Reactuación de Base de
+                                Datos</span></li>
+                    </ul>
+                </div>
+
+                <!-- Servicio 2 -->
+                <div class="service-card featured">
+                    <div class="chip" data-i18n="service2_badge">High Impact</div>
+                    <div class="card-icon"><i class="fa-solid fa-network-wired"></i></div>
+                    <h3 data-i18n="service2_title">Infraestructura de Revenue</h3>
+                    <p data-i18n="service2_desc">Conectamos Marketing y Ventas. Si un lead entra, el CRM se actualiza,
+                        el equipo recibe alerta y el lead recibe valor.</p>
+                    <ul class="feature-list">
+                        <li><i class="fa-solid fa-check"></i> <span data-i18n="service2_feat1">Integración
+                                End-to-End</span></li>
+                        <li><i class="fa-solid fa-check"></i> <span data-i18n="service2_feat2">Dashboards de
+                                Control</span></li>
+                        <li><i class="fa-solid fa-check"></i> <span data-i18n="service2_feat3">Atribución de
+                                Ventas</span></li>
+                    </ul>
+                </div>
+
+                <!-- Servicio 3 -->
+                <div class="service-card">
+                    <div class="card-icon"><i class="fa-solid fa-microchip"></i></div>
+                    <h3 data-i18n="service3_title">Agentes Autónomos B2B</h3>
+                    <p data-i18n="service3_desc">Empleados digitales que crean listas de prospectos, envían correos
+                        personalizados y hacen seguimiento hasta la respuesta.</p>
+                    <ul class="feature-list">
+                        <li><i class="fa-solid fa-check"></i> <span data-i18n="service3_feat1">Outbound
+                                Automatizado</span></li>
+                        <li><i class="fa-solid fa-check"></i> <span data-i18n="service3_feat2">Investigación de
+                                Leads</span></li>
+                        <li><i class="fa-solid fa-check"></i> <span data-i18n="service3_feat3">Personalización a
+                                Escala</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="metodo" class="method-section" style="padding: 6rem 5%; background: rgba(255,255,255,0.02);">
+            <div class="section-title">
+                <h2 data-i18n="method_title">Ingeniería de Ventas</h2>
+                <p class="subtitle" style="margin: 0 auto; margin-top: 1rem;" data-i18n="method_subtitle">Resultados
+                    predecibles, no suerte.
+                </p>
+            </div>
+
+            <div class="steps-grid"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 3rem; margin-top: 4rem;">
+                <div class="step-card" style="text-align: center;">
+                    <div class="step-number"
+                        style="font-size: 4rem; font-weight: 700; color: rgba(255,255,255,0.1); margin-bottom: -2rem;">
+                        01</div>
+                    <h3 style="margin-bottom: 1rem; position: relative;" data-i18n="method_step1_title">Diagnóstico</h3>
+                    <p style="color: var(--text-secondary);" data-i18n="method_step1_desc">Identificamos cuellos de
+                        botella en tu embudo de ventas y operaciones.</p>
+                </div>
+                <div class="step-card" style="text-align: center;">
+                    <div class="step-number"
+                        style="font-size: 4rem; font-weight: 700; color: rgba(255,255,255,0.1); margin-bottom: -2rem;">
+                        02</div>
+                    <h3 style="margin-bottom: 1rem; position: relative;" data-i18n="method_step2_title">Implementación
+                    </h3>
+                    <p style="color: var(--text-secondary);" data-i18n="method_step2_desc">Desplegamos tu sistema de
+                        automatización y entrenamos a tus agentes IA.</p>
+                </div>
+                <div class="step-card" style="text-align: center;">
+                    <div class="step-number"
+                        style="font-size: 4rem; font-weight: 700; color: rgba(255,255,255,0.1); margin-bottom: -2rem;">
+                        03</div>
+                    <h3 style="margin-bottom: 1rem; position: relative;" data-i18n="method_step3_title">Escalado</h3>
+                    <p style="color: var(--text-secondary);" data-i18n="method_step3_desc">Optimizamos métricas (CPL,
+                        CAC) para aumentar el volumen de leads cualificados.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRODUCT SHOWCASE SECTION -->
+        <section id="portfolio" class="portfolio-section" style="padding: 6rem 5%; background: rgba(0,0,0,0.2);">
+            <div class="section-title" style="text-align: center; margin-bottom: 4rem;">
+                <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">Nuestra Tecnología en <span
+                        class="text-accent">Acción</span></h2>
+                <p style="color: var(--text-secondary);">No solo creamos software para otros, desarrollamos nuestros
+                    propios productos escalables.</p>
+            </div>
+
+            <!-- NEW: GenerArise Marketplace Card -->
+            <div class="portfolio-card"
+                style="display: flex; background: rgba(99, 102, 241, 0.05); border-radius: 24px; overflow: hidden; border: 1px solid rgba(99, 102, 241, 0.2); flex-wrap: wrap; margin-bottom: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+                <div class="portfolio-img"
+                    style="flex: 1; min-width: 300px; background: linear-gradient(135deg, #00d2ff, #6366f1); min-height: 350px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                    <i class="fas fa-shopping-cart" style="font-size: 10rem; color: #030307; opacity: 0.15;"></i>
+                    <div style="position: absolute; text-align: center; width: 100%;">
+                        <div
+                            style="font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; color: #030307; letter-spacing: -1px;">
+                            AI Marketplace</div>
+                        <div style="color: rgba(3,3,7,0.8); font-weight: 600;">GenerArise Solutions</div>
+                    </div>
+                </div>
+                <div class="portfolio-info" style="flex: 1.5; padding: 4rem; min-width: 300px;">
+                    <div class="badge" style="margin-bottom: 1rem; width: fit-content; background: rgba(0,210,255,0.2); color: #00d2ff; border: 1px solid rgba(0,210,255,0.3);">Lanzamiento 2026</div>
+                    <h3 style="font-size: 2.5rem; margin-bottom: 1.5rem; font-family: 'Space Grotesk', sans-serif;">Accedé a nuestras soluciones High-Ticket</h3>
+                    <p style="margin-bottom: 2rem; color: var(--text-secondary); font-size: 1.1rem; line-height: 1.7;">
+                        Hemos consolidado nuestras mejores herramientas de IA en un marketplace exclusivo. Desde el Content Factory hasta el B2B Sniper, configurá tu ecosistema de crecimiento en minutos.</p>
+                    <a href="tienda.html" class="cta-button primary" style="background: linear-gradient(135deg, #00d2ff, #6366f1); color: #fff; border: none; font-weight: 700;">Explorar Ofertas <i class="fas fa-external-link-alt" style="margin-left: 10px;"></i></a>
+                </div>
+            </div>
+
+            <!-- Content Factory Card -->
+            <div class="portfolio-card"
+                style="display: flex; background: rgba(255,255,255,0.03); border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; margin-bottom: 2rem;">
+                <div class="portfolio-img"
+                    style="flex: 1; min-width: 300px; background: linear-gradient(135deg, #22d3ee, #34d399); min-height: 350px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                    <i class="fas fa-robot" style="font-size: 10rem; color: #030307; opacity: 0.15;"></i>
+                    <div style="position: absolute; text-align: center; width: 100%;">
+                        <div
+                            style="font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; color: #030307; letter-spacing: -1px;">
+                            Content Factory</div>
+                        <div style="color: rgba(3,3,7,0.8); font-weight: 600;">Automatización de Redes</div>
+                    </div>
+                </div>
+                <div class="portfolio-info" style="flex: 1.5; padding: 4rem; min-width: 300px;">
+                    <div class="badge" style="margin-bottom: 1rem; width: fit-content; background: rgba(34,211,238,0.2); color: #22d3ee; border: 1px solid rgba(34,211,238,0.3);">Producto Estrella | $49/mes</div>
+                    <h3 style="font-size: 2.5rem; margin-bottom: 1.5rem; font-family: 'Space Grotesk', sans-serif;">SaaS de Automatización de Contenido</h3>
+                    <p style="margin-bottom: 2rem; color: var(--text-secondary); font-size: 1.1rem; line-height: 1.7;">
+                        Plataforma multi-inquilino donde empresas y creadores de terceros conectan sus propias cuentas de Instagram, Facebook, TikTok y YouTube. Generan y publican su propio contenido usando nuestra IA. Uso exclusivo para terceros, no interno.</p>
+                    <a href="https://app.generarise.space/auth.html" target="_blank" class="cta-button primary" style="background: linear-gradient(135deg, #22d3ee, #34d399); color: #030307; border: none; font-weight: 700;">Plataforma SaaS <i class="fas fa-arrow-right" style="margin-left: 10px;"></i></a>
+                </div>
+            </div>
+
+            <!-- Tienda Digital Card -->
+            <div class="portfolio-card"
+                style="display: flex; background: rgba(255,255,255,0.03); border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; margin-bottom: 2rem;">
+                <div class="portfolio-info" style="flex: 1.5; padding: 4rem; min-width: 300px;">
+                    <div class="badge" style="margin-bottom: 1rem; width: fit-content; background: rgba(251,113,133,0.2); color: #fb7185; border: 1px solid rgba(251,113,133,0.3);">E-commerce | $29/mes</div>
+                    <h3 style="font-size: 2.5rem; margin-bottom: 1.5rem; font-family: 'Space Grotesk', sans-serif;">Tienda Digital Autónoma</h3>
+                    <p style="margin-bottom: 2rem; color: var(--text-secondary); font-size: 1.1rem; line-height: 1.7;">
+                        Sincronizá tu catálogo y dejá que la IA lo promueva. Integra pagos sin comisiones directamente con MercadoPago y generá Reels automáticos vendiendo tus productos.</p>
+                    <a href="https://app.generarise.space/auth.html?plan=store" target="_blank" class="cta-button primary" style="background: linear-gradient(135deg, #fb7185, #fbbf24); color: #030307; border: none; font-weight: 700;">Activar Mi Tienda <i class="fas fa-shopping-cart" style="margin-left: 10px;"></i></a>
+                </div>
+                <div class="portfolio-img"
+                    style="flex: 1; min-width: 300px; background: linear-gradient(135deg, #fb7185, #fbbf24); min-height: 350px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                    <i class="fas fa-store" style="font-size: 10rem; color: #030307; opacity: 0.15;"></i>
+                    <div style="position: absolute; text-align: center; width: 100%;">
+                        <div
+                            style="font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; color: #030307; letter-spacing: -1px;">
+                            Tienda Digital</div>
+                        <div style="color: rgba(3,3,7,0.8); font-weight: 600;">Zero Comisiones</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SDR Card -->
+            <div class="portfolio-card"
+                style="display: flex; background: rgba(255,255,255,0.03); border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; margin-bottom: 2rem;">
+                <div class="portfolio-img"
+                    style="flex: 1; min-width: 300px; background: linear-gradient(135deg, #a78bfa, #6366f1); min-height: 350px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                    <i class="fas fa-headset" style="font-size: 10rem; color: white; opacity: 0.15;"></i>
+                    <div style="position: absolute; text-align: center; width: 100%;">
+                        <div
+                            style="font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; color: white; letter-spacing: -1px;">
+                            SDR Autónomo</div>
+                        <div style="color: rgba(255,255,255,0.9); font-weight: 300;">Sales Development Rep</div>
+                    </div>
+                </div>
+                <div class="portfolio-info" style="flex: 1.5; padding: 4rem; min-width: 300px;">
+                    <div class="badge" style="margin-bottom: 1rem; width: fit-content; background: rgba(167,139,250,0.2); color: #a78bfa; border: 1px solid rgba(167,139,250,0.3);">Enterprise | A Convenir</div>
+                    <h3 style="font-size: 2.5rem; margin-bottom: 1.5rem; font-family: 'Space Grotesk', sans-serif;">Tu vendedor 100% automático</h3>
+                    <p style="margin-bottom: 2rem; color: var(--text-secondary); font-size: 1.1rem; line-height: 1.7;">
+                        Descubre leads en Google Maps, los contacta por WhatsApp, califica a los interesados y te los pasa listos para cerrar. Un equipo comercial trabajando 24/7 para vos.</p>
+                    <a href="https://cal.com/gustavo-a.-dornhofer-nqjqos/sdr-community-manager-ia" target="_blank" class="cta-button primary" style="background: linear-gradient(135deg, #a78bfa, #6366f1); color: white; border: none; font-weight: 700;">Agendar Demo <i class="fas fa-calendar-check" style="margin-left: 10px;"></i></a>
+                </div>
+            </div>
+
+            <!-- Lead Marketplace Card -->
+            <div class="portfolio-card"
+                style="display: flex; background: rgba(255,255,255,0.03); border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; margin-bottom: 2rem;">
+                <div class="portfolio-info" style="flex: 1.5; padding: 4rem; min-width: 300px;">
+                    <div class="badge" style="margin-bottom: 1rem; width: fit-content; background: rgba(250,204,21,0.2); color: #facc15; border: 1px solid rgba(250,204,21,0.3);">B2B Data | Pago por Uso</div>
+                    <h3 style="font-size: 2.5rem; margin-bottom: 1.5rem; font-family: 'Space Grotesk', sans-serif;">Lead Marketplace</h3>
+                    <p style="margin-bottom: 2rem; color: var(--text-secondary); font-size: 1.1rem; line-height: 1.7;">
+                        Comprá bases de datos de leads hiper-cualificados para tu nicho. Teléfonos, correos y tomadores de decisión listos para que tu equipo comercial o tu Agente SDR los contacte.</p>
+                    <a href="https://app.generarise.space/marketplace.html" target="_blank" class="cta-button primary" style="background: linear-gradient(135deg, #facc15, #eab308); color: #030307; border: none; font-weight: 700;">Explorar Leads <i class="fas fa-database" style="margin-left: 10px;"></i></a>
+                </div>
+                <div class="portfolio-img"
+                    style="flex: 1; min-width: 300px; background: linear-gradient(135deg, #facc15, #eab308); min-height: 350px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                    <i class="fas fa-users" style="font-size: 10rem; color: #030307; opacity: 0.15;"></i>
+                    <div style="position: absolute; text-align: center; width: 100%;">
+                        <div
+                            style="font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; color: #030307; letter-spacing: -1px;">
+                            B2B Data</div>
+                        <div style="color: rgba(3,3,7,0.8); font-weight: 600;">Contactos Validados</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="portfolio-card"
+                style="display: flex; background: rgba(255,255,255,0.03); border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap;">
+                <div class="portfolio-img"
+                    style="flex: 1; min-width: 300px; background: linear-gradient(135deg, #6366f1, #ec4899); min-height: 350px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                    <i class="fas fa-brain" style="font-size: 10rem; color: white; opacity: 0.2;"></i>
+                    <div style="position: absolute; text-align: center; width: 100%;">
+                        <div
+                            style="font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; color: white; letter-spacing: -1px;">
+                            MindHafen</div>
+                        <div style="color: rgba(255,255,255,0.9); font-weight: 300;">Salud Mental Digital</div>
+                    </div>
+                </div>
+                <div class="portfolio-info" style="flex: 1.5; padding: 4rem; min-width: 300px;">
+                    <div class="badge" style="margin-bottom: 1rem; width: fit-content;">Producto Propio | SaaS</div>
+                    <h3 style="font-size: 2.5rem; margin-bottom: 1.5rem; font-family: 'Space Grotesk', sans-serif;">La
+                        IA como aliada del bienestar</h3>
+                    <p style="margin-bottom: 2rem; color: var(--text-secondary); font-size: 1.1rem; line-height: 1.7;">
+                        MindHafen es nuestra plataforma insignia de neurociencia aplicada, donde implementamos
+                        arquitecturas avanzadas de IA para la personalización de terapias digitales y gestión
+                        automatizada de usuarios.</p>
+                    <ul style="list-style: none; margin-bottom: 2.5rem; padding: 0;">
+                        <li
+                            style="margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px; color: var(--text-secondary);">
+                            <i class="fas fa-check-circle" style="color: #6366f1;"></i> Pagos Automatizados con Mercado
+                            Pago
+                        </li>
+                        <li
+                            style="margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px; color: var(--text-secondary);">
+                            <i class="fas fa-check-circle" style="color: #6366f1;"></i> Agentes de Mentoría
+                            Personalizada
+                        </li>
+                    </ul>
+                    <a href="https://mindhafen.generarise.space" target="_blank" class="cta-button primary">Ver Demo del
+                        Producto <i class="fas fa-external-link-alt" style="margin-left: 10px;"></i></a>
+                </div>
+            </div>
+
+            <!-- GenerArise Smart Storefront Card -->
+            <div class="portfolio-card"
+                style="display: flex; background: rgba(255,255,255,0.03); border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; margin-top: 2rem;">
+                <div class="portfolio-img"
+                    style="flex: 1; min-width: 300px; background: linear-gradient(135deg, #6366f1, #a855f7); min-height: 350px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                    <i class="fas fa-shopping-bag" style="font-size: 10rem; color: white; opacity: 0.2;"></i>
+                    <div style="position: absolute; text-align: center; width: 100%;">
+                        <div
+                            style="font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; color: white; letter-spacing: -1px;">
+                            Smart Catalog</div>
+                        <div style="color: rgba(255,255,255,0.9); font-weight: 300;">GenerArise Engine v2.0</div>
+                    </div>
+                </div>
+                <div class="portfolio-info" style="flex: 1.5; padding: 4rem; min-width: 300px;">
+                    <div class="badge"
+                        style="margin-bottom: 1rem; width: fit-content; background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border: 1px solid rgba(165, 180, 252, 0.3);">
+                        E-commerce | AI Powered</div>
+                    <h3 style="font-size: 2.5rem; margin-bottom: 1.5rem; font-family: 'Space Grotesk', sans-serif;">
+                        Vidrieras de Venta Inteligente</h3>
+                    <p style="margin-bottom: 2rem; color: var(--text-secondary); font-size: 1.1rem; line-height: 1.7;">
+                        Convierte tu catálogo estático en una máquina de ventas. Sitios web optimizados para móviles, con carga instantánea y conectados directamente a tu WhatsApp.
+                    </p>
+                    <ul style="list-style: none; margin-bottom: 2.5rem; padding: 0;">
+                        <li
+                            style="margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px; color: var(--text-secondary);">
+                            <i class="fas fa-check-circle" style="color: #6366f1;"></i> Catálogo de Artículos con IA
+                        </li>
+                        <li
+                            style="margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px; color: var(--text-secondary);">
+                            <i class="fas fa-check-circle" style="color: #6366f1;"></i> Integración Directa WhatsApp
+                        </li>
+                    </ul>
+                    <a href="storefront-demo.html" class="cta-button primary"
+                        style="background: linear-gradient(135deg, #6366f1, #ec4899); border: none; color: white; font-weight: 700;">Ver Ejemplo de Catálogo
+                        <i class="fas fa-eye" style="margin-left: 10px;"></i></a>
+                </div>
+            </div>
+
+            <!-- Stefan AI Austria Card -->
+            <div class="portfolio-card"
+                style="display: flex; background: rgba(255,255,255,0.03); border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; margin-top: 2rem;">
+                <div class="portfolio-img"
+                    style="flex: 1; min-width: 300px; background: linear-gradient(135deg, #06b6d4, #0891b2); min-height: 350px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                    <i class="fas fa-hotel" style="font-size: 10rem; color: white; opacity: 0.2;"></i>
+                    <div style="position: absolute; text-align: center; width: 100%;">
+                        <div
+                            style="font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; color: white; letter-spacing: -1px;">
+                            Stefan AI</div>
+                        <div style="color: rgba(255,255,255,0.9); font-weight: 300;">Turismo 4.0 Austria</div>
+                    </div>
+                </div>
+                <div class="portfolio-info" style="flex: 1.5; padding: 4rem; min-width: 300px;">
+                    <div class="badge"
+                        style="margin-bottom: 1rem; width: fit-content; background: rgba(6, 182, 212, 0.2); color: #22d3ee; border: 1px solid rgba(34, 211, 238, 0.3);">
+                        Proyecto Regional | B2B</div>
+                    <h3 style="font-size: 2.5rem; margin-bottom: 1.5rem; font-family: 'Space Grotesk', sans-serif;">
+                        Automatización de Hospitalidad Elite</h3>
+                    <p style="margin-bottom: 2rem; color: var(--text-secondary); font-size: 1.1rem; line-height: 1.7;">
+                        Stefan es nuestro agente especializado para el mercado austríaco. Un concierge virtual
+                        multilingüe que gestiona reservas, califica huéspedes y eleva la eficiencia operativa de hoteles
+                        de lujo.
+                    </p>
+                    <ul style="list-style: none; margin-bottom: 2.5rem; padding: 0;">
+                        <li
+                            style="margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px; color: var(--text-secondary);">
+                            <i class="fas fa-check-circle" style="color: #06b6d4;"></i> Multilingüe: DE/EN/ES/IT
+                        </li>
+                        <li
+                            style="margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px; color: var(--text-secondary);">
+                            <i class="fas fa-check-circle" style="color: #06b6d4;"></i> Integración Directa con PMS
+                        </li>
+                    </ul>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <a href="https://austria.generarise.space" target="_blank" class="cta-button primary"
+                            style="background: linear-gradient(135deg, #0891b2, #0e7490); border: none; flex: 1; text-align: center;">Explorar
+                            Proyecto
+                            <i class="fas fa-mountain" style="margin-left: 10px;"></i></a>
+                        <a href="https://wa.me/5491173719972?text=Hola%20Stefan,%20vengo%20de%20la%20web.%20Me%20interesa%20la%20IA%20para%20hoteles%20en%20Austria."
+                            target="_blank" class="cta-button secondary"
+                            style="border: 2px solid #25D366; color: #25D366; flex: 1; text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <i class="fab fa-whatsapp"></i> Hablar con Stefan</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GenerArise Studio (AdSniper) Card -->
+            <div class="portfolio-card"
+                style="display: flex; background: rgba(255,255,255,0.03); border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; margin-top: 2rem;">
+                <div class="portfolio-info" style="flex: 1.5; padding: 4rem; min-width: 300px;">
+                    <div class="badge"
+                        style="margin-bottom: 1rem; width: fit-content; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3);">
+                        SaaS | Ads Optimization</div>
+                    <h3 style="font-size: 2.5rem; margin-bottom: 1.5rem; font-family: 'Space Grotesk', sans-serif;">
+                        GenerArise Studio</h3>
+                    <p style="margin-bottom: 2rem; color: var(--text-secondary); font-size: 1.1rem; line-height: 1.7;">
+                        La herramienta definitiva para crear anuncios virales en segundos. Analiza productos de Shopify,
+                        genera copys persuasivos y crea imágenes de alto impacto con IA. (Anteriormente AdSniper)
+                    </p>
+                    <ul style="list-style: none; margin-bottom: 2.5rem; padding: 0;">
+                        <li
+                            style="margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px; color: var(--text-secondary);">
+                            <i class="fas fa-check-circle" style="color: #10b981;"></i> Generación de Creativos con Flux
+                        </li>
+                        <li
+                            style="margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px; color: var(--text-secondary);">
+                            <i class="fas fa-check-circle" style="color: #10b981;"></i> Análisis de Competencia
+                            Real-Time
+                        </li>
+                    </ul>
+                    <a href="https://studio.generarise.space" target="_blank" class="cta-button primary"
+                        style="background: linear-gradient(135deg, #10b981, #059669); border: none;">Entrar al Studio
+                        <i class="fas fa-crosshairs" style="margin-left: 10px;"></i></a>
+                </div>
+                <div class="portfolio-img"
+                    style="flex: 1; min-width: 300px; background: linear-gradient(135deg, #064e3b, #065f46); min-height: 350px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                    <i class="fas fa-bullseye" style="font-size: 10rem; color: white; opacity: 0.2;"></i>
+                </div>
+            </div>
+
+            <!-- GenerArise Agency SaaS Card (Template) -->
+            <div class="portfolio-card"
+                style="display: flex; background: rgba(255,255,255,0.03); border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; margin-top: 2rem;">
+                <div class="portfolio-info" style="flex: 1.5; padding: 4rem; min-width: 300px;">
+                    <div class="badge"
+                        style="margin-bottom: 1rem; width: fit-content; background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border: 1px solid rgba(165, 180, 252, 0.3);">
+                        Marketing Agency | SaaS</div>
+                    <h3 style="font-size: 2.5rem; margin-bottom: 1.5rem; font-family: 'Space Grotesk', sans-serif;">
+                        Infraestructura de Crecimiento</h3>
+                    <p style="margin-bottom: 2rem; color: var(--text-secondary); font-size: 1.1rem; line-height: 1.7;">
+                        Nuestra plataforma "white-label" para agencias de marketing. Incluye dashboards de revenue,
+                        automatización de CRM y despliegue instantáneo de landing pages optimizadas para conversión.
+                    </p>
+                    <ul style="list-style: none; margin-bottom: 2.5rem; padding: 0;">
+                        <li
+                            style="margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px; color: var(--text-secondary);">
+                            <i class="fas fa-check-circle" style="color: #6366f1;"></i> Despliegue en 60 segundos
+                        </li>
+                        <li
+                            style="margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px; color: var(--text-secondary);">
+                            <i class="fas fa-check-circle" style="color: #6366f1;"></i> Automatización de Ventas B2B
+                        </li>
+                    </ul>
+                    <a href="https://template.generarise.space" target="_blank" class="cta-button primary">Ver
+                        Plataforma <i class="fas fa-rocket" style="margin-left: 10px;"></i></a>
+                </div>
+                <div class="portfolio-img"
+                    style="flex: 1; min-width: 300px; background: linear-gradient(135deg, #1e1b4b, #312e81); min-height: 350px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                    <i class="fas fa-ad" style="font-size: 10rem; color: #6366f1; opacity: 0.2;"></i>
+                    <div style="position: absolute; text-align: center; width: 100%;">
+                        <div
+                            style="font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; color: white; letter-spacing: -1px;">
+                            Marketing SaaS</div>
+                        <div style="color: #6366f1; font-weight: 300;">Agency Infrastructure</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Servicios Rápidos con PayPal -->
+
+        </section>
+
+        <section id="contacto" class="contact-section">
+            <style>
+                /* ── AUDIT FORM MULTI-STEP ── */
+                .audit-container {
+                    max-width: 780px;
+                    margin: 0 auto;
+                    position: relative;
+                }
+                .audit-header {
+                    text-align: center;
+                    margin-bottom: 2.5rem;
+                }
+                .audit-header h2 {
+                    font-family: 'Space Grotesk', sans-serif;
+                    font-size: 2.2rem;
+                    margin-bottom: .5rem;
+                }
+                .audit-header p {
+                    color: var(--text-secondary);
+                    font-size: 1.05rem;
+                }
+                /* Progress Bar */
+                .audit-progress {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 2.5rem;
+                    position: relative;
+                }
+                .audit-progress::before {
+                    content: '';
+                    position: absolute;
+                    top: 18px;
+                    left: 40px;
+                    right: 40px;
+                    height: 2px;
+                    background: rgba(255,255,255,.08);
+                    z-index: 0;
+                }
+                .audit-progress .progress-fill {
+                    position: absolute;
+                    top: 18px;
+                    left: 40px;
+                    height: 2px;
+                    background: linear-gradient(90deg, #6366f1, #ec4899);
+                    z-index: 1;
+                    transition: width .5s cubic-bezier(.4,0,.2,1);
+                    width: 0%;
+                }
+                .progress-step {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 8px;
+                    z-index: 2;
+                    cursor: default;
+                }
+                .step-circle {
+                    width: 38px;
+                    height: 38px;
+                    border-radius: 50%;
+                    border: 2px solid rgba(255,255,255,.12);
+                    background: #0a0a14;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 14px;
+                    font-weight: 700;
+                    color: rgba(255,255,255,.35);
+                    transition: all .4s;
+                }
+                .progress-step.active .step-circle {
+                    border-color: #6366f1;
+                    color: #fff;
+                    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                    box-shadow: 0 0 20px rgba(99,102,241,.4);
+                }
+                .progress-step.done .step-circle {
+                    border-color: #10b981;
+                    background: #10b981;
+                    color: #fff;
+                }
+                .step-label {
+                    font-size: 11px;
+                    color: rgba(255,255,255,.3);
+                    font-weight: 500;
+                    transition: color .3s;
+                    text-align: center;
+                }
+                .progress-step.active .step-label,
+                .progress-step.done .step-label {
+                    color: rgba(255,255,255,.8);
+                }
+                /* Form Panel */
+                .audit-panel {
+                    background: rgba(255,255,255,.02);
+                    border: 1px solid rgba(255,255,255,.08);
+                    border-radius: 20px;
+                    padding: 2.5rem;
+                    backdrop-filter: blur(10px);
+                }
+                .audit-step {
+                    display: none;
+                    animation: auditFadeIn .4s ease;
+                }
+                .audit-step.active {
+                    display: block;
+                }
+                @keyframes auditFadeIn {
+                    from { opacity: 0; transform: translateY(12px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .audit-step h3 {
+                    font-family: 'Space Grotesk', sans-serif;
+                    font-size: 1.3rem;
+                    margin-bottom: .3rem;
+                }
+                .audit-step .step-desc {
+                    color: var(--text-secondary);
+                    font-size: .9rem;
+                    margin-bottom: 1.8rem;
+                }
+                /* Inputs */
+                .audit-row {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1rem;
+                    margin-bottom: 1rem;
+                }
+                .audit-field {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                    margin-bottom: .5rem;
+                }
+                .audit-field.full {
+                    grid-column: 1 / -1;
+                }
+                .audit-field label {
+                    font-size: 12px;
+                    font-weight: 600;
+                    color: rgba(255,255,255,.65);
+                    text-transform: uppercase;
+                    letter-spacing: .5px;
+                }
+                .audit-field input,
+                .audit-field select,
+                .audit-field textarea {
+                    width: 100%;
+                    padding: 11px 14px;
+                    background: rgba(255,255,255,.04);
+                    border: 1px solid rgba(255,255,255,.1);
+                    border-radius: 10px;
+                    color: #f1f1f5;
+                    font-size: 14px;
+                    font-family: 'Outfit', sans-serif;
+                    outline: none;
+                    transition: border-color .25s, box-shadow .25s;
+                }
+                .audit-field input:focus,
+                .audit-field select:focus,
+                .audit-field textarea:focus {
+                    border-color: #6366f1;
+                    box-shadow: 0 0 0 3px rgba(99,102,241,.15);
+                }
+                .audit-field input.invalid,
+                .audit-field select.invalid,
+                .audit-field textarea.invalid {
+                    border-color: #ef4444;
+                    box-shadow: 0 0 0 3px rgba(239,68,68,.12);
+                }
+                .audit-field select option {
+                    background: #13132a;
+                }
+                .audit-field textarea {
+                    resize: vertical;
+                    min-height: 80px;
+                }
+                /* Checkbox Group */
+                .checkbox-group {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                }
+                .checkbox-group label {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 8px 14px;
+                    border-radius: 8px;
+                    border: 1px solid rgba(255,255,255,.1);
+                    background: rgba(255,255,255,.03);
+                    cursor: pointer;
+                    font-size: 13px;
+                    font-weight: 400;
+                    text-transform: none;
+                    letter-spacing: 0;
+                    color: rgba(255,255,255,.6);
+                    transition: all .2s;
+                }
+                .checkbox-group label:hover {
+                    border-color: rgba(99,102,241,.4);
+                    color: #fff;
+                }
+                .checkbox-group input[type="checkbox"] {
+                    width: 16px;
+                    height: 16px;
+                    accent-color: #6366f1;
+                }
+                .checkbox-group input[type="checkbox"]:checked + span {
+                    color: #fff;
+                }
+                /* Dynamic Industry Fields */
+                .industry-fields {
+                    display: none;
+                    animation: auditFadeIn .35s ease;
+                    border-top: 1px solid rgba(255,255,255,.06);
+                    padding-top: 1.2rem;
+                    margin-top: .5rem;
+                }
+                .industry-fields.visible {
+                    display: block;
+                }
+                .industry-fields h4 {
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #a78bfa;
+                    margin-bottom: 1rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                /* Navigation Buttons */
+                .audit-nav {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 2rem;
+                    gap: 1rem;
+                }
+                .audit-btn {
+                    padding: 13px 28px;
+                    border-radius: 12px;
+                    border: none;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all .25s;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-family: 'Outfit', sans-serif;
+                }
+                .audit-btn-back {
+                    background: rgba(255,255,255,.06);
+                    color: rgba(255,255,255,.6);
+                    border: 1px solid rgba(255,255,255,.1);
+                }
+                .audit-btn-back:hover {
+                    background: rgba(255,255,255,.1);
+                    color: #fff;
+                }
+                .audit-btn-next {
+                    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                    color: #fff;
+                    margin-left: auto;
+                    box-shadow: 0 4px 15px rgba(99,102,241,.3);
+                }
+                .audit-btn-next:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 6px 25px rgba(99,102,241,.45);
+                }
+                .audit-btn-next:disabled {
+                    opacity: .5;
+                    cursor: not-allowed;
+                    transform: none;
+                    box-shadow: none;
+                }
+                .audit-btn-submit {
+                    background: linear-gradient(135deg, #10b981, #059669);
+                    color: #fff;
+                    margin-left: auto;
+                    box-shadow: 0 4px 15px rgba(16,185,129,.3);
+                    font-size: 15px;
+                    padding: 14px 36px;
+                }
+                .audit-btn-submit:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 6px 25px rgba(16,185,129,.45);
+                }
+                /* Result Screen */
+                .audit-result {
+                    display: none;
+                    text-align: center;
+                    padding: 2rem 1rem;
+                }
+                .audit-result.visible {
+                    display: block;
+                    animation: auditFadeIn .5s ease;
+                }
+                .result-loader {
+                    margin-bottom: 1.5rem;
+                }
+                .result-loader .spinner {
+                    width: 52px;
+                    height: 52px;
+                    border: 3px solid rgba(99,102,241,.15);
+                    border-top-color: #6366f1;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                    margin: 0 auto 1rem;
+                }
+                @keyframes spin { to { transform: rotate(360deg); } }
+                .result-loader p {
+                    color: var(--text-secondary);
+                    font-size: 1rem;
+                }
+                .result-content {
+                    display: none;
+                    text-align: left;
+                }
+                .result-content.visible {
+                    display: block;
+                    animation: auditFadeIn .6s ease;
+                }
+                .result-card {
+                    background: rgba(99,102,241,.06);
+                    border: 1px solid rgba(99,102,241,.2);
+                    border-radius: 16px;
+                    padding: 2rem;
+                    margin: 1.5rem 0;
+                    text-align: left;
+                }
+                .result-card h4 {
+                    font-size: 1.1rem;
+                    margin-bottom: 1rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .result-card p,
+                .result-card .proposal-text {
+                    color: var(--text-secondary);
+                    font-size: .95rem;
+                    line-height: 1.7;
+                    white-space: pre-wrap;
+                }
+                .result-cta {
+                    margin-top: 2rem;
+                    display: flex;
+                    gap: 1rem;
+                    flex-wrap: wrap;
+                    justify-content: center;
+                }
+                .result-cta a {
+                    text-decoration: none;
+                }
+                /* Responsive */
+                @media (max-width: 640px) {
+                    .audit-row { grid-template-columns: 1fr; }
+                    .audit-panel { padding: 1.5rem; }
+                    .audit-header h2 { font-size: 1.6rem; }
+                    .step-label { font-size: 9px; }
+                    .step-circle { width: 32px; height: 32px; font-size: 12px; }
+                    .audit-progress::before, .audit-progress .progress-fill { top: 15px; }
+                }
+            </style>
+
+            <div class="audit-container">
+                <div class="audit-header">
+                    <div class="badge" style="margin: 0 auto 1rem; width: fit-content;" data-i18n="audit_badge">Diagnóstico Gratuito con IA</div>
+                    <h2><span data-i18n="audit_title">Auditoría Inteligente de</span> <span class="text-accent" data-i18n="audit_title_accent">Crecimiento</span></h2>
+                    <p data-i18n="audit_subtitle">Respondé 4 pasos. Nuestra IA analiza tu negocio y te entrega un diagnóstico con ROI estimado en tiempo real.</p>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="audit-progress" id="auditProgress">
+                    <div class="progress-fill" id="progressFill"></div>
+                    <div class="progress-step active" data-step="1">
+                        <div class="step-circle">1</div>
+                        <div class="step-label" data-i18n="progress_step1">Tu Empresa</div>
+                    </div>
+                    <div class="progress-step" data-step="2">
+                        <div class="step-circle">2</div>
+                        <div class="step-label" data-i18n="progress_step2">Operación</div>
+                    </div>
+                    <div class="progress-step" data-step="3">
+                        <div class="step-circle">3</div>
+                        <div class="step-label" data-i18n="progress_step3">Tu Industria</div>
+                    </div>
+                    <div class="progress-step" data-step="4">
+                        <div class="step-circle">4</div>
+                        <div class="step-label" data-i18n="progress_step4">Objetivos</div>
+                    </div>
+                </div>
+
+                <div class="audit-panel">
+                    <form id="auditForm" autocomplete="off" novalidate>
+
+                        <!-- ═══ PASO 1: Tu Empresa ═══ -->
+                        <div class="audit-step active" id="step1">
+                            <h3><i class="fa-solid fa-building" style="color:#6366f1;margin-right:8px;"></i> <span data-i18n="step1_title">Sobre Vos y tu Empresa</span></h3>
+                            <p class="step-desc" data-i18n="step1_desc">Necesitamos conocer quién sos y tu negocio para personalizar el análisis.</p>
+                            <div class="audit-row">
+                                <div class="audit-field">
+                                    <label for="audit_name" data-i18n="label_name">Nombre Completo *</label>
+                                    <input type="text" id="audit_name" name="name" data-i18n-placeholder="ph_name" placeholder="Tu nombre" required>
+                                </div>
+                                <div class="audit-field">
+                                    <label for="audit_role" data-i18n="label_role">Cargo *</label>
+                                    <select id="audit_role" name="role" required>
+                                        <option value="" disabled selected data-i18n="opt_select">Seleccioná...</option>
+                                        <option value="dueno" data-i18n="opt_role_owner">Dueño / Fundador</option>
+                                        <option value="gerente" data-i18n="opt_role_manager">Gerente / Director</option>
+                                        <option value="marketing" data-i18n="opt_role_marketing">Director de Marketing</option>
+                                        <option value="consultor" data-i18n="opt_role_consultant">Consultor Independiente</option>
+                                        <option value="otro" data-i18n="opt_role_other">Otro</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="audit-row">
+                                <div class="audit-field">
+                                    <label for="audit_company" data-i18n="label_company">Nombre de la Empresa *</label>
+                                    <input type="text" id="audit_company" name="company" data-i18n-placeholder="ph_company" placeholder="Ej: Estudio Contable Sur" required>
+                                </div>
+                                <div class="audit-field">
+                                    <label for="audit_website" data-i18n="label_website">Sitio Web</label>
+                                    <input type="url" id="audit_website" name="website" data-i18n-placeholder="ph_website" placeholder="https://tuempresa.com">
+                                </div>
+                            </div>
+                            <div class="audit-row">
+                                <div class="audit-field">
+                                    <label for="audit_email" data-i18n="label_email">Email Corporativo *</label>
+                                    <input type="email" id="audit_email" name="email" data-i18n-placeholder="ph_email" placeholder="nombre@empresa.com" required>
+                                </div>
+                                <div class="audit-field">
+                                    <label for="audit_phone" data-i18n="label_phone">WhatsApp / Móvil *</label>
+                                    <input type="tel" id="audit_phone" name="phone" data-i18n-placeholder="ph_phone" placeholder="+54 9 11..." required>
+                                </div>
+                            </div>
+                            <div class="audit-row">
+                                <div class="audit-field">
+                                    <label for="audit_country" data-i18n="label_country">País *</label>
+                                    <select id="audit_country" name="country" required>
+                                        <option value="" disabled selected data-i18n="opt_select">Seleccioná...</option>
+                                        <option value="argentina" data-i18n="opt_country_ar">Argentina</option>
+                                        <option value="mexico" data-i18n="opt_country_mx">México</option>
+                                        <option value="españa" data-i18n="opt_country_es">España</option>
+                                        <option value="usa" data-i18n="opt_country_us">Estados Unidos</option>
+                                        <option value="colombia" data-i18n="opt_country_co">Colombia</option>
+                                        <option value="chile" data-i18n="opt_country_cl">Chile</option>
+                                        <option value="peru" data-i18n="opt_country_pe">Perú</option>
+                                        <option value="austria" data-i18n="opt_country_at">Austria</option>
+                                        <option value="alemania" data-i18n="opt_country_de">Alemania</option>
+                                        <option value="otro" data-i18n="opt_country_other">Otro</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="audit-nav">
+                                <div></div>
+                                <button type="button" class="audit-btn audit-btn-next" onclick="auditNextStep(2)">
+                                    <span data-i18n="btn_next">Siguiente</span> <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ═══ PASO 2: Operación ═══ -->
+                        <div class="audit-step" id="step2">
+                            <h3><i class="fa-solid fa-gears" style="color:#8b5cf6;margin-right:8px;"></i> <span data-i18n="step2_title">Tu Operación Actual</span></h3>
+                            <p class="step-desc" data-i18n="step2_desc">Estos datos nos permiten calcular el impacto real de la automatización en tu caso.</p>
+                            <div class="audit-row">
+                                <div class="audit-field">
+                                    <label for="audit_industry" data-i18n="label_industry">Industria / Rubro *</label>
+                                    <select id="audit_industry" name="industry" required onchange="showIndustryFields(this.value)">
+                                        <option value="" disabled selected data-i18n="ph_industry">Tu Sector...</option>
+                                        <option value="inmobiliaria" data-i18n="opt_ind_realestate">Real Estate / Inmobiliaria</option>
+                                        <option value="salud" data-i18n="opt_ind_health">Salud / Clínica</option>
+                                        <option value="legal" data-i18n="opt_ind_legal">Legal / Abogacía</option>
+                                        <option value="restaurante" data-i18n="opt_ind_restaurant">Restaurante / Gastronomía</option>
+                                        <option value="hotel" data-i18n="opt_ind_hotel">Hotel / Hospitalidad</option>
+                                        <option value="ecommerce" data-i18n="opt_ind_ecommerce">E-commerce / Retail</option>
+                                        <option value="saas" data-i18n="opt_ind_saas">SaaS / Tecnología</option>
+                                        <option value="servicios" data-i18n="opt_ind_services">Servicios B2B</option>
+                                        <option value="gym" data-i18n="opt_ind_gym">Gym / Fitness</option>
+                                        <option value="belleza" data-i18n="opt_ind_beauty">Salón de Belleza / Estética</option>
+                                        <option value="educacion" data-i18n="opt_ind_education">Educación / Instituto</option>
+                                        <option value="contabilidad" data-i18n="opt_ind_accounting">Contabilidad / Finanzas</option>
+                                        <option value="otro" data-i18n="opt_ind_other">Otro</option>
+                                    </select>
+                                </div>
+                                <div class="audit-field">
+                                    <label for="audit_years" data-i18n="label_years">Años en el Mercado *</label>
+                                    <select id="audit_years" name="years_in_market" required>
+                                        <option value="" disabled selected data-i18n="opt_select">Seleccioná...</option>
+                                        <option value="0-1" data-i18n="opt_years_0_1">Menos de 1 año</option>
+                                        <option value="1-3" data-i18n="opt_years_1_3">1 a 3 años</option>
+                                        <option value="3-5" data-i18n="opt_years_3_5">3 a 5 años</option>
+                                        <option value="5-10" data-i18n="opt_years_5_10">5 a 10 años</option>
+                                        <option value="10+" data-i18n="opt_years_10">Más de 10 años</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="audit-row">
+                                <div class="audit-field">
+                                    <label for="audit_employees" data-i18n="label_employees">Empleados *</label>
+                                    <select id="audit_employees" name="employees" required>
+                                        <option value="" disabled selected data-i18n="ph_employees">Cantidad...</option>
+                                        <option value="1-5" data-i18n="opt_emp_1_5">1 a 5</option>
+                                        <option value="5-15" data-i18n="opt_emp_5_15">5 a 15</option>
+                                        <option value="15-50" data-i18n="opt_emp_15_50">15 a 50</option>
+                                        <option value="50+" data-i18n="opt_emp_50">Más de 50</option>
+                                    </select>
+                                </div>
+                                <div class="audit-field">
+                                    <label for="audit_revenue" data-i18n="label_revenue">Facturación Mensual Aprox. *</label>
+                                    <select id="audit_revenue" name="monthly_revenue" required>
+                                        <option value="" disabled selected data-i18n="ph_revenue">Rango...</option>
+                                        <option value="<5k" data-i18n="opt_rev_5k">Menos de $5.000 USD</option>
+                                        <option value="5k-15k" data-i18n="opt_rev_5_15">$5.000 - $15.000 USD</option>
+                                        <option value="15k-50k" data-i18n="opt_rev_15_50">$15.000 - $50.000 USD</option>
+                                        <option value="50k-100k" data-i18n="opt_rev_50_100">$50.000 - $100.000 USD</option>
+                                        <option value="100k+" data-i18n="opt_rev_100">Más de $100.000 USD</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="audit-field">
+                                <label data-i18n="label_channels">Canales de Venta Actuales *</label>
+                                <div class="checkbox-group" id="audit_channels">
+                                    <label><input type="checkbox" name="channels" value="whatsapp"><span data-i18n="ch_whatsapp">WhatsApp</span></label>
+                                    <label><input type="checkbox" name="channels" value="instagram"><span data-i18n="ch_instagram">Instagram</span></label>
+                                    <label><input type="checkbox" name="channels" value="web"><span data-i18n="ch_web">Web</span></label>
+                                    <label><input type="checkbox" name="channels" value="email"><span data-i18n="ch_email">Email</span></label>
+                                    <label><input type="checkbox" name="channels" value="telefono"><span data-i18n="ch_phone">Teléfono</span></label>
+                                    <label><input type="checkbox" name="channels" value="presencial"><span data-i18n="ch_presencial">Presencial</span></label>
+                                    <label><input type="checkbox" name="channels" value="marketplace"><span data-i18n="ch_marketplace">Marketplace</span></label>
+                                </div>
+                            </div>
+                            <div class="audit-row">
+                                <div class="audit-field">
+                                    <label for="audit_crm" data-i18n="label_crm">¿Usás CRM? *</label>
+                                    <select id="audit_crm" name="uses_crm" required>
+                                        <option value="" disabled selected data-i18n="opt_select">Seleccioná...</option>
+                                        <option value="si" data-i18n="opt_crm_yes">Sí</option>
+                                        <option value="no" data-i18n="opt_crm_no">No</option>
+                                        <option value="no_se" data-i18n="opt_crm_unknown">No sé qué es</option>
+                                    </select>
+                                </div>
+                                <div class="audit-field">
+                                    <label for="audit_msgs" data-i18n="label_msgs">Mensajes de clientes/semana</label>
+                                    <input type="text" id="audit_msgs" name="weekly_messages" data-i18n-placeholder="ph_msgs" placeholder="Ej: 50, 200, 500+">
+                                </div>
+                            </div>
+                            <div class="audit-nav">
+                                <button type="button" class="audit-btn audit-btn-back" onclick="auditPrevStep(1)">
+                                    <i class="fa-solid fa-arrow-left"></i> <span data-i18n="btn_back">Atrás</span>
+                                </button>
+                                <button type="button" class="audit-btn audit-btn-next" onclick="auditNextStep(3)">
+                                    <span data-i18n="btn_next">Siguiente</span> <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ═══ PASO 3: Datos de Industria ═══ -->
+                        <div class="audit-step" id="step3">
+                            <h3><i class="fa-solid fa-microscope" style="color:#a855f7;margin-right:8px;"></i> <span data-i18n="step3_title">Datos Específicos de tu Rubro</span></h3>
+                            <p class="step-desc" data-i18n="step3_desc">Cuanto más detalle, mejor será tu diagnóstico personalizado.</p>
+
+                            <!-- INMOBILIARIA -->
+                            <div class="industry-fields" id="fields_inmobiliaria">
+                                <h4><i class="fa-solid fa-house"></i> <span data-i18n="ind_realestate_title">Datos Inmobiliaria</span></h4>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_realestate_properties">Propiedades Activas</label><input type="number" name="ind_properties" placeholder="Ej: 45"></div>
+                                    <div class="audit-field"><label data-i18n="ind_realestate_ticket">Ticket Promedio (USD)</label><input type="text" name="ind_avg_ticket" placeholder="Ej: $120.000"></div>
+                                </div>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_realestate_ops">Operaciones/Mes</label><input type="number" name="ind_monthly_ops" placeholder="Ej: 3"></div>
+                                    <div class="audit-field"><label data-i18n="ind_realestate_source">Principal Fuente de Leads</label><input type="text" name="ind_lead_source" placeholder="Ej: Portales, Instagram..."></div>
+                                </div>
+                            </div>
+
+                            <!-- SALUD -->
+                            <div class="industry-fields" id="fields_salud">
+                                <h4><i class="fa-solid fa-stethoscope"></i> <span data-i18n="ind_health_title">Datos Clínica / Salud</span></h4>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_health_appointments">Turnos/Día Promedio</label><input type="number" name="ind_daily_appointments" placeholder="Ej: 25"></div>
+                                    <div class="audit-field"><label data-i18n="ind_health_insurance">Obras Sociales</label><input type="text" name="ind_insurance" placeholder="Ej: OSDE, Swiss Medical"></div>
+                                </div>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_health_wait">Tiempo de Espera</label><input type="text" name="ind_wait_time" placeholder="Ej: 3 días para turno"></div>
+                                    <div class="audit-field"><label data-i18n="ind_health_noshows">% No-Shows</label><input type="text" name="ind_no_shows" placeholder="Ej: 15%"></div>
+                                </div>
+                            </div>
+
+                            <!-- LEGAL -->
+                            <div class="industry-fields" id="fields_legal">
+                                <h4><i class="fa-solid fa-scale-balanced"></i> <span data-i18n="ind_legal_title">Datos Estudio Legal</span></h4>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_legal_specialty">Especialidad Principal</label><input type="text" name="ind_specialty" placeholder="Ej: Derecho Laboral"></div>
+                                    <div class="audit-field"><label data-i18n="ind_legal_consults">Consultas Nuevas/Semana</label><input type="number" name="ind_weekly_consultations" placeholder="Ej: 10"></div>
+                                </div>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_legal_fee">Honorarios Consulta (USD)</label><input type="text" name="ind_consultation_fee" placeholder="Ej: $50"></div>
+                                    <div class="audit-field"><label data-i18n="ind_legal_source">Fuente de Clientes</label><input type="text" name="ind_client_source" placeholder="Ej: Referidos, Google"></div>
+                                </div>
+                            </div>
+
+                            <!-- RESTAURANTE -->
+                            <div class="industry-fields" id="fields_restaurante">
+                                <h4><i class="fa-solid fa-utensils"></i> <span data-i18n="ind_restaurant_title">Datos Restaurante</span></h4>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_restaurant_covers">Cubiertos/Día</label><input type="number" name="ind_covers_day" placeholder="Ej: 80"></div>
+                                    <div class="audit-field"><label data-i18n="ind_restaurant_ticket">Ticket Promedio (USD)</label><input type="text" name="ind_avg_ticket_resto" placeholder="Ej: $25"></div>
+                                </div>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_restaurant_delivery">¿Hacen Delivery?</label>
+                                        <select name="ind_delivery"><option value="" selected data-i18n="opt_select_generic">Seleccioná</option><option value="si" data-i18n="opt_yes">Sí</option><option value="no" data-i18n="opt_no">No</option></select>
+                                    </div>
+                                    <div class="audit-field"><label data-i18n="ind_restaurant_platforms">Plataformas Delivery</label><input type="text" name="ind_delivery_platforms" placeholder="Ej: Rappi, PedidosYa"></div>
+                                </div>
+                            </div>
+
+                            <!-- HOTEL -->
+                            <div class="industry-fields" id="fields_hotel">
+                                <h4><i class="fa-solid fa-hotel"></i> <span data-i18n="ind_hotel_title">Datos Hotel / Hospitalidad</span></h4>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_hotel_rooms">Habitaciones</label><input type="number" name="ind_rooms" placeholder="Ej: 32"></div>
+                                    <div class="audit-field"><label data-i18n="ind_hotel_occupancy">Ocupación Promedio %</label><input type="text" name="ind_occupancy" placeholder="Ej: 65%"></div>
+                                </div>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_hotel_rate">Precio Noche Promedio (USD)</label><input type="text" name="ind_avg_rate" placeholder="Ej: $120"></div>
+                                    <div class="audit-field"><label data-i18n="ind_hotel_channels">Canales de Reserva</label><input type="text" name="ind_booking_channels" placeholder="Ej: Booking, directo, Airbnb"></div>
+                                </div>
+                            </div>
+
+                            <!-- ECOMMERCE -->
+                            <div class="industry-fields" id="fields_ecommerce">
+                                <h4><i class="fa-solid fa-cart-shopping"></i> <span data-i18n="ind_ecommerce_title">Datos E-commerce</span></h4>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_ecommerce_orders">Pedidos/Mes</label><input type="number" name="ind_monthly_orders" placeholder="Ej: 150"></div>
+                                    <div class="audit-field"><label data-i18n="ind_ecommerce_ticket">Ticket Promedio (USD)</label><input type="text" name="ind_avg_order" placeholder="Ej: $45"></div>
+                                </div>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_ecommerce_returns">% Devoluciones</label><input type="text" name="ind_returns_pct" placeholder="Ej: 5%"></div>
+                                    <div class="audit-field"><label data-i18n="ind_ecommerce_platform">Plataforma</label><input type="text" name="ind_platform" placeholder="Ej: Shopify, TiendaNube"></div>
+                                </div>
+                            </div>
+
+                            <!-- SAAS -->
+                            <div class="industry-fields" id="fields_saas">
+                                <h4><i class="fa-solid fa-cloud"></i> <span data-i18n="ind_saas_title">Datos SaaS / Tech</span></h4>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_saas_mrr">MRR Actual (USD)</label><input type="text" name="ind_mrr" placeholder="Ej: $8.000"></div>
+                                    <div class="audit-field"><label data-i18n="ind_saas_churn">Churn Mensual %</label><input type="text" name="ind_churn" placeholder="Ej: 4%"></div>
+                                </div>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_saas_tickets">Tickets Soporte/Semana</label><input type="number" name="ind_support_tickets" placeholder="Ej: 30"></div>
+                                    <div class="audit-field"><label data-i18n="ind_saas_conversion">Trial-to-Paid %</label><input type="text" name="ind_trial_conversion" placeholder="Ej: 12%"></div>
+                                </div>
+                            </div>
+
+                            <!-- GYM -->
+                            <div class="industry-fields" id="fields_gym">
+                                <h4><i class="fa-solid fa-dumbbell"></i> <span data-i18n="ind_gym_title">Datos Gym / Fitness</span></h4>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_gym_members">Socios Activos</label><input type="number" name="ind_active_members" placeholder="Ej: 320"></div>
+                                    <div class="audit-field"><label data-i18n="ind_gym_retention">Tasa de Retención %</label><input type="text" name="ind_retention" placeholder="Ej: 70%"></div>
+                                </div>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_gym_price">Precio Mensual (USD)</label><input type="text" name="ind_monthly_price" placeholder="Ej: $30"></div>
+                                    <div class="audit-field"><label data-i18n="ind_gym_trial">¿Ofrecen Clase de Prueba?</label>
+                                        <select name="ind_trial_class"><option value="" selected data-i18n="opt_select_generic">Seleccioná</option><option value="si" data-i18n="opt_yes">Sí</option><option value="no" data-i18n="opt_no">No</option></select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CONTABILIDAD -->
+                            <div class="industry-fields" id="fields_contabilidad">
+                                <h4><i class="fa-solid fa-calculator"></i> <span data-i18n="ind_accounting_title">Datos Contabilidad</span></h4>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_accounting_clients">Clientes Activos</label><input type="number" name="ind_active_clients" placeholder="Ej: 80"></div>
+                                    <div class="audit-field"><label data-i18n="ind_accounting_fee">Honorario Mensual Promedio (USD)</label><input type="text" name="ind_avg_fee" placeholder="Ej: $150"></div>
+                                </div>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_accounting_hours">Hrs/Semana en Tareas Repetitivas</label><input type="number" name="ind_repetitive_hours" placeholder="Ej: 20"></div>
+                                    <div class="audit-field"><label data-i18n="ind_accounting_software">Software Contable</label><input type="text" name="ind_accounting_sw" placeholder="Ej: Xubio, Contabilium"></div>
+                                </div>
+                            </div>
+
+                            <!-- SERVICIOS B2B -->
+                            <div class="industry-fields" id="fields_servicios">
+                                <h4><i class="fa-solid fa-handshake"></i> <span data-i18n="ind_services_title">Datos Servicios B2B</span></h4>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_services_clients">Clientes Activos</label><input type="number" name="ind_b2b_clients" placeholder="Ej: 20"></div>
+                                    <div class="audit-field"><label data-i18n="ind_services_ticket">Ticket Promedio (USD)</label><input type="text" name="ind_b2b_ticket" placeholder="Ej: $2.000"></div>
+                                </div>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_services_cycle">Ciclo de Venta (días)</label><input type="number" name="ind_sales_cycle" placeholder="Ej: 30"></div>
+                                    <div class="audit-field"><label data-i18n="ind_services_source">Fuente Principal de Leads</label><input type="text" name="ind_b2b_lead_source" placeholder="Ej: LinkedIn, referidos"></div>
+                                </div>
+                            </div>
+
+                            <!-- BELLEZA -->
+                            <div class="industry-fields" id="fields_belleza">
+                                <h4><i class="fa-solid fa-spa"></i> <span data-i18n="ind_beauty_title">Datos Salón / Estética</span></h4>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_beauty_bookings">Citas/Día Promedio</label><input type="number" name="ind_daily_bookings" placeholder="Ej: 15"></div>
+                                    <div class="audit-field"><label data-i18n="ind_beauty_ticket">Ticket Promedio (USD)</label><input type="text" name="ind_beauty_ticket" placeholder="Ej: $35"></div>
+                                </div>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_beauty_cancellations">% Cancelaciones</label><input type="text" name="ind_cancellation_rate" placeholder="Ej: 10%"></div>
+                                    <div class="audit-field"><label data-i18n="ind_beauty_online">¿Agenda Online?</label>
+                                        <select name="ind_online_booking"><option value="" selected data-i18n="opt_select_generic">Seleccioná</option><option value="si" data-i18n="opt_yes">Sí</option><option value="no" data-i18n="opt_no">No</option></select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- EDUCACION -->
+                            <div class="industry-fields" id="fields_educacion">
+                                <h4><i class="fa-solid fa-graduation-cap"></i> <span data-i18n="ind_education_title">Datos Educación</span></h4>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_education_students">Alumnos Activos</label><input type="number" name="ind_students" placeholder="Ej: 200"></div>
+                                    <div class="audit-field"><label data-i18n="ind_education_price">Precio Mensual (USD)</label><input type="text" name="ind_edu_price" placeholder="Ej: $80"></div>
+                                </div>
+                                <div class="audit-row">
+                                    <div class="audit-field"><label data-i18n="ind_education_inquiries">Consultas/Semana</label><input type="number" name="ind_edu_inquiries" placeholder="Ej: 30"></div>
+                                    <div class="audit-field"><label data-i18n="ind_education_conversion">% Conversión Consulta→Inscripción</label><input type="text" name="ind_edu_conversion" placeholder="Ej: 25%"></div>
+                                </div>
+                            </div>
+
+                            <!-- OTRO -->
+                            <div class="industry-fields" id="fields_otro">
+                                <h4><i class="fa-solid fa-briefcase"></i> <span data-i18n="ind_other_title">Datos de tu Negocio</span></h4>
+                                <div class="audit-field full">
+                                    <label data-i18n="ind_other_desc">Describí tu operación brevemente</label>
+                                    <textarea name="ind_other_desc" rows="4" placeholder="Contanos qué hace tu empresa, cómo ganan dinero, cuántos clientes manejan..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="audit-nav">
+                                <button type="button" class="audit-btn audit-btn-back" onclick="auditPrevStep(2)">
+                                    <i class="fa-solid fa-arrow-left"></i> <span data-i18n="btn_back">Atrás</span>
+                                </button>
+                                <button type="button" class="audit-btn audit-btn-next" onclick="auditNextStep(4)">
+                                    <span data-i18n="btn_next">Siguiente</span> <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ═══ PASO 4: Objetivos ═══ -->
+                        <div class="audit-step" id="step4">
+                            <h3><i class="fa-solid fa-crosshairs" style="color:#ec4899;margin-right:8px;"></i> <span data-i18n="step4_title">El Dolor y el Objetivo</span></h3>
+                            <p class="step-desc" data-i18n="step4_desc">Esta es la info más importante. Cuanto más honesto seas, mejor será tu diagnóstico.</p>
+                            <div class="audit-field">
+                                <label for="audit_pain" data-i18n="label_pain">¿Cuál es el cuello de botella que más te cuesta plata? *</label>
+                                <textarea id="audit_pain" name="main_pain" rows="3" data-i18n-placeholder="ph_pain" placeholder="Ej: Perdemos leads porque tardamos horas en responder WhatsApp. Mis vendedores pasan más tiempo en admin que vendiendo..." required></textarea>
+                            </div>
+                            <div class="audit-field">
+                                <label for="audit_goal" data-i18n="label_goal">¿Qué cambiaría todo para tu negocio en 90 días? *</label>
+                                <textarea id="audit_goal" name="goal_90_days" rows="3" data-i18n-placeholder="ph_goal" placeholder="Ej: Duplicar la cantidad de leads calificados sin contratar más gente. Reducir el tiempo de respuesta a menos de 5 minutos..." required></textarea>
+                            </div>
+                            <div class="audit-row">
+                                <div class="audit-field">
+                                    <label for="audit_budget" data-i18n="label_budget">Inversión Mensual Disponible *</label>
+                                    <select id="audit_budget" name="budget" required>
+                                        <option value="" disabled selected data-i18n="ph_budget">Rango...</option>
+                                        <option value="<500" data-i18n="opt_budget_500">Menos de $500 USD</option>
+                                        <option value="500-1k" data-i18n="opt_budget_500_1k">$500 - $1.000 USD</option>
+                                        <option value="1k-3k" data-i18n="opt_budget_1k_3k">$1.000 - $3.000 USD</option>
+                                        <option value="3k-10k" data-i18n="opt_budget_3k_10k">$3.000 - $10.000 USD</option>
+                                        <option value="10k+" data-i18n="opt_budget_10k">Más de $10.000 USD</option>
+                                    </select>
+                                </div>
+                                <div class="audit-field">
+                                    <label for="audit_contact_pref" data-i18n="label_contact_pref">¿Cómo Preferís que te Contactemos? *</label>
+                                    <select id="audit_contact_pref" name="contact_preference" required>
+                                        <option value="" disabled selected data-i18n="opt_select">Seleccioná...</option>
+                                        <option value="whatsapp" data-i18n="opt_contact_whatsapp">WhatsApp</option>
+                                        <option value="llamada" data-i18n="opt_contact_call">Llamada Telefónica</option>
+                                        <option value="email" data-i18n="opt_contact_email">Email</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Hidden fields -->
+                            <input type="hidden" name="source" value="audit_form_v1">
+                            <input type="hidden" name="lang" id="langInput" value="es">
+
+                            <div class="audit-nav">
+                                <button type="button" class="audit-btn audit-btn-back" onclick="auditPrevStep(3)">
+                                    <i class="fa-solid fa-arrow-left"></i> <span data-i18n="btn_back">Atrás</span>
+                                </button>
+                                <button type="submit" class="audit-btn audit-btn-submit" id="submitAudit">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span data-i18n="btn_submit">Generar Mi Diagnóstico Gratis</span>
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+
+                    <!-- ═══ RESULTADO ═══ -->
+                    <div class="audit-result" id="auditResult">
+                        <div class="result-loader" id="resultLoader">
+                            <div class="spinner"></div>
+                            <p><strong data-i18n="result_analyzing">Analizando tu negocio con IA...</strong></p>
+                            <p style="font-size:.85rem;color:rgba(255,255,255,.4);margin-top:.5rem;" data-i18n="result_analyzing_sub">Estamos cruzando tus datos operativos con benchmarks de tu industria</p>
+                        </div>
+                        <div class="result-content" id="resultContent">
+                            <div style="font-size:3rem;margin-bottom:1rem;">🎯</div>
+                            <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem;margin-bottom:.5rem;" data-i18n="result_ready">Diagnóstico Listo</h3>
+                            <p style="color:var(--text-secondary);margin-bottom:1rem;"><span data-i18n="result_detected">Esto es lo que detectamos para</span> <strong id="resultCompany"></strong>:</p>
+                            <div class="result-card">
+                                <h4><i class="fa-solid fa-brain" style="color:#6366f1;"></i> <span data-i18n="result_card_title">Análisis Personalizado</span></h4>
+                                <div class="proposal-text" id="proposalText"></div>
+                            </div>
+                            <div class="result-cta">
+                                <a href="https://cal.com/gustavo-a.-dornhofer-nqjqos/auditoria-estrategica-ia" target="_blank" class="audit-btn audit-btn-submit" style="text-decoration:none;">
+                                    <i class="fa-solid fa-calendar"></i> <span data-i18n="result_cta_call">Agendar Llamada Estratégica</span>
+                                </a>
+                                <a href="https://wa.me/5491178287901?text=Hola%20Alex,%20acabo%20de%20hacer%20mi%20auditoría%20en%20GenerArise%20y%20me%20interesa%20conocer%20más." target="_blank" class="audit-btn audit-btn-back" style="text-decoration:none;border-color:rgba(37,211,102,.3);color:#25d366;">
+                                    <i class="fa-brands fa-whatsapp"></i> <span data-i18n="result_cta_whatsapp">Hablar por WhatsApp</span>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- Fallback when n8n is unavailable -->
+                        <div class="result-content" id="resultFallback" style="display:none;">
+                            <div style="font-size:3rem;margin-bottom:1rem;">✅</div>
+                            <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem;margin-bottom:.5rem;" data-i18n="result_fallback_title">¡Datos Recibidos!</h3>
+                            <p style="color:var(--text-secondary);margin-bottom:1rem;"><span data-i18n="result_fallback_desc">Nuestro equipo está analizando tu caso. Te contactaremos dentro de las próximas</span> <strong data-i18n="result_fallback_hours">24 horas</strong> <span data-i18n="result_fallback_suffix">con tu diagnóstico completo.</span></p>
+                            <div class="result-cta">
+                                <a href="https://cal.com/gustavo-a.-dornhofer-nqjqos/auditoria-estrategica-ia" target="_blank" class="audit-btn audit-btn-submit" style="text-decoration:none;">
+                                    <i class="fa-solid fa-calendar"></i> <span data-i18n="result_fallback_cta">Agendar Llamada Mientras Tanto</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <!-- Trust Badges Section -->
+        <div
+            style="background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.1); padding: 3rem 5% 2rem;">
+            <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+                <h4
+                    style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-secondary); margin-bottom: 2rem; font-weight: 400;">
+                    Tecnología y Certificaciones</h4>
+
+                <div
+                    style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 3rem; margin-bottom: 2rem;">
+
+                    <!-- Google AI Badge -->
+                    <div style="text-align: center; opacity: 0.8; transition: opacity 0.3s;"
+                        onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
+                        <div
+                            style="background: linear-gradient(135deg, #4285f4, #34a853); width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);">
+                            <i class="fa-brands fa-google" style="font-size: 28px; color: white;"></i>
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Google AI</div>
+                    </div>
+
+                    <!-- Groq Badge -->
+                    <div style="text-align: center; opacity: 0.8; transition: opacity 0.3s;"
+                        onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
+                        <div
+                            style="background: linear-gradient(135deg, #ff6b6b, #ee5a6f); width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);">
+                            <i class="fa-solid fa-microchip" style="font-size: 28px; color: white;"></i>
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Groq LPU</div>
+                    </div>
+
+                    <!-- SSL/Security Badge -->
+                    <div style="text-align: center; opacity: 0.8; transition: opacity 0.3s;"
+                        onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
+                        <div
+                            style="background: linear-gradient(135deg, #00c853, #64dd17); width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; box-shadow: 0 4px 15px rgba(0, 200, 83, 0.3);">
+                            <i class="fa-solid fa-shield-halved" style="font-size: 28px; color: white;"></i>
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">SSL Secure</div>
+                    </div>
+
+                    <!-- Years of Experience -->
+                    <div style="text-align: center; opacity: 0.8; transition: opacity 0.3s;"
+                        onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
+                        <div
+                            style="background: linear-gradient(135deg, #6366f1, #8b5cf6); width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);">
+                            <i class="fa-solid fa-award" style="font-size: 28px; color: white;"></i>
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">5+ Años IA</div>
+                    </div>
+
+                    <!-- LATAM Badge -->
+                    <div style="text-align: center; opacity: 0.8; transition: opacity 0.3s;"
+                        onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
+                        <div
+                            style="background: linear-gradient(135deg, #ed6c02, #f57c00); width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; box-shadow: 0 4px 15px rgba(237, 108, 2, 0.3);">
+                            <i class="fa-solid fa-earth-americas" style="font-size: 28px; color: white;"></i>
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Serving LATAM</div>
+                    </div>
+
+                </div>
+
+                <!-- Social Proof Stats -->
+                <div
+                    style="display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05);">
+                    <div style="text-align: center;">
+                        <div
+                            style="font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #6366f1, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                            100+</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.3rem;">
+                            Automatizaciones</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div
+                            style="font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #6366f1, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                            24/7</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.3rem;">Agentes
+                            Activos</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div
+                            style="font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #6366f1, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                            340%</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.3rem;">Avg. ROI
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Copyright Footer -->
+        <div class="footer-content">
+            <p>&copy; 2026 GenerArise. Todos los derechos reservados. | <a href="privacy.html"
+                    style="color: inherit; text-decoration: none; opacity: 0.7;">Privacidad</a></p>
+            <div class="socials">
+                <!-- <a href="#" target="_blank" title="LinkedIn"><i class="fa-brands fa-linkedin"></i></a> -->
+                <a href="https://www.instagram.com/generarise.space/" target="_blank" title="Instagram"><i
+                        class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+    <!-- WhatsApp Widget (Agente Alex - GenerArise Agency) -->
+    <a href="https://wa.me/5491178287901?text=Hola%20Alex,%20vengo%20de%20GenerArise.%20Necesito%20automatizar%20mi%20negocio."
+        class="whatsapp-float" target="_blank">
+        <div class="whatsapp-pulse"></div>
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- VAPI VOICE WIDGET — Alex AI Demo Inbound           -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <style>
+        /* Alex Demo Banner in Hero */
+        .alex-demo-banner {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 1.2rem;
+            padding: 10px 22px;
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 50px;
+            color: #a5b4fc;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            animation: alexBannerGlow 3s ease-in-out infinite;
+        }
+        .alex-demo-banner:hover {
+            background: rgba(99, 102, 241, 0.22);
+            border-color: rgba(99, 102, 241, 0.6);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.25);
+        }
+        .alex-demo-banner .fa-microphone {
+            color: #6366f1;
+            font-size: 1.1rem;
+        }
+        .alex-pulse-ring {
+            position: absolute;
+            left: 18px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #6366f1;
+            animation: alexPulse 2s infinite;
+            opacity: 0;
+            pointer-events: none;
+        }
+        @keyframes alexPulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            100% { transform: scale(2.2); opacity: 0; }
+        }
+        @keyframes alexBannerGlow {
+            0%, 100% { box-shadow: 0 0 0 rgba(99,102,241,0); }
+            50% { box-shadow: 0 0 20px rgba(99,102,241,0.15); }
+        }
+
+        /* Vapi button override — blend with site design */
+        #vapi-support-btn {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4) !important;
+            transition: all 0.3s ease !important;
+        }
+        #vapi-support-btn:hover {
+            transform: scale(1.1) !important;
+            box-shadow: 0 6px 30px rgba(99, 102, 241, 0.6) !important;
+        }
+
+        @media (max-width: 768px) {
+            .alex-demo-banner {
+                font-size: 0.8rem;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="agency-main_v10.js"></script>
+
+    <!-- Vapi SDK -->
+    <script>
+        // Load Vapi SDK
+        var vapiScript = document.createElement('script');
+        vapiScript.src = 'https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js';
+        vapiScript.defer = true;
+        vapiScript.onload = function() {
+            if (window.vapiSDK) {
+                // Detectar idioma del navegador para un saludo natural de alto impacto
+                var userLang = navigator.language || navigator.userLanguage;
+                var isEnglish = userLang.toLowerCase().startsWith('en');
+                var dynamicGreeting = isEnglish 
+                    ? "Hi there! I'm Alex, AI sales consultant. How can I help you scale today?" 
+                    : "¡Hola! Soy Alex, tu consultor de IA. ¿En qué te puedo ayudar hoy?";
+
+                window.vapiSDK.run({
+                    apiKey: "3fe2e389-3dc5-4071-bfb5-c91a511af385",
+                    assistant: "d446be03-dfb6-4de6-b83b-9b904af74829",
+                    assistantOverrides: {
+                        firstMessage: dynamicGreeting
+                    },
+                    config: {
+                        position: "bottom-left",
+                        title: "Alex - AI Consultant",
+                        subtitle: "GenerArise",
+                        color: "#6366f1"
+                    }
+                });
+                console.log('[GenerArise] Vapi widget loaded — Alex inbound ready (' + (isEnglish ? 'EN' : 'ES') + ')');
+            }
+        };
+        document.head.appendChild(vapiScript);
+
+        // Alex Demo Banner click → scroll to make Vapi button visible
+        document.addEventListener('DOMContentLoaded', function() {
+            var banner = document.getElementById('alexDemoBanner');
+            if (banner) {
+                banner.addEventListener('click', function() {
+                    // Scroll to bottom to reveal Vapi widget, then try to click it
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                    // Flash the Vapi button after scroll
+                    setTimeout(function() {
+                        var vapiBtn = document.querySelector('[id*="vapi"]') || document.querySelector('.vapi-btn');
+                        if (vapiBtn) {
+                            vapiBtn.style.transform = 'scale(1.3)';
+                            vapiBtn.style.boxShadow = '0 0 40px rgba(99,102,241,0.8)';
+                            setTimeout(function() {
+                                vapiBtn.style.transform = '';
+                                vapiBtn.style.boxShadow = '';
+                            }, 1500);
+                        }
+                    }, 800);
+                });
+            }
+        });
+    </script>
+
+    <!-- FOOTER — Legal Links (Required by TikTok / Meta) -->
+    <footer style="padding:48px 5%;text-align:center;border-top:1px solid rgba(255,255,255,0.08);margin-top:4rem;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;">
+            <img src="assets/logo.png" alt="GenerArise" style="width:28px;height:28px;border-radius:8px;object-fit:contain;">
+            <span style="font-weight:700;font-size:15px;color:var(--text-primary,#e2e8f0);">GenerArise</span>
+        </div>
+        <p style="max-width:600px;margin:0 auto 20px;font-size:13px;color:var(--text-secondary,#94a3b8);line-height:1.6;">GenerArise is an AI-powered content automation platform that generates, schedules, and publishes content across TikTok, Instagram, Facebook, and YouTube. It also provides B2B lead discovery, AI-based scoring, and automated sales outreach.</p>
+        <p style="margin-bottom:12px;font-size:14px;">
+            <a href="/privacy.html" style="color:#818cf8;text-decoration:none;font-weight:600;">Privacy Policy</a>
+            &nbsp;·&nbsp;
+            <a href="/terms.html" style="color:#818cf8;text-decoration:none;font-weight:600;">Terms of Service</a>
+            &nbsp;·&nbsp;
+            <a href="mailto:soporte@generarise.space" style="color:#818cf8;text-decoration:none;">Contact Us</a>
+        </p>
+        <p style="font-size:12px;color:rgba(255,255,255,0.25);">© 2026 GenerArise / GenerArise Labs — All rights reserved.</p>
+    </footer>
+
+</body>
+
+</html>

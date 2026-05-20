@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GenerArise - Onboarding de Clientes AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-base: #030305;
+            --bg-card: #0a0a12;
+            --bg-card-hover: #12121f;
+            --primary: #7c3aed;
+            --primary-glow: rgba(124, 58, 237, 0.4);
+            --secondary: #10b981;
+            --secondary-glow: rgba(16, 185, 129, 0.3);
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(124, 58, 237, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 15% 50%, var(--primary-glow) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, var(--secondary-glow) 0%, transparent 50%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Outfit', sans-serif; }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: rgba(124, 58, 237, 0.1);
+            border: 1px solid var(--border-highlight);
+            border-radius: 100px;
+            color: #c4b5fd;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #ffffff, #a78bfa);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Sections */
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #f8fafc;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            background: var(--bg-card-hover);
+            border-color: var(--border-highlight);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px var(--primary-glow);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: rgba(124, 58, 237, 0.1);
+            color: #a78bfa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .card-icon.emerald { background: rgba(16, 185, 129, 0.1); color: #34d399; }
+        .card-icon.blue { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+        .card-icon.rose { background: rgba(244, 63, 94, 0.1); color: #fb7185; }
+
+        .card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        .requirement-list {
+            list-style: none;
+        }
+
+        .requirement-list li {
+            position: relative;
+            padding-left: 28px;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+        }
+
+        .requirement-list li i {
+            position: absolute;
+            left: 0;
+            top: 2px;
+            color: var(--secondary);
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Specific highlights */
+        .step-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+
+        .step-content h4 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .step-content p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .alert-box {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-left: 4px solid #f59e0b;
+            padding: 16px 24px;
+            border-radius: 8px;
+            display: flex;
+            gap: 16px;
+            margin: 40px 0;
+        }
+
+        .alert-box i { color: #f59e0b; flex-shrink: 0; }
+        .alert-box p { color: #fcd34d; font-size: 0.9rem; margin-bottom: 0; }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 80px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="badge">
+                <i data-lucide="bot"></i> GenerArise AI Agency
+            </div>
+            <h1>Guía de Onboarding para Clientes</h1>
+            <p>Requisitos técnicos y de conocimiento para implementar Asistentes de Inteligencia Artificial (Voz y Texto) en cualquier negocio.</p>
+        </header>
+
+        <div class="alert-box">
+            <i data-lucide="alert-circle"></i>
+            <div>
+                <strong>Aclaración Importante:</strong> La Inteligencia Artificial es tan buena como la información que recibe. Para que el agente responda como un experto, el cliente DEBE proveernos todo el conocimiento interno de su empresa, tarifas, y los accesos a los sistemas donde la IA trabajará.
+            </div>
+        </div>
+
+        <!-- FASE 1: Conocimiento del Negocio -->
+        <h2 class="section-title"><i data-lucide="brain-circuit"></i> Fase 1: Base de Conocimiento (Entrenamiento)</h2>
+        <div class="step-box">
+            <div class="step-number">1</div>
+            <div class="step-content">
+                <h4>Data del Negocio (Obligatorio para TODOS los rubros)</h4>
+                <p>El cliente debe entregar un documento (PDF, Word, Notion o sitio web completo) respondiendo:</p>
+                <ul class="requirement-list" style="margin-top: 16px;">
+                    <li><i data-lucide="check-circle-2"></i><strong>Identidad:</strong> Nombre, misión, tono de voz (formal, amigable, persuasivo).</li>
+                    <li><i data-lucide="check-circle-2"></i><strong>Catálogo/Servicios:</strong> Lista exacta de servicios, productos, y <strong>precios actualizados</strong>.</li>
+                    <li><i data-lucide="check-circle-2"></i><strong>FAQ's:</strong> Las 20 preguntas más comunes que hacen los clientes y sus respuestas exactas.</li>
+                    <li><i data-lucide="check-circle-2"></i><strong>Políticas:</strong> Qué hacer ante devoluciones, cancelaciones, demoras o quejas.</li>
+                    <li><i data-lucide="check-circle-2"></i><strong>Límites del Agente:</strong> Qué cosas la IA <strong>NUNCA</strong> debe prometer o responder.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- FASE 2: Canales de Comunicación -->
+        <h2 class="section-title" style="margin-top: 60px;"><i data-lucide="satellite"></i> Fase 2: Conexión de Canales</h2>
+        
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-icon emerald"><i data-lucide="message-square"></i></div>
+                <h3>WhatsApp (Texto y Notas de Voz)</h3>
+                <p>Para conectar el agente a su línea de WhatsApp business o personal:</p>
+                <ul class="requirement-list">
+                    <li><i data-lucide="arrow-right"></i><strong>Método QR (No Oficial):</strong> Le enviaremos un código QR generado por nuestro sistema (vía Evolution API) que deberán escanear desde su celular en <em>"Dispositivos Vinculados"</em>.</li>
+                    <li><i data-lucide="arrow-right"></i><strong>API Oficial:</strong> Deben darnos acceso a su Meta Business Manager, tener una tarjeta de crédito verificada en Meta, y otorgarnos permisos de Administrador de Sistema.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-icon blue"><i data-lucide="send"></i></div>
+                <h3>Telegram</h3>
+                <p>Si la empresa usa Telegram para soporte VIP o comunidades:</p>
+                <ul class="requirement-list">
+                    <li><i data-lucide="arrow-right"></i>El cliente debe ir a Telegram y escribirle a <strong>@BotFather</strong>.</li>
+                    <li><i data-lucide="arrow-right"></i>Usar el comando <code>/newbot</code> y ponerle nombre y usuario al bot.</li>
+                    <li><i data-lucide="arrow-right"></i>Entregarnos el <strong>HTTP API Token</strong> que BotFather les genera.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-icon rose"><i data-lucide="mail"></i></div>
+                <h3>Correo Electrónico</h3>
+                <p>Para agentes que leen y responden emails (Customer Success o Cold Outreach):</p>
+                <ul class="requirement-list">
+                    <li><i data-lucide="arrow-right"></i><strong>Google Workspace:</strong> Deben ir a seguridad de su cuenta y crear una "App Password" (Contraseña de Aplicación) y darnos ese código + el correo.</li>
+                    <li><i data-lucide="arrow-right"></i><strong>Herramientas Masivas:</strong> Credenciales API de Brevo, Mailgun, o Amazon SES si haremos campañas.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- FASE 3: Software por Rubros -->
+        <h2 class="section-title"><i data-lucide="blocks"></i> Fase 3: Integraciones por Rubro</h2>
+        
+        <div class="card-grid">
+            <!-- Hotelería -->
+            <div class="card">
+                <div class="card-icon"><i data-lucide="hotel"></i></div>
+                <h3>Hoteles & Airbnbs</h3>
+                <p>Para que la IA verifique disponibilidad y reserve:</p>
+                <ul class="requirement-list">
+                    <li><i data-lucide="check"></i><strong>PMS API:</strong> Token de API de su sistema (Cloudbeds, Mews, Guesty, Hostify).</li>
+                    <li><i data-lucide="check"></i>Link a motores de reserva directos.</li>
+                    <li><i data-lucide="check"></i>Mapa de habitaciones y check-in/out times.</li>
+                </ul>
+            </div>
+
+            <!-- Real Estate -->
+            <div class="card">
+                <div class="card-icon"><i data-lucide="building-2"></i></div>
+                <h3>Real Estate & Inmobiliarias</h3>
+                <p>Para calificar prospectos y mostrar propiedades:</p>
+                <ul class="requirement-list">
+                    <li><i data-lucide="check"></i><strong>CRM Access:</strong> API Key de HubSpot, Salesforce, Tokko Broker o EasyBroker.</li>
+                    <li><i data-lucide="check"></i>Acceso de editor a Calendly para que la voz AI agende visitas.</li>
+                </ul>
+            </div>
+
+            <!-- Clínicas -->
+            <div class="card">
+                <div class="card-icon"><i data-lucide="stethoscope"></i></div>
+                <h3>Clínicas y Odontología</h3>
+                <p>Para agendar y cancelar turnos médicos por WhatsApp/Voz:</p>
+                <ul class="requirement-list">
+                    <li><i data-lucide="check"></i>Acceso al Software de Turnos Médicos (Webhook o API).</li>
+                    <li><i data-lucide="check"></i>Nombres exactos de especialistas y obras sociales aceptadas.</li>
+                </ul>
+            </div>
+
+            <!-- Restaurantes -->
+            <div class="card">
+                <div class="card-icon"><i data-lucide="utensils-crossed"></i></div>
+                <h3>Restaurantes & Delivery</h3>
+                <p>Para tomar pedidos o reservas de mesas:</p>
+                <ul class="requirement-list">
+                    <li><i data-lucide="check"></i>Menú digital exportado en PDF o JSON con precios.</li>
+                    <li><i data-lucide="check"></i>Integración con sistema de reservas (OpenTable, CoverManager).</li>
+                    <li><i data-lucide="check"></i>Políticas de delivery y mapas de zonas.</li>
+                </ul>
+            </div>
+
+            <!-- Contadores -->
+            <div class="card">
+                <div class="card-icon"><i data-lucide="calculator"></i></div>
+                <h3>Contadores & Finanzas</h3>
+                <p>Para clasificar facturas y recordar impuestos:</p>
+                <ul class="requirement-list">
+                    <li><i data-lucide="check"></i>Carpetas compartidas de Google Drive.</li>
+                    <li><i data-lucide="check"></i>Acceso API a sistemas de gestión contable (Xero, QuickBooks).</li>
+                    <li><i data-lucide="check"></i>Calendario impositivo anual exacto.</li>
+                </ul>
+            </div>
+
+            <!-- Ticketeras -->
+            <div class="card">
+                <div class="card-icon"><i data-lucide="ticket"></i></div>
+                <h3>Ticketeras & Eventos</h3>
+                <p>Para soporte de entradas y validaciones:</p>
+                <ul class="requirement-list">
+                    <li><i data-lucide="check"></i>API de la plataforma de Ticketing.</li>
+                    <li><i data-lucide="check"></i>Políticas de reembolso estrictas.</li>
+                    <li><i data-lucide="check"></i>Listado de eventos actualizados en tiempo real (RSS o JSON endpoint).</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="step-box" style="margin-top: 40px; border-color: var(--primary);">
+            <div class="step-number" style="background: var(--primary);">✓</div>
+            <div class="step-content">
+                <h4>Fase Final: Pruebas End-to-End</h4>
+                <p>Una vez que el cliente entrega TODA esta información, nuestro equipo de GenerArise requiere <strong>entre 3 y 7 días hábiles</strong> para conectar los módulos (Vapi, n8n, OpenAI/Groq), inyectar prompts de base, y realizar pruebas de estrés. No se conectará a la línea oficial del cliente hasta que ellos mismos prueben el bot en nuestro entorno de staging.</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>GenerArise AI Agency - Transformando empresas con Inteligencia Artificial. Documento de requerimientos confidencial V2.0 (2026).</p>
+        </div>
+    </div>
+
+    <script>
+        // Inicializar iconos
+        lucide.createIcons();
+    </script>
+</body>
+</html>

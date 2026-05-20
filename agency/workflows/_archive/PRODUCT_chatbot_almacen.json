@@ -1,0 +1,659 @@
+{
+    "name": "Chatbot Almacén/Minimercado - Order & Catalog Assistant",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "whatsapp-almacen",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "id": "webhook",
+            "name": "Webhook WhatsApp",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                240,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "from",
+                            "name": "from",
+                            "value": "={{ $json.body.data.key.remoteJid }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "message",
+                            "name": "message",
+                            "value": "={{ $json.body.data.message.conversation || $json.body.data.message.extendedTextMessage.text }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "phone",
+                            "name": "phone",
+                            "value": "={{ $json.from.replace('@s.whatsapp.net', '') }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "extract",
+            "name": "Extraer Mensaje",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                460,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "nombre_almacen",
+                            "name": "nombre_almacen",
+                            "value": "NOMBRE_ALMACEN",
+                            "type": "string"
+                        },
+                        {
+                            "id": "horario",
+                            "name": "horario",
+                            "value": "Lun-Sab 8-21hs, Dom 9-13hs",
+                            "type": "string"
+                        },
+                        {
+                            "id": "ubicacion",
+                            "name": "ubicacion",
+                            "value": "Av. Corrientes 1234, CABA",
+                            "type": "string"
+                        },
+                        {
+                            "id": "delivery",
+                            "name": "delivery",
+                            "value": "Sí, $500 hasta 10 cuadras",
+                            "type": "string"
+                        },
+                        {
+                            "id": "formas_pago",
+                            "name": "formas_pago",
+                            "value": "Efectivo, transferencia, Mercado Pago",
+                            "type": "string"
+                        },
+                        {
+                            "id": "sheet_catalogo_id",
+                            "name": "sheet_catalogo_id",
+                            "value": "YOUR_CATALOG_SHEET_ID",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "config",
+            "name": "CONFIG",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                680,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.message.toLowerCase() }}",
+                            "rightValue": "tienen|hay|precio|cuánto|stock",
+                            "operator": {
+                                "type": "string",
+                                "operation": "regex"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_product_query",
+            "name": "Consulta Producto?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                680,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "getAll",
+                "documentId": {
+                    "__rl": true,
+                    "value": "={{ $('CONFIG').item.json.sheet_catalogo_id }}",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "catalogo",
+                    "mode": "list"
+                },
+                "options": {}
+            },
+            "id": "get_catalog",
+            "name": "Obtener Catálogo",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                900,
+                200
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq1",
+            "name": "Groq Search",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                900,
+                420
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Catálogo disponible:\n{{ $('Obtener Catálogo').all().map(item => `- ${item.json.Producto} ${item.json.Marca}: $${item.json.Precio} (Stock: ${item.json.Stock})`).join('\\n') }}\n\nConsulta cliente: {{ $('Extraer Mensaje').item.json.message }}\n\nBusca en el catálogo el/los productos que el cliente pregunta.\nSi encuentra: responder precio + stock.\nSi NO encuentra: sugerir alternativa similar o informar que no hay.\n\nRespuesta (máximo 3 líneas):",
+                "hasOutputParser": false
+            },
+            "id": "search_product",
+            "name": "Buscar Producto",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1120,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.message.toLowerCase() }}",
+                            "rightValue": "pedido|quiero|necesito|envío|delivery",
+                            "operator": {
+                                "type": "string",
+                                "operation": "regex"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_order",
+            "name": "Es Pedido?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                900,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq2",
+            "name": "Groq Extract Order",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                1120,
+                620
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Mensaje: {{ $('Extraer Mensaje').item.json.message }}\n\nExtrae del mensaje:\n- Productos solicitados (con cantidades si menciona)\n- Dirección de entrega (si menciona)\n- Forma de pago preferida (si menciona)\n\nResponde JSON:\n{\n  \"productos\": \"lista de productos mencionados\",\n  \"direccion\": \"dirección o 'no especificado'\",\n  \"pago\": \"forma de pago o 'no especificado'\"\n}\n\nSolo JSON:",
+                "hasOutputParser": true
+            },
+            "id": "extract_order",
+            "name": "Extraer Pedido",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1340,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const order = JSON.parse($input.item.json.output);\nconst faltantes = [];\n\nif (!order.productos || order.productos === 'no especificado') faltantes.push('productos');\nif (order.direccion === 'no especificado') faltantes.push('dirección');\n\nreturn [{\n  json: {\n    ...order,\n    completo: faltantes.length === 0,\n    faltantes: faltantes.join(', ')\n  }\n}];"
+            },
+            "id": "check_order",
+            "name": "Verificar Pedido",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1560,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.completo }}",
+                            "rightValue": "true",
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "order_complete",
+            "name": "Pedido Completo?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1780,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "response",
+                            "name": "response",
+                            "value": "=✅ Pedido anotado!\n\n📦 Productos: {{ $json.productos }}\n📍 Dirección: {{ $json.direccion }}\n💳 Pago: {{ $json.pago || 'efectivo' }}\n\nTe confirmamos en minutos el total y tiempo de entrega 🛵",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "confirm_order",
+            "name": "Confirmar Pedido",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                2000,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "response",
+                            "name": "response",
+                            "value": "=Para confirmar tu pedido necesito:\n{{ $json.faltantes }}\n\n¿Me pasás esos datos? 😊",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "request_missing",
+            "name": "Pedir Faltantes",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                2000,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq3",
+            "name": "Groq General",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                900,
+                820
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres asistente de {{ $('CONFIG').item.json.nombre_almacen }}.\n\nINFO:\n- Horario: {{ $('CONFIG').item.json.horario }}\n- Ubicación: {{ $('CONFIG').item.json.ubicacion }}\n- Delivery: {{ $('CONFIG').item.json.delivery }}\n- Formas de pago: {{ $('CONFIG').item.json.formas_pago }}\n\nConsulta: {{ $('Extraer Mensaje').item.json.message }}\n\nResponde amigable y conciso (máximo 2 líneas).\nSi preguntan por producto específico, decir \"consultá por WhatsApp el nombre del producto\".\n\nRespuesta:",
+                "hasOutputParser": false
+            },
+            "id": "general_response",
+            "name": "Respuesta General",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1120,
+                700
+            ]
+        },
+        {
+            "parameters": {
+                "url": "=https://evolution-api.com/message/sendText/{{$('CONFIG').item.json.instance_name}}",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"number\": \"{{ $('Extraer Mensaje').item.json.phone }}\",\n  \"text\": \"{{ $json.response || $json.output }}\"\n}",
+                "options": {}
+            },
+            "id": "send_wp",
+            "name": "Enviar WhatsApp",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                2220,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_LOG_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "pedidos",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Fecha": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+                        "Telefono": "={{ $('Extraer Mensaje').item.json.phone }}",
+                        "Mensaje": "={{ $('Extraer Mensaje').item.json.message }}",
+                        "Tipo": "={{ $json.is_order ? 'Pedido' : 'Consulta' }}",
+                        "Productos": "={{ $json.productos || '' }}",
+                        "Direccion": "={{ $json.direccion || '' }}",
+                        "Estado": "={{ $json.completo ? 'Completo' : 'Incompleto' }}"
+                    }
+                }
+            },
+            "id": "log",
+            "name": "Log Pedido",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                2440,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\"success\": true}",
+                "options": {}
+            },
+            "id": "response",
+            "name": "Response OK",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                2660,
+                400
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Extraer Mensaje",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extraer Mensaje": {
+            "main": [
+                [
+                    {
+                        "node": "Consulta Producto?",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "CONFIG",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "CONFIG": {
+            "main": [
+                [
+                    {
+                        "node": "Respuesta General",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Consulta Producto?": {
+            "main": [
+                [
+                    {
+                        "node": "Obtener Catálogo",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Es Pedido?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Obtener Catálogo": {
+            "main": [
+                [
+                    {
+                        "node": "Buscar Producto",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Search": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Buscar Producto",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Buscar Producto": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Es Pedido?": {
+            "main": [
+                [
+                    {
+                        "node": "Extraer Pedido",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Groq Extract Order": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Extraer Pedido",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extraer Pedido": {
+            "main": [
+                [
+                    {
+                        "node": "Verificar Pedido",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Verificar Pedido": {
+            "main": [
+                [
+                    {
+                        "node": "Pedido Completo?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Pedido Completo?": {
+            "main": [
+                [
+                    {
+                        "node": "Confirmar Pedido",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Pedir Faltantes",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Confirmar Pedido": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Pedir Faltantes": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq General": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Respuesta General",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Respuesta General": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Log Pedido",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Log Pedido": {
+            "main": [
+                [
+                    {
+                        "node": "Response OK",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "chatbot-almacen-v1"
+}

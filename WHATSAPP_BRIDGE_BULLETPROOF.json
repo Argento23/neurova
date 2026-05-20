@@ -1,0 +1,116 @@
+{
+  "name": "WHATSAPP_BRIDGE_BULLETPROOF_V22",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vapi-whatsapp",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "67329841-3294-4328-9412-329482394823",
+      "name": "Webhook Vapi",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const toolCall = $json.body.message.toolCalls[0];\nconst textData = JSON.stringify(toolCall);\n\n// 🔍 SCAN DE TELÉFONO\nconst phoneMatch = textData.match(/(?:phone\"\\s*:\\s*\")(\\+?\\d{8,15})/i);\nconst phone = phoneMatch ? phoneMatch[1].replace(/\\D/g, '') : \"\";\n\n// 🔍 SCAN DE MENSAJE\nconst messageMatch = textData.match(/(?:message\"\\s*:\\s*\")([^\"]+)/i);\nconst message = messageMatch ? messageMatch[1].replace(/\\\\n/g, '\\n') : \"Hola, te contacto de GenerArise.\";\n\nreturn [{\n  json: {\n    phone: phone,\n    message: message,\n    toolCallId: toolCall.id\n  }\n}];"
+      },
+      "id": "12349841-3294-4328-9412-329482394823",
+      "name": "Nuclear Bypass v2.3",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.generarise.space/message/sendButtons/GenerArise",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "6B9DEA02F90C-4D11-9543-583DB047694E"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.phone }}\",\n  \"title\": \"🚀 Propuesta Estratégica\",\n  \"description\": \"{{ $json.message }}\",\n  \"footer\": \"GenerArise Agency\",\n  \"media\": {\n    \"type\": \"image\",\n    \"url\": \"https://generarise.space/downloads/brochure_cover.jpg\"\n  },\n  \"buttons\": [\n    {\n      \"type\": \"reply\",\n      \"displayText\": \"📅 Agendar Auditoría\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "55529841-3294-4328-9412-329482394823",
+      "name": "Evolution API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        540,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $node['Nuclear Bypass v2.3'].json.toolCallId }}\",\n      \"result\": \"Mensaje de WhatsApp enviado correctamente.\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "99929841-3294-4328-9412-329482394823",
+      "name": "Final Response Vapi",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        760,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Vapi": {
+      "main": [
+        [
+          {
+            "node": "Nuclear Bypass v2.3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nuclear Bypass v2.3": {
+      "main": [
+        [
+          {
+            "node": "Evolution API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evolution API": {
+      "main": [
+        [
+          {
+            "node": "Final Response Vapi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f22"
+}

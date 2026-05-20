@@ -1,0 +1,252 @@
+{
+    "name": "STEFAN_V6_DUAL_MASTER",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "vapi-stefan-v6",
+                "options": {},
+                "responseMode": "responseNode"
+            },
+            "id": "st-webhook-vapi-v6",
+            "name": "Webhook VAPI",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $json.body.message.toolCalls[0].id }}\",\n      \"result\": \"Message sent\"\n    }\n  ]\n}",
+                "options": {}
+            },
+            "id": "st-resp-vapi-v6",
+            "name": "Respond to VAPI",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                240,
+                -40
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "Austria",
+                "options_message": {
+                    "number": "={{ $json.body.message.toolCalls[0].function.arguments.phone.replace(/[^0-9]/g, '') + '@s.whatsapp.net' }}",
+                    "textMessage": {
+                        "text": "={{ $json.body.message.toolCalls[0].function.arguments.message }}"
+                    }
+                }
+            },
+            "id": "st-evo-vapi-v6",
+            "name": "Evolution VAPI",
+            "type": "n8n-nodes-base.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                480,
+                0
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "Austria"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "chat-stefan-v6",
+                "options": {},
+                "responseMode": "responseNode"
+            },
+            "id": "st-webhook-wa-v6",
+            "name": "Webhook WA",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                360
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "{\"status\":\"success\"}",
+                "options": {}
+            },
+            "id": "st-resp-wa-v6",
+            "name": "Respond to WA",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                240,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "st-wa-phone",
+                            "name": "phone",
+                            "value": "={{ ($json.body.data?.key?.remoteJid || $json.body.key?.remoteJid || \"\").replace(/[^0-9]/g, '') }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "st-wa-text",
+                            "name": "text",
+                            "value": "={{ $json.body.data?.message?.conversation || $json.body.data?.message?.extendedTextMessage?.text || $json.body.message?.conversation || \"Me gustaría saber más\" }}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "st-extractor-wa-v6",
+            "name": "Extractor WA",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                240,
+                440
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile",
+                "options": {
+                    "temperature": 0.7
+                }
+            },
+            "id": "st-groq-wa-v6",
+            "name": "Groq LLM WA",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                540,
+                580
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres Stefan, Hunter de Hotelería 4.0 para Argenterio AI.\n\nMENSAJE DEL USUARIO: {{ $json.text }}\n\nINSTRUCCIONES CRÍTICAS:\n1. HABLA COMO UN PROFESIONAL HUMANO. Demuestra autoridad y elegancia.\n2. Evita a toda costa dar el enlace del calendario en la primera interacción. Engancha primero mediante charla o preguntas de valor sobre hoteles.\n3. Si el usuario ya demuestra interés para hablar, o solicita videollamada, recién ahí puedes dar: https://cal.com/gustavo-a.-dornhofer-nqjqos/argenterio\n4. SOLAMENTE TEXTO plano.",
+                "hasOutputParser": true
+            },
+            "id": "st-ai-wa-v6",
+            "name": "AI Chain WA",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                540,
+                440
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "Austria",
+                "options_message": {
+                    "number": "={{ $json.phone + '@s.whatsapp.net' }}",
+                    "textMessage": {
+                        "text": "={{ $node[\"AI Chain WA\"].json.text }}"
+                    }
+                }
+            },
+            "id": "st-evo-wa-v6",
+            "name": "Evolution WA",
+            "type": "n8n-nodes-base.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                860,
+                440
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "Austria"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook VAPI": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to VAPI",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Evolution VAPI",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook WA": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to WA",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Extractor WA",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extractor WA": {
+            "main": [
+                [
+                    {
+                        "node": "AI Chain WA",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq LLM WA": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Chain WA",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Chain WA": {
+            "main": [
+                [
+                    {
+                        "node": "Evolution WA",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

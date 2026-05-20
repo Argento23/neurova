@@ -1,0 +1,156 @@
+{
+    "name": "Agente Director Creativo IA",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "trigger-manual",
+            "name": "Cuando se hace clic en Ejecutar",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                380,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "modelId": {
+                    "__rl": true,
+                    "value": "gpt-4o",
+                    "mode": "list",
+                    "cachedResultName": "GPT-4o"
+                },
+                "messages": {
+                    "values": [
+                        {
+                            "content": "Eres un Director Creativo experto en Marketing Digital y Arte Generativo.\n\nTu objetivo es recibir un TEMA o PRODUCTO y generar todos los assets creativos necesarios (en texto) para una campaña viral.\n\nDebes devolver un JSON estructurado (sin bloques de código, solo el JSON puro) con los siguientes campos:\n- \"titulo_campana\": Un título corto y pegadizo.\n- \"post_copy_instagram\": El texto para el post de Instagram, con emojis y hashtags.\n- \"post_copy_linkedin\": El texto profesional para LinkedIn.\n- \"image_prompt_dalle\": Un prompt MUY detallado, en inglés, optimizado para DALL-E 3. Describe iluminación, estilo (ej: cyberpunk, minimalista), cámara, composición.\n- \"video_prompt_runway\": Un prompt descriptivo para generar un video de 4 segundos en herramientas como Runway o Pika.\n- \"video_script_narrator\": Un guion corto de 15 segundos para que un avatar lo lea.\n\nINPUT DEL USUARIO:\n{{ $json.topic }}"
+                        }
+                    ]
+                },
+                "jsonOutput": true
+            },
+            "id": "agent-llm",
+            "name": "Agente Creativo (GPT-4o)",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                600,
+                240
+            ],
+            "credentials": {
+                "openaiApi": {
+                    "id": "YOUR_OPENAI_CREDENTIAL_ID",
+                    "name": "OpenAI account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "prompt": "={{ $json.image_prompt_dalle }}",
+                "n": 1,
+                "size": "1024x1024",
+                "responseFormat": "url"
+            },
+            "id": "generate-image",
+            "name": "Generar Banner (DALL-E 3)",
+            "type": "n8n-nodes-base.openai",
+            "typeVersion": 1.1,
+            "position": [
+                960,
+                140
+            ],
+            "credentials": {
+                "openaiApi": {
+                    "id": "YOUR_OPENAI_CREDENTIAL_ID",
+                    "name": "OpenAI account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "content": "## Campaña Generada: {{ $json.titulo_campana }}\n\n### 📸 Prompt de Imagen (Usado):\n> {{ $json.image_prompt_dalle }}\n\n### 🎥 Prompt de Video:\n> {{ $json.video_prompt_runway }}\n\n### 🗣️ Guion Avatar:\n> {{ $json.video_script_narrator }}\n\n### 📱 Copy Instagram:\n{{ $json.post_copy_instagram }}\n\n### 💼 Copy LinkedIn:\n{{ $json.post_copy_linkedin }}\n\n![Banner Generado]({{ $('generate-image').item.json.url }})"
+            },
+            "id": "format-output",
+            "name": "Formatear Resultado",
+            "type": "n8n-nodes-base.markdown",
+            "typeVersion": 1,
+            "position": [
+                1220,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "topic",
+                            "value": "Lanzamiento de un nuevo servicio de Automatización de Ventas con IA para Inmobiliarias",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "input-data",
+            "name": "Definir Tema (Input)",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                180,
+                240
+            ]
+        }
+    ],
+    "pinData": {},
+    "connections": {
+        "Cuando se hace clic en Ejecutar": {
+            "main": [
+                [
+                    {
+                        "node": "Agente Creativo (GPT-4o)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Definir Tema (Input)": {
+            "main": [
+                [
+                    {
+                        "node": "Cuando se hace clic en Ejecutar",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Agente Creativo (GPT-4o)": {
+            "main": [
+                [
+                    {
+                        "node": "Generar Banner (DALL-E 3)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Formatear Resultado",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generar Banner (DALL-E 3)": {
+            "main": [
+                [
+                    {
+                        "node": "Formatear Resultado",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

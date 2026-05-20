@@ -1,0 +1,313 @@
+{
+  "version": "1.0",
+  "lastGenerated": null,
+  "weekTemplate": [
+    {
+      "dayOfWeek": 1,
+      "slots": [
+        {
+          "time": "09:00",
+          "type": "tip_practico",
+          "platforms": [
+            "instagram",
+            "facebook"
+          ],
+          "language": "es"
+        },
+        {
+          "time": "15:00",
+          "type": "tendencia_ia",
+          "platforms": [
+            "instagram",
+            "facebook",
+            "tiktok"
+          ],
+          "language": "es"
+        }
+      ]
+    },
+    {
+      "dayOfWeek": 2,
+      "slots": [
+        {
+          "time": "09:00",
+          "type": "caso_uso",
+          "platforms": [
+            "instagram",
+            "facebook"
+          ],
+          "language": "es"
+        },
+        {
+          "time": "18:00",
+          "type": "video_corto",
+          "platforms": [
+            "instagram",
+            "facebook",
+            "tiktok",
+            "youtube"
+          ],
+          "language": "es"
+        }
+      ]
+    },
+    {
+      "dayOfWeek": 3,
+      "slots": [
+        {
+          "time": "09:00",
+          "type": "educacion",
+          "platforms": [
+            "instagram",
+            "facebook"
+          ],
+          "language": "es"
+        },
+        {
+          "time": "14:00",
+          "type": "tip_practico",
+          "platforms": [
+            "instagram",
+            "facebook"
+          ],
+          "language": "es"
+        },
+        {
+          "time": "20:00",
+          "type": "video_corto",
+          "platforms": [
+            "instagram",
+            "facebook",
+            "tiktok"
+          ],
+          "language": "es"
+        }
+      ]
+    },
+    {
+      "dayOfWeek": 4,
+      "slots": [
+        {
+          "time": "09:00",
+          "type": "behind_scenes",
+          "platforms": [
+            "instagram",
+            "facebook",
+            "tiktok"
+          ],
+          "language": "es"
+        },
+        {
+          "time": "19:00",
+          "type": "quote",
+          "platforms": [
+            "instagram",
+            "facebook"
+          ],
+          "language": "es"
+        }
+      ]
+    },
+    {
+      "dayOfWeek": 5,
+      "slots": [
+        {
+          "time": "10:00",
+          "type": "tendencia_ia",
+          "platforms": [
+            "instagram",
+            "facebook"
+          ],
+          "language": "es"
+        },
+        {
+          "time": "18:00",
+          "type": "video_corto",
+          "platforms": [
+            "instagram",
+            "facebook",
+            "tiktok",
+            "youtube"
+          ],
+          "language": "es"
+        }
+      ]
+    },
+    {
+      "dayOfWeek": 6,
+      "slots": [
+        {
+          "time": "11:00",
+          "type": "educacion",
+          "platforms": [
+            "instagram",
+            "facebook"
+          ],
+          "language": "es"
+        }
+      ]
+    },
+    {
+      "dayOfWeek": 0,
+      "slots": [
+        {
+          "time": "17:00",
+          "type": "community",
+          "platforms": [
+            "instagram",
+            "facebook"
+          ],
+          "language": "es"
+        }
+      ]
+    }
+  ],
+  "topicBank": {
+    "tip_practico": [
+      "Cómo automatizar respuestas de WhatsApp en 5 minutos",
+      "3 formas de usar IA para calificar leads automáticamente",
+      "El truco de automatización que ahorra 10 horas/semana",
+      "Cómo conectar tu CRM a WhatsApp sin código",
+      "5 tareas que tu negocio debería automatizar hoy"
+    ],
+    "caso_uso": [
+      "Cómo un hotel redujo 40% sus tiempos de respuesta con IA",
+      "Case Study: clínica estética automatizó 80% de sus consultas",
+      "De 10 a 100 leads/mes: el poder de la automatización B2B"
+    ],
+    "tendencia_ia": [
+      "Agentes autónomos: la revolución del 2026",
+      "GPT vs Agentes: ¿cuál es la diferencia real?",
+      "El futuro de las ventas B2B con inteligencia artificial"
+    ],
+    "behind_scenes": [
+      "Así se ve nuestro dashboard de automatización en tiempo real",
+      "Un día en GenerArise: creando agentes de IA",
+      "El stack tecnológico detrás de nuestros agentes"
+    ],
+    "quote": [
+      "La IA no te va a reemplazar. Te va a reemplazar alguien que use IA.",
+      "Automatizar no es despedir. Es liberar talento para lo que importa.",
+      "El mejor vendedor no descansa, no se enferma y habla 30 idiomas."
+    ],
+    "educacion": [
+      "Tutorial: Conectar CRM con WhatsApp paso a paso",
+      "Qué es un Agente de IA y cómo funciona (explicado simple)",
+      "3 pasos para crear tu primer flujo de automatización"
+    ],
+    "community": [
+      "¿Cuál es tu mayor dolor operativo en tu negocio?",
+      "¿Qué tarea repetitiva te gustaría automatizar primero?",
+      "Si pudieras clonar a un empleado, ¿cuál sería?"
+    ],
+    "video_corto": [
+      "3 cosas que tu negocio debería automatizar HOY",
+      "Así suena un agente de IA atendiendo clientes a las 3AM",
+      "El secreto de las empresas que escalan sin contratar",
+      "Watch this AI agent book a hotel room in 30 seconds"
+    ]
+  },
+  "posts": [
+    {
+      "id": "post_1778260011737_wemz",
+      "date": "2026-05-08",
+      "type": "tendencia_ia",
+      "topic": "GPT vs Agentes: ¿cuál es la diferencia real?",
+      "language": "es",
+      "platforms": [
+        "instagram",
+        "facebook"
+      ],
+      "publishTime": "10:00",
+      "caption": "¡Feliz Día Mundial de la Liberación de la Información! 🌎💻\nHoy, 8 de mayo, es un día para reflexionar sobre el poder de la información y cómo la tecnología está cambiando la forma en que la procesamos. \nEn el mundo de la IA, una de las discusiones más candentes es la diferencia entre GPT y Agentes. ¿Cuál es la diferencia real? 🤔\nLa verdad es que, en muchos casos, los profesionales de la información se encuentran perdidos en un mar de términos y tecnologías emergentes. 🌊\nEn GenerArise, entendemos que la clave para aprovechar al máximo la IA es entender sus componentes y cómo interactúan. \nGPT se enfoca en el procesamiento del lenguaje natural, mientras que los Agentes están diseñados para tomar decisiones y realizar acciones en un entorno determinado. 🤖\nEntender esta diferencia es crucial para desarrollar soluciones efectivas y eficientes. \n¿Quieres saber más sobre cómo la IA puede revolucionar tu negocio? 🚀\nComenta abajo con tus preguntas o comparte este post con alguien que pueda beneficiarse de esta información. ¡Guarda este post para futuras referencias! 📚\n\n#tendencia_ia #GPT #Agentes #LiberacionDeLaInformacion #IA #InteligenciaArtificial #Tecnologia #Innovacion #Negocios #GenerArise #AutomatizacionIA #InteligenciaArtificial",
+      "hashtags": [
+        "#tendencia_ia",
+        "#GPT",
+        "#Agentes",
+        "#LiberacionDeLaInformacion",
+        "#IA",
+        "#InteligenciaArtificial",
+        "#Tecnologia",
+        "#Innovacion",
+        "#Negocios",
+        "#GenerArise",
+        "#AutomatizacionIA",
+        "#InteligenciaArtificial"
+      ],
+      "imageUrl": null,
+      "imagePath": "C:\\Users\\Gustavo\\Downloads\\neurova\\content-factory\\output\\images\\post_1778260011737_wemz.jpg",
+      "videoPath": null,
+      "status": "partial",
+      "error": null,
+      "createdAt": "2026-05-08T17:06:51.737Z",
+      "publishedAt": "2026-05-08T17:09:59.495Z",
+      "publishResults": [
+        {
+          "platform": "instagram",
+          "success": false,
+          "error": "timeout of 30000ms exceeded"
+        },
+        {
+          "platform": "facebook",
+          "success": true
+        }
+      ]
+    },
+    {
+      "id": "post_1778260011738_xyub",
+      "date": "2026-05-08",
+      "type": "video_corto",
+      "topic": "El secreto de las empresas que escalan sin contratar",
+      "language": "es",
+      "platforms": [
+        "instagram",
+        "facebook",
+        "tiktok",
+        "youtube"
+      ],
+      "publishTime": "18:00",
+      "caption": "¿Sabes qué hace que algunas empresas escalen sin necesidad de contratar a más personal? 🤔\nHoy, 8 de mayo, es el Día Mundial de la Reducción de Riesgos, y queremos hablar sobre cómo reducir el riesgo de estancamiento en tu negocio. 🌎\nMuchas empresas creen que el crecimiento requiere más personal, pero la verdad es que a menudo se trata de optimizar procesos y automatizar tareas. 🤖\nEn GenerArise, hemos visto cómo las empresas que se enfocan en la eficiencia y la innovación pueden escalar de manera exponencial sin necesidad de aumentar su plantilla. 🚀\n¿Quieres saber el secreto? 🤫\nEs simple: identificar y automatizar las tareas que te quitan tiempo y recursos, y enfocarte en lo que realmente importa: innovar y crear valor. 💡\nAsí que, ¿qué tarea vas a automatizar hoy? 📅\nComparte con nosotros en los comentarios y no te olvides de guardar este video para que puedas volver a él más tarde. ¡Y si te gustó, compártelo con alguien que pueda necesitar escalar su negocio! 🤝\n\n#DíaMundialDeLaReducciónDeRiesgos #EscaladoEmpresarial #Automatización #Innovación #Eficiencia #Emprendimiento #Negocios #CrecimientoEmpresarial #GenerArise #AutomatizacionIA #InteligenciaArtificial",
+      "hashtags": [
+        "#DíaMundialDeLaReducciónDeRiesgos",
+        "#EscaladoEmpresarial",
+        "#Automatización",
+        "#Innovación",
+        "#Eficiencia",
+        "#Emprendimiento",
+        "#Negocios",
+        "#CrecimientoEmpresarial",
+        "#GenerArise",
+        "#AutomatizacionIA",
+        "#InteligenciaArtificial"
+      ],
+      "imageUrl": null,
+      "imagePath": null,
+      "videoPath": "C:\\Users\\Gustavo\\Downloads\\neurova\\content-factory\\output\\videos\\post_1778260011738_xyub.mp4",
+      "status": "partial",
+      "error": null,
+      "createdAt": "2026-05-08T17:06:51.738Z",
+      "publishedAt": "2026-05-08T21:00:27.402Z",
+      "publishResults": [
+        {
+          "platform": "instagram",
+          "success": false,
+          "error": "IG container processing error for 17871573993669391"
+        },
+        {
+          "platform": "facebook",
+          "success": false,
+          "error": "Request failed with status code 400"
+        },
+        {
+          "platform": "tiktok",
+          "success": true
+        },
+        {
+          "platform": "youtube",
+          "success": false,
+          "error": "Request failed with status code 400"
+        }
+      ]
+    }
+  ]
+}

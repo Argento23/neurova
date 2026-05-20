@@ -1,0 +1,578 @@
+{
+    "name": "Autonomous Sales Agent v15 (MEMORY CHECK)",
+    "nodes": [
+        {
+            "parameters": {},
+            "name": "Start Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                -400,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "values": {
+                    "string": [
+                        {
+                            "name": "search_term",
+                            "value": "Inmobiliarias"
+                        },
+                        {
+                            "name": "location",
+                            "value": "Buenos Aires, Argentina"
+                        },
+                        {
+                            "name": "target_audience",
+                            "value": "Empresas que necesiten automatización con IA"
+                        },
+                        {
+                            "name": "sender_email",
+                            "value": "gustavo@neurova.ai"
+                        },
+                        {
+                            "name": "sheet_id",
+                            "value": "PON_TU_ID_AQUI_MANUALMENTE"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "CONFIGURACION",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 1,
+            "position": [
+                -200,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "documentId": {
+                    "__rl": true,
+                    "value": "PON_TU_ID_AQUI_MANUALMENTE",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "Hoja 1",
+                    "mode": "list"
+                },
+                "options": {}
+            },
+            "name": "Cargar Memoria (Sheets)",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                0,
+                460
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+                    "name": "Google Sheets"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "url": "https://serpapi.com/search.json",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "queryAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "api_key",
+                            "value": "9be0d43581dc9220232e9a2819f308c303a32082a1e62f97c9c87b75dfde8d72"
+                        },
+                        {
+                            "name": "engine",
+                            "value": "google_maps"
+                        },
+                        {
+                            "name": "q",
+                            "value": "={{ $json[\"search_term\"] + \" en \" + $json[\"location\"] }}"
+                        },
+                        {
+                            "name": "type",
+                            "value": "search"
+                        },
+                        {
+                            "name": "num",
+                            "value": "10"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "SerpApi - Maps Scraper",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                0,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "local_results",
+                "options": {}
+            },
+            "name": "Separar Resultados",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 1,
+            "position": [
+                220,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// FILTRO DE MEMORIA\nconst nuevos = $input.all();\nconst viejos = $('Cargar Memoria (Sheets)').all().map(item => item.json.Empresa);\n\n// Filtramos los que NO están en la lista de viejos\nreturn nuevos.filter(lead => !viejos.includes(lead.json.title));"
+            },
+            "name": "Filtro de Memoria (Code)",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                440,
+                300
+            ],
+            "notesInFlow": true,
+            "notes": "Solo deja pasar los leads cuyo nombre NO existe en el Excel."
+        },
+        {
+            "parameters": {
+                "batchSize": 1,
+                "options": {}
+            },
+            "name": "Loop (1 por 1)",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 2,
+            "position": [
+                660,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "={{ $json.website }}",
+                "options": {
+                    "redirect": {
+                        "redirect": {
+                            "maxRedirects": 3
+                        }
+                    },
+                    "timeout": 5000
+                }
+            },
+            "name": "Visitar Pagina Web",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                880,
+                300
+            ],
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "jsCode": "const html = $input.item.json.data || '';\nconst text = html.replace(/<[^>]*>?/gm, ' ');\nreturn { text_content: text.substring(0, 5000) };"
+            },
+            "name": "Limpiar HTML",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "modelName": "models/gemini-1.5-flash",
+                "options": {}
+            },
+            "name": "Google Gemini Chat Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+            "typeVersion": 1,
+            "position": [
+                1320,
+                540
+            ],
+            "credentials": {
+                "googlePalmApi": {
+                    "id": "YOUR_GEMINI_CREDENTIAL_ID",
+                    "name": "Google Gemini Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Analiza el texto de esta web inmobiliaria:\n\n---\n{{ $json.text_content }}\n---\n\nDATOS:\nNombre: {{ $('Loop (1 por 1)').item.json.title }}\n\nTAREA:\n1. Busca un EMAIL de contacto real.\n2. Califica (1-10) si podrían beneficiarse de un Chatbot IA que atienda leads 24/7.\n3. Redacta un EMAIL DE VENTA AGRESIVO pero profesional. \n   - Asunto: Algo que llame la atención sobre perder ventas.\n   - Cuerpo: Ofrece una demo de Neurova AI para automatizar su atención al cliente.\n\nJSON:\n{ \n  \"score\": 8, \n  \"email_address\": \"...\", \n  \"email_subject\": \"...\",\n  \"email_body\": \"<p>Hola team...</p>\",\n  \"reason\": \"...\"\n}",
+                "hasOutputParser": true
+            },
+            "name": "Gemini - Vendedor",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1320,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "try {\n  let content = $input.item.json.text || '';\n  if (content.includes(\"safe\")) throw new Error(\"Safety Filter\");\n\n  content = content.replace(/```json/g, '').replace(/```/g, '').trim();\n  const parsed = JSON.parse(content);\n  return parsed;\n} catch (error) {\n  return {\n    score: 0,\n    email_address: \"\",\n    reason: \"Error IA o Sin Datos\"\n  };\n}"
+            },
+            "name": "JSON Parser",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1540,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "number": [
+                        {
+                            "value1": "={{ $json.score }}",
+                            "operation": "largerEqual",
+                            "value2": 7
+                        }
+                    ],
+                    "string": [
+                        {
+                            "value1": "={{ $json.email_address }}",
+                            "operation": "isNotEmpty"
+                        }
+                    ]
+                }
+            },
+            "name": "Filtro Final",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                1760,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "senderEmail": "={{ $('CONFIGURACION').item.json.sender_email }}",
+                "toEmail": "={{ $json.email_address }}",
+                "subject": "={{ $json.email_subject }}",
+                "htmlContent": "={{ $json.email_body }}"
+            },
+            "name": "Brevo - Enviar Email",
+            "type": "n8n-nodes-base.sendInBlue",
+            "typeVersion": 2,
+            "position": [
+                1980,
+                180
+            ],
+            "credentials": {
+                "sendInBlueApi": {
+                    "id": "YOUR_BREVO_CREDENTIAL_ID",
+                    "name": "Brevo/Sendinblue"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "PON_TU_ID_AQUI_MANUALMENTE",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "Hoja 1",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Fecha": "={{ $now.toISO() }}",
+                        "Empresa": "={{ $('Loop (1 por 1)').item.json.title }}",
+                        "Email Enviado": "SI",
+                        "Destinatario": "={{ $json.email_address }}",
+                        "Asunto": "={{ $json.email_subject }}",
+                        "Motivo": "Exito"
+                    }
+                },
+                "options": {}
+            },
+            "name": "Log: EXITO",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                2200,
+                180
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+                    "name": "Google Sheets"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "PON_TU_ID_AQUI_MANUALMENTE",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "Hoja 1",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Fecha": "={{ $now.toISO() }}",
+                        "Empresa": "={{ $('Loop (1 por 1)').item.json.title }}",
+                        "Email Enviado": "NO",
+                        "Motivo": "{{ $json.reason || 'Sin email/Low score' }}",
+                        "Destinatario": "N/A",
+                        "Asunto": "N/A"
+                    }
+                },
+                "options": {}
+            },
+            "name": "Log: DESCARTE",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                2000,
+                460
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+                    "name": "Google Sheets"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "amount": 2,
+                "unit": "seconds"
+            },
+            "name": "Esperar 2s",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                2420,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Start Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "CONFIGURACION",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "CONFIGURACION": {
+            "main": [
+                [
+                    {
+                        "node": "SerpApi - Maps Scraper",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Cargar Memoria (Sheets)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Cargar Memoria (Sheets)": {
+            "main": [
+                [
+                    {
+                        "node": "Filtro de Memoria (Code)",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "SerpApi - Maps Scraper": {
+            "main": [
+                [
+                    {
+                        "node": "Separar Resultados",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Separar Resultados": {
+            "main": [
+                [
+                    {
+                        "node": "Filtro de Memoria (Code)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtro de Memoria (Code)": {
+            "main": [
+                [
+                    {
+                        "node": "Loop (1 por 1)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop (1 por 1)": {
+            "main": [
+                [
+                    {
+                        "node": "Visitar Pagina Web",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Visitar Pagina Web": {
+            "main": [
+                [
+                    {
+                        "node": "Limpiar HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Limpiar HTML": {
+            "main": [
+                [
+                    {
+                        "node": "Gemini - Vendedor",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Gemini Chat Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Gemini - Vendedor",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Gemini - Vendedor": {
+            "main": [
+                [
+                    {
+                        "node": "JSON Parser",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "JSON Parser": {
+            "main": [
+                [
+                    {
+                        "node": "Filtro Final",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtro Final": {
+            "main": [
+                [
+                    {
+                        "node": "Brevo - Enviar Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Log: DESCARTE",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Brevo - Enviar Email": {
+            "main": [
+                [
+                    {
+                        "node": "Log: EXITO",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Log: EXITO": {
+            "main": [
+                [
+                    {
+                        "node": "Esperar 2s",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Log: DESCARTE": {
+            "main": [
+                [
+                    {
+                        "node": "Esperar 2s",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Esperar 2s": {
+            "main": [
+                [
+                    {
+                        "node": "Loop (1 por 1)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

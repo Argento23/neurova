@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GenerArise Agency - Marketing Augmented 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #06b6d4;
+            --secondary: #3b82f6;
+            --bg: #030712;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-dark {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gradient-border {
+            position: relative;
+            border-radius: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.5s ease;
+        }
+
+        .gradient-border::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: 2rem;
+            padding: 1px;
+            background: linear-gradient(135deg, var(--primary), transparent, var(--secondary));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0.5;
+        }
+
+        .hero-glow {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .card-hover:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(6, 182, 212, 0.4);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+
+            .glass {
+                border: 1px solid #ddd;
+                background: white;
+                box-shadow: none;
+            }
+
+            .gradient-text {
+                -webkit-text-fill-color: #06b6d4;
+            }
+        }
+    </style>
+</head>
+
+<body class="selection:bg-cyan-500/30">
+    <div class="hero-glow"></div>
+
+    <!-- Navigation -->
+    <nav class="p-8 flex justify-between items-center max-w-7xl mx-auto">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 glass flex items-center justify-center rounded-xl border-cyan-500/30">
+                <span class="text-2xl font-bold text-cyan-400">G</span>
+            </div>
+            <span class="text-2xl font-bold tracking-tight">Gener<span class="text-cyan-400">Arise</span></span>
+        </div>
+        <div class="hidden md:flex gap-8 text-sm font-medium text-slate-400 uppercase tracking-widest">
+            <span class="hover:text-cyan-400 cursor-pointer transition-colors">Agencia</span>
+            <span class="hover:text-cyan-400 cursor-pointer transition-colors">Servicios</span>
+            <span class="hover:text-cyan-400 cursor-pointer transition-colors">Estrategia</span>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-20 pb-32 px-6 overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col items-center text-center space-y-10">
+                <div
+                    class="glass px-6 py-2 rounded-full border-cyan-500/20 text-cyan-400 text-xs font-bold tracking-[0.3em] uppercase">
+                    Innovación & Escalabilidad 2026
+                </div>
+                <h1 class="text-6xl md:text-9xl font-bold tracking-tighter leading-[0.9]">
+                    Marketing <br>
+                    <span class="gradient-text">Aumentado</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-slate-400 max-w-3xl font-light leading-relaxed">
+                    Sincronizamos inteligencia artificial avanzada con arquitecturas de conversión para escalar tu
+                    negocio de forma autónoma.
+                </p>
+                <div class="pt-10 flex flex-col md:flex-row gap-6">
+                    <a href="https://cal.com/gustavo-a.-dornhofer-nqjqos/auditoria-ia-gratuita-free-ai-audit-kostenloses-ki-audit" target="_blank"
+                        class="bg-cyan-500 hover:bg-cyan-400 text-black px-12 py-5 rounded-2xl font-bold text-lg transition-all shadow-lg shadow-cyan-500/20 active:scale-95 flex items-center justify-center">
+                        Agendar Auditoría IA
+                    </a>
+                    <button
+                        class="glass px-12 py-5 rounded-2xl font-bold text-lg hover:bg-white/5 transition-all active:scale-95">
+                        Ver Portafolio
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Decorative Elements -->
+        <div class="absolute -top-20 -left-20 w-80 h-80 bg-cyan-500/10 rounded-full blur-[100px] pointer-events-none">
+        </div>
+        <div class="absolute top-40 -right-20 w-80 h-80 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none">
+        </div>
+    </section>
+
+    <!-- The Vision / Image Showcase -->
+    <section class="py-32 px-6 max-w-7xl mx-auto grid md:grid-cols-2 gap-20 items-center">
+        <div class="space-y-8">
+            <h2 class="text-5xl font-bold leading-tight">¿Por qué <span class="text-cyan-500">GenerArise?</span></h2>
+            <p class="text-xl text-slate-400 leading-relaxed font-light">
+                No somos una agencia tradicional. Somos ingenieros de automatización e inteligencia artificial 
+                dedicados a construir máquinas de ventas que operan sin intervención humana.
+            </p>
+            <ul class="space-y-6 text-slate-300">
+                <li class="flex items-start gap-4">
+                    <div class="mt-1 w-6 h-6 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-500">✓</div>
+                    <div>
+                        <span class="font-bold text-white block">Arquitectura Inteligente</span>
+                        Construimos sobre n8n, Groq y Vapi para flujos de conversión de alta gama.
+                    </div>
+                </li>
+                <li class="flex items-start gap-4">
+                    <div class="mt-1 w-6 h-6 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-500">✓</div>
+                    <div>
+                        <span class="font-bold text-white block">Resultados Matemáticos</span>
+                        Reducción drástica del CPL asumiendo la calificación de leads al 100%.
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="relative">
+            <div class="glass p-2 rounded-[40px] rotate-2 scale-105 overflow-hidden">
+                <img src="assets/tmpnv8l6a33.png"
+                    alt="GenerArise Tech Command Center" class="rounded-[38px] opacity-80 mix-blend-screen">
+            </div>
+            <div class="absolute -bottom-10 -left-10 glass p-8 rounded-3xl -rotate-3 border-cyan-500/30">
+                <p class="text-sm font-bold">"El salto evolutivo en ventas digitales."</p>
+                <p class="text-[10px] text-slate-500 uppercase mt-1">Marketing 4.0 Standard</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Services -->
+    <section class="py-24 px-6 bg-slate-900/20">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Card 1 -->
+                <div class="glass p-10 rounded-[32px] card-hover transition-all duration-500 space-y-6 group">
+                    <div
+                        class="w-16 h-16 bg-cyan-500/10 rounded-2xl flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
+                        🤖</div>
+                    <h3 class="text-2xl font-bold">Bots de Venta AI</h3>
+                    <p class="text-slate-400 font-light leading-relaxed">Sistemas de atención multicanal que califican
+                        leads y cierran citas 24/7 sin intervención humana.</p>
+                </div>
+                <!-- Card 2 -->
+                <div class="glass p-10 rounded-[32px] card-hover transition-all duration-500 space-y-6 group">
+                    <div
+                        class="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
+                        🎬</div>
+                    <h3 class="text-2xl font-bold">Ad Video Mastery</h3>
+                    <p class="text-slate-400 font-light leading-relaxed">Generación masiva de creativos de video con IA
+                        para Facebook, TikTok e YouTube Ads.</p>
+                </div>
+                <!-- Card 3 -->
+                <div class="glass p-10 rounded-[32px] card-hover transition-all duration-500 space-y-6 group">
+                    <div
+                        class="w-16 h-16 bg-cyan-500/10 rounded-2xl flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
+                        📉</div>
+                    <h3 class="text-2xl font-bold">Data Pipelines</h3>
+                    <p class="text-slate-400 font-light leading-relaxed">Conexión total entre n8n, CRM, Sheets y APIs
+                        para eliminar tareas repetitivas.</p>
+                </div>
+                <!-- Card 4 -->
+                <div class="glass p-10 rounded-[32px] card-hover transition-all duration-500 space-y-6 group">
+                    <div
+                        class="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
+                        🚀</div>
+                    <h3 class="text-2xl font-bold">Hyper-Scale</h3>
+                    <p class="text-slate-400 font-light leading-relaxed">Estrategias agresivas de crecimiento mediante
+                        automatización del ROI y LTV.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Promos & Offers (Sales Hunter Section) -->
+    <section class="py-24 px-6 bg-cyan-950/10 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-900/10 to-transparent pointer-events-none"></div>
+        <div class="max-w-7xl mx-auto space-y-20 relative z-10">
+            <div class="text-center space-y-4">
+                <h2 class="text-4xl font-bold">Ofertas Exclusivas de <span class="text-cyan-400">Onboarding</span></h2>
+                <div class="w-20 h-1 bg-cyan-500 mx-auto rounded-full"></div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12">
+                <!-- Promo 1 -->
+                <div class="glass p-2 rounded-3xl group overflow-hidden border-cyan-500/20 hover:border-cyan-400 transition-colors">
+                    <div class="h-64 overflow-hidden rounded-[20px] relative">
+                        <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200" 
+                             alt="Auditoria Global" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute top-4 right-4 bg-cyan-500 text-black text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest">
+                            Cupos Limitados
+                        </div>
+                    </div>
+                    <div class="p-8 space-y-4">
+                        <h3 class="text-2xl font-bold">Auditoría IA + Setup Bonificado</h3>
+                        <p class="text-slate-400 font-light">
+                            Analizamos tus cuellos de botella actuales y estructuramos la arquitectura IA gratuita. Si apruebas, bonificamos el 50% del Setup inicial del bot.
+                        </p>
+                        <a href="https://cal.com/gustavo-a.-dornhofer-nqjqos/auditoria-ia-gratuita-free-ai-audit-kostenloses-ki-audit" target="_blank"
+                            class="inline-block mt-4 text-cyan-400 font-bold hover:text-cyan-300 transition-colors flex items-center gap-2">
+                            Aplica Ahora <span>→</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Promo 2 -->
+                <div class="glass p-2 rounded-3xl group overflow-hidden border-blue-500/20 hover:border-blue-400 transition-colors">
+                    <div class="h-64 overflow-hidden rounded-[20px] relative">
+                        <img src="https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&q=80&w=1200" 
+                             alt="Voice Bot Integration" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute top-4 right-4 bg-blue-500 text-white text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest">
+                            Implementación Rápida
+                        </div>
+                    </div>
+                    <div class="p-8 space-y-4">
+                        <h3 class="text-2xl font-bold">Acelerador de VoiceBots (Vapi)</h3>
+                        <p class="text-slate-400 font-light">
+                            Descuento agresivo en tu primera integración de asistente de voz. Agentes clonados listos para derivar llamadas en menos de 7 días.
+                        </p>
+                        <a href="https://cal.com/gustavo-a.-dornhofer-nqjqos/auditoria-ia-gratuita-free-ai-audit-kostenloses-ki-audit" target="_blank"
+                            class="inline-block mt-4 text-blue-400 font-bold hover:text-blue-300 transition-colors flex items-center gap-2">
+                            Agendar Demo <span>→</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Big Statement -->
+    <section class="py-40 px-6 relative">
+        <div
+            class="max-w-5xl mx-auto glass p-20 rounded-[64px] text-center space-y-12 border-white/5 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 -z-10"></div>
+            <h2 class="text-4xl md:text-7xl font-bold tracking-tight leading-tight">
+                "No solo creamos anuncios, <br>
+                <span class="text-cyan-400">creamos activos digitales</span> <br>
+                que trabajan por ti."
+            </h2>
+            <div class="flex flex-wrap justify-center gap-16 md:gap-32">
+                <div class="text-center">
+                    <p class="text-6xl font-bold gradient-text">10x</p>
+                    <p class="text-xs text-slate-500 uppercase tracking-widest mt-2">Plus de Velocidad</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-6xl font-bold gradient-text">-85%</p>
+                    <p class="text-xs text-slate-500 uppercase tracking-widest mt-2">Costo Operativo</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-6xl font-bold gradient-text">24h</p>
+                    <p class="text-xs text-slate-500 uppercase tracking-widest mt-2">Atención Total</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-20 px-6 text-center border-t border-white/5">
+        <div class="flex justify-center flex-wrap gap-12 mb-16 opacity-30 grayscale contrast-125">
+            <span class="text-2xl font-bold uppercase tracking-widest">Groq</span>
+            <span class="text-2xl font-bold uppercase tracking-widest">n8n</span>
+            <span class="text-2xl font-bold uppercase tracking-widest">Replicate</span>
+            <span class="text-2xl font-bold uppercase tracking-widest">Vapi</span>
+        </div>
+        <div class="max-w-2xl mx-auto space-y-6">
+            <div class="flex justify-center gap-3">
+                <div class="w-10 h-10 glass flex items-center justify-center rounded-lg">G</div>
+                <span class="text-xl font-bold">GenerArise Agency</span>
+            </div>
+            <p class="text-slate-500 text-sm tracking-widest uppercase">
+                &copy; 2026 Innovation Hub | studio.generarise.space
+            </p>
+        </div>
+    </footer>
+
+    <!-- Print Button -->
+    <div class="no-print fixed bottom-8 right-8">
+        <button onclick="window.print()"
+            class="bg-white text-black px-8 py-4 rounded-full font-bold shadow-2xl hover:scale-105 transition-transform active:scale-95">
+            Descargar PDF
+        </button>
+    </div>
+</body>
+
+</html>

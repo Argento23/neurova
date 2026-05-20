@@ -1,0 +1,118 @@
+{
+    "name": "CEREBRO_WHATSAPP_ALEX_V1",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "whatsapp-alex",
+                "options": {}
+            },
+            "id": "node-webhook",
+            "name": "Webhook Alex",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile",
+                "options": {
+                    "temperature": 0.7
+                }
+            },
+            "id": "node-groq",
+            "name": "Groq Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                300,
+                500
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres Alex, Senior SDR de GenerArise. Tu objetivo es cerrar auditorías de 15 min.\n\nIDENTIDAD: Agresivo, experto, directo. No pides permiso, das soluciones.\n\nCONTEXTO MENSAJE:\nUsuario: {{ $json.body.data.message.conversation || $json.body.data.message.extendedTextMessage.text }}\nTeléfono: {{ $json.body.data.key.remoteJid }}\n\nINSTRUCCIONES:\n1. Responde de forma persuasiva.\n2. Si preguntan precio, di que depende de la auditoría. \n3. Si están listos, envía el link de Cal.com: https://cal.com/gustavo-a.-dornhofer-nqjqos/argenterio\n4. RESPUESTA SOLO TEXTO.",
+                "hasOutputParser": true
+            },
+            "id": "node-ai-agent",
+            "name": "AI Agent Alex",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                300,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "GenerArise",
+                "options_message": {
+                    "number": "={{ $node[\"Webhook Alex\"].json.body.data.key.remoteJid }}",
+                    "textMessage": {
+                        "text": "={{ $json.text }}"
+                    }
+                }
+            },
+            "id": "node-evo",
+            "name": "Enviar WhatsApp (Alex)",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                550,
+                300
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook Alex": {
+            "main": [
+                [
+                    {
+                        "node": "AI Agent Alex",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Agent Alex",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Agent Alex": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp (Alex)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

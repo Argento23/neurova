@@ -1,0 +1,202 @@
+{
+    "name": "Shopify AdSniper AI - Wealth Multiplier V2 (Stealth Mode)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "shopify-adsniper",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "id": "webhook",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "={{ $json.body.product_url }}",
+                "options": {
+                    "redirect": {
+                        "redirect": true
+                    }
+                },
+                "headerParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "User-Agent",
+                            "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+                        },
+                        {
+                            "name": "Accept",
+                            "value": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+                        },
+                        {
+                            "name": "Accept-Language",
+                            "value": "es-ES,es;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
+                        },
+                        {
+                            "name": "Accept-Encoding",
+                            "value": "gzip, deflate, br"
+                        },
+                        {
+                            "name": "Referer",
+                            "value": "https://www.google.com/"
+                        },
+                        {
+                            "name": "Upgrade-Insecure-Requests",
+                            "value": "1"
+                        },
+                        {
+                            "name": "Sec-Fetch-Dest",
+                            "value": "document"
+                        },
+                        {
+                            "name": "Sec-Fetch-Mode",
+                            "value": "navigate"
+                        },
+                        {
+                            "name": "Sec-Fetch-Site",
+                            "value": "none"
+                        },
+                        {
+                            "name": "Sec-Fetch-User",
+                            "value": "?1"
+                        }
+                    ]
+                }
+            },
+            "id": "scrape",
+            "name": "Scrape Product",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                450,
+                300
+            ],
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "jsCode": "// Robust Extraction Logic (Regex + Schema.org)\nconst item = $input.item.json;\nconst html = item.data || '';\nconst url = $('Webhook').item.json.body.product_url || '';\n\nlet title = 'Producto Desconocido';\nlet description = 'Sin descripción disponible due to scraping protection.';\nlet price = 'Consultar';\nlet image = '';\n\n// Check if scraping succeeded\nif (html && typeof html === 'string' && html.length > 100) {\n    // 1. Regex Extraction (Meta Tags)\n    const titleMatch = html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i);\n    if (titleMatch) title = titleMatch[1].replace(/\\s+/g, ' ').trim();\n    \n    const descMatch = html.match(/<meta[^>]*name=[\"']description[\"'][^>]*content=[\"']([\\s\\S]*?)[\"']/i) ||\n                      html.match(/<meta[^>]*content=[\"']([\\s\\S]*?)[\"'][^>]*name=[\"']description[\"']/i);\n    if (descMatch) description = descMatch[1].replace(/\\s+/g, ' ').trim();\n\n    // Price Regex\n    const priceMatch = html.match(/[\"']price[\"']\\s*:\\s*[\"']?([0-9.,]+)[\"']?/i) || \n                       html.match(/class=[\"'][^\"']*price[^\"']*[\"'][^>]*>([$\\£\\€]?[0-9.,]+)/i);\n    if (priceMatch) price = priceMatch[1];\n\n    // Image Extraction Priority: Schema > OG > Twitter > SRC\n    \n    // A. Schema.org JSON-LD (Most Reliable for Shopify)\n    if (!image) {\n        try {\n            const schemaMatches = html.match(/<script type=[\"']application\\/ld\\+json[\"']>([\\s\\S]*?)<\\/script>/gi);\n            if (schemaMatches) {\n                for (const script of schemaMatches) {\n                    const jsonContent = script.replace(/<[^>]+>/g, '').trim();\n                    try {\n                        const data = JSON.parse(jsonContent);\n                        // Direct Image\n                        if (data.image) {\n                             image = Array.isArray(data.image) ? data.image[0] : (typeof data.image === 'string' ? data.image : data.image.url);\n                             if(image) break;\n                        }\n                        // Graph Structure\n                        if (data['@graph']) {\n                             const product = data['@graph'].find(i => i['@type'] === 'Product' || i['@type'] === 'ProductGroup');\n                             if (product && product.image) {\n                                  image = Array.isArray(product.image) ? product.image[0] : (typeof product.image === 'string' ? product.image : product.image.url);\n                                  if(image) break;\n                             }\n                        }\n                    } catch(e) {}\n                }\n            }\n        } catch(e) {}\n    }\n\n    // B. Open Graph Image\n    if (!image) {\n        const ogMatch = html.match(/<meta[^>]*property=[\"']og:image[\"'][^>]*content=[\"']([\\s\\S]*?)[\"']/i);\n        if (ogMatch) image = ogMatch[1];\n    }\n\n    // C. Twitter Image\n    if (!image) {\n        const twMatch = html.match(/<meta[^>]*name=[\"']twitter:image[\"'][^>]*content=[\"']([\\s\\S]*?)[\"']/i);\n        if (twMatch) image = twMatch[1];\n    }\n    \n    // D. Shopify specific fallback\n    if (!image) {\n         const shopifyMatch = html.match(/[\"']https:\\/\\/[^\"']*cdn.shopify.com[^\"']*products[^\"']*\\.(jpg|png|webp|jpeg)[\"']/i);\n         if (shopifyMatch) image = shopifyMatch[0].replace(/[\"']/g, '');\n    }\n}\n\n// Clean up title\nif (title.includes('|')) title = title.split('|')[0].trim();\nif (title.includes('-')) title = title.split('-')[0].trim();\n\n// Fallback Title\nif (title === 'Producto Desconocido') {\n    try {\n        const slug = url.split('/').pop().split('?')[0];\n        title = slug.replace(/-/g, ' ').replace(/\\b\\w/g, l => l.toUpperCase());\n        description = 'Este producto se llama ' + title + '. Genera anuncios basados en este nombre y la URL: ' + url;\n    } catch(e) {}\n}\n\n// Normalize Image URL (ensure protocol)\nif (image && image.startsWith('//')) image = 'https:' + image;\n\nreturn {\n  product_url: url,\n  title: title,\n  price: price,\n  description: description.substring(0, 3000),\n  main_image: image\n};"
+            },
+            "id": "normalize",
+            "name": "Extract & Normalize",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                700,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq_model",
+            "name": "Groq Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                950,
+                500
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=SYSTEM ROLE:\nYou are AdSniper, an elite Direct Response Copywriter.\nYour execution language is: {{ $json.body.language === 'en' ? 'ENGLISH' : 'SPANISH (Español)' }}.\n\nPRODUCT INFO:\nName: {{ $json.title }}\nPrice: {{ $json.price }}\nDescription: {{ $json.description }}\nImage URL: {{ $json.main_image }}\n\nTASK:\nGenerate 3 distinct Facebook Ad Variations for this product in {{ $json.body.language === 'en' ? 'ENGLISH' : 'SPANISH' }}.\n\nVARIATION 1: LOGIC & BENEFITS\nVARIATION 2: EMOTIONAL & DESIRE\nVARIATION 3: SCARCITY & FOMO\n\nOUTPUT FORMAT:\nReturn ONLY a valid JSON array of objects. Do not include markdown.\nExample:\n[\n  { \"type\": \"Logic\", \"headline\": \"...\", \"primary_text\": \"...\", \"image_prompt\": \"...\" },\n  ...\n]",
+                "hasOutputParser": true
+            },
+            "id": "ai_generator",
+            "name": "AdSniper AI Generator",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                950,
+                300
+            ],
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "jsCode": "const aiItem = $input.item.json;\nconst aiResponse = aiItem.output || aiItem.text || aiItem.response || '';\nlet ads = [];\n\n// Try to access previous node data for main_image\nconst prevData = $('Extract & Normalize').first().json;\n\nif (aiItem.error) {\n    ads = [{ type: 'Error', headline: 'Fallo en IA', primary_text: 'El modelo no respondió. Reintenta.', image_prompt: 'N/A' }];\n} else {\n    if (typeof aiResponse === 'string') {\n        try {\n            const cleanJson = aiResponse.replace(/^```json/, '').replace(/```$/, '').trim();\n            ads = JSON.parse(cleanJson);\n        } catch (e) {\n            ads = [{ type: 'Error', headline: 'Error Parsing AI', primary_text: aiResponse, image_prompt: 'N/A' }];\n        }\n    } else if (Array.isArray(aiResponse)) {\n        ads = aiResponse;\n    } else if (typeof aiResponse === 'object') {\n        ads = [aiResponse];\n    }\n}\n\nreturn {\n    ads: ads,\n    product_image: prevData.main_image || '',\n    product_title: prevData.title || ''\n};"
+            },
+            "id": "format_output",
+            "name": "Format Output",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1200,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Scrape Product",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Scrape Product": {
+            "main": [
+                [
+                    {
+                        "node": "Extract & Normalize",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract & Normalize": {
+            "main": [
+                [
+                    {
+                        "node": "AdSniper AI Generator",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AdSniper AI Generator",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AdSniper AI Generator": {
+            "main": [
+                [
+                    {
+                        "node": "Format Output",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

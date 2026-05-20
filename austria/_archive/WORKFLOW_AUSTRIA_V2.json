@@ -1,0 +1,274 @@
+{
+    "name": "Austria Voice Assistant V2",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "webhook-trigger",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                200,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// SIMULACIÓN DE RESPUESTA AI (Solo para pruebas)\n// En producción, esto vendría de tu nodo AI Agent o HTTP Request\n\nreturn [\n  {\n    json: {\n      // Caso 1: Solo voz\n      // response: '{\"respuesta_voz\": \"Hola, ¿en qué puedo ayudarte?\", \"accion_requerida\": \"info\"}'\n      \n      // Caso 2: Agendar cita\n      response: '{\"respuesta_voz\": \"Perfecto, te envío mi calendario.\", \"accion_requerida\": \"agendar\"}'\n    }\n  }\n];"
+            },
+            "id": "mock-ai-response",
+            "name": "MOCK AI (Eliminar)",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                400,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// ═══════════════════════════════════════════════════════════════\n// FILTRO SEPARADOR VOZ + ACCIÓN - ARGENTERÍO AUSTRIA (Simple)\n// El AI solo genera voz, el flujo maneja los textos automáticamente\n// ═══════════════════════════════════════════════════════════════\n\n// A. OBTENER INPUT\nlet inputData = $input.item.json.original_voice \n             || $input.item.json.text \n             || $input.item.json.output \n             || $input.item.json.response\n             || \"\";\n\n// Variables por defecto\nlet textoVoz = \"\";\nlet accionFinal = \"info\";\n\n// B. PARSEO DE RESPUESTA AI\nif (typeof inputData === 'object' && inputData !== null) {\n  // CASO 1: Ya es objeto JSON parseado\n  textoVoz = inputData.respuesta_voz || \"\";\n  accionFinal = inputData.accion_requerida || \"info\";\n\n} else if (typeof inputData === 'string') {\n  // CASO 2: Es string, intentar parsear JSON\n  \n  let cleanString = inputData\n    .replace(/```json\\s*/g, \"\")\n    .replace(/```\\s*/g, \"\")\n    .trim();\n\n  try {\n    const parsed = JSON.parse(cleanString);\n    textoVoz = parsed.respuesta_voz || \"\";\n    accionFinal = parsed.accion_requerida || \"info\";\n  } catch (e) {\n    // Fallback: Si no es JSON válido, usar como texto de voz directo\n    console.log(\"⚠️ JSON inválido, usando texto directo como voz\");\n    textoVoz = cleanString;\n    accionFinal = \"info\";\n  }\n}\n\n// C. LIMPIEZA PARA TTS (elimina símbolos que el TTS no debe leer)\nfunction cleanForTTS(text) {\n  if (!text || typeof text !== 'string') return \"\";\n  return text\n    // Remover emojis\n    .replace(/[\\u{1F600}-\\u{1F64F}\\u{1F300}-\\u{1F5FF}\\u{1F680}-\\u{1F6FF}\\u{2600}-\\u{26FF}\\u{2700}-\\u{27BF}]/gu, \"\")\n    // URLs completas eliminadas (el AI no debería decirlas)\n    .replace(/(https?:\\/\\/[^\\s]+)/g, \"\")\n    // Símbolos JSON/Markdown residuales\n    .replace(/[\"*{}\\[\\]_`]/g, \"\")\n    // Múltiples espacios → uno solo\n    .replace(/\\s+/g, \" \")\n    .trim();\n}\n\n// E. RETORNO FINAL\nreturn {\n  json: {\n    clean_voice: cleanForTTS(textoVoz),              // → Va al TTS\n    accion: accionFinal.toLowerCase().trim()         // → Va al Switch\n  }\n};"
+            },
+            "id": "filtro-js",
+            "name": "Filtro JS (Voz+Acción)",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                600,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "dataType": "string",
+                "value1": "={{ $json.accion }}",
+                "rules": {
+                    "rules": [
+                        {
+                            "value2": "info"
+                        },
+                        {
+                            "value2": "agendar"
+                        },
+                        {
+                            "value2": "contacto"
+                        },
+                        {
+                            "value2": "derivar"
+                        }
+                    ]
+                }
+            },
+            "id": "switch-accion",
+            "name": "Switch Acción",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 1,
+            "position": [
+                800,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://api.elevenlabs.io/v1/text-to-speech/voice_id",
+                "method": "POST",
+                "authentication": "headerAuth",
+                "headerParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "xi-api-key",
+                            "value": "TU_API_KEY"
+                        }
+                    ]
+                },
+                "jsonParameters": true,
+                "options": {},
+                "bodyParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "text",
+                            "value": "={{ $json.clean_voice }}"
+                        }
+                    ]
+                }
+            },
+            "id": "tts-node",
+            "name": "Generar Audio (TTS)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                1100,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://api.evolution-api.com/message/sendText",
+                "method": "POST",
+                "authentication": "headerAuth",
+                "jsonParameters": true,
+                "options": {},
+                "bodyParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "number",
+                            "value": "NUMERO_DESTINO"
+                        },
+                        {
+                            "name": "text",
+                            "value": "🔗 Agendá tu auditoría aquí:\n\nhttps://cal.com/gustavo-a.-dornhofer-nqjqos/auditoria-ia-gratuita-free-ai-audit-kostenloses-ki-audit\n\nElegí día y horario. Duración: 30 min ⏱️"
+                        }
+                    ]
+                }
+            },
+            "id": "whatsapp-agendar",
+            "name": "Enviar Link Cal.com",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                1100,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://api.evolution-api.com/message/sendText",
+                "method": "POST",
+                "authentication": "headerAuth",
+                "jsonParameters": true,
+                "options": {},
+                "bodyParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "number",
+                            "value": "NUMERO_DESTINO"
+                        },
+                        {
+                            "name": "text",
+                            "value": "📞 Contacto directo:\n\n• WhatsApp: +54 9 11 7371-9972\n• Email: agentes.space@gmail.com\n\n¿En qué más puedo ayudarte?"
+                        }
+                    ]
+                }
+            },
+            "id": "whatsapp-contacto",
+            "name": "Enviar Datos Contacto",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                1100,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://api.evolution-api.com/message/sendText",
+                "method": "POST",
+                "authentication": "headerAuth",
+                "jsonParameters": true,
+                "options": {},
+                "bodyParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "number",
+                            "value": "NUMERO_DESTINO"
+                        },
+                        {
+                            "name": "text",
+                            "value": "He notificado a un especialista humano sobre tu caso. Te contactarán a la brevedad."
+                        }
+                    ]
+                }
+            },
+            "id": "whatsapp-derivar",
+            "name": "Notificar Humano",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                1100,
+                800
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "MOCK AI (Eliminar)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MOCK AI (Eliminar)": {
+            "main": [
+                [
+                    {
+                        "node": "Filtro JS (Voz+Acción)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtro JS (Voz+Acción)": {
+            "main": [
+                [
+                    {
+                        "node": "Switch Acción",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Switch Acción": {
+            "main": [
+                [
+                    {
+                        "node": "Generar Audio (TTS)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Generar Audio (TTS)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Enviar Link Cal.com",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Generar Audio (TTS)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Enviar Datos Contacto",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Generar Audio (TTS)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Notificar Humano",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp - Arriola Abogados</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0b141a;
+            height: 100vh;
+            overflow: hidden;
+            cursor: default;
+            user-select: none;
+        }
+
+        .wa-container {
+            display: flex;
+            height: 100vh;
+            max-width: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 340px;
+            background: #111b21;
+            border-right: 1px solid #222d34;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1f2c34;
+        }
+
+        .sidebar-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00a884, #25d366);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .sidebar-icons {
+            display: flex;
+            gap: 20px;
+            color: #aebac1;
+            font-size: 20px;
+        }
+
+        .search-bar {
+            padding: 8px 12px;
+            background: #111b21;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 8px 32px;
+            border-radius: 8px;
+            border: none;
+            background: #202c33;
+            color: #e9edef;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .chat-list-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #222d34;
+        }
+
+        .chat-list-item:first-child {
+            background: #2a3942;
+        }
+
+        .chat-list-item .avatar {
+            width: 49px;
+            height: 49px;
+            border-radius: 50%;
+            margin-right: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .chat-list-item .chat-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-list-item .chat-name {
+            color: #e9edef;
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .chat-list-item .chat-preview {
+            color: #8696a0;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-list-item .chat-time {
+            color: #00a884;
+            font-size: 12px;
+            align-self: flex-start;
+            margin-top: 4px;
+        }
+
+        /* Main Chat */
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0b141a;
+        }
+
+        .chat-header {
+            padding: 10px 16px;
+            background: #1f2c34;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #222d34;
+        }
+
+        .chat-header .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1a3a5c, #2d6da8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .chat-header-info {
+            flex: 1;
+        }
+
+        .chat-header-info .name {
+            color: #e9edef;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .chat-header-info .status {
+            color: #8696a0;
+            font-size: 13px;
+        }
+
+        .chat-header-icons {
+            display: flex;
+            gap: 24px;
+            color: #aebac1;
+            font-size: 20px;
+        }
+
+        /* Messages area */
+        .messages-area {
+            flex: 1;
+            padding: 20px 60px;
+            overflow-y: auto;
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='p' width='40' height='40' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='20' cy='20' r='1' fill='%23ffffff08'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='200' height='200' fill='url(%23p)'/%3E%3C/svg%3E");
+        }
+
+        .message {
+            max-width: 65%;
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            border-radius: 8px;
+            font-size: 14.5px;
+            line-height: 1.45;
+            position: relative;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: none;
+        }
+
+        .message.visible {
+            opacity: 1;
+            transform: translateY(0);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.sent {
+            background: #005c4b;
+            color: #e9edef;
+            margin-left: auto;
+            border-top-right-radius: 2px;
+        }
+
+        .message.received {
+            background: #202c33;
+            color: #e9edef;
+            margin-right: auto;
+            border-top-left-radius: 2px;
+        }
+
+        .message .time {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            float: right;
+            margin-left: 10px;
+            margin-top: 4px;
+        }
+
+        .message .check {
+            color: #53bdeb;
+            margin-left: 2px;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 4px;
+            background: #202c33;
+            padding: 12px 16px;
+            border-radius: 8px;
+            max-width: 80px;
+            margin-bottom: 4px;
+        }
+
+        .typing-indicator.visible {
+            display: flex;
+        }
+
+        .typing-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #8696a0;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-5px); opacity: 1; }
+        }
+
+        /* Input bar */
+        .input-bar {
+            padding: 10px 16px;
+            background: #1f2c34;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-bar .emoji { font-size: 26px; color: #8696a0; }
+
+        .input-bar input {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: none;
+            background: #2a3942;
+            color: #e9edef;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .input-bar .mic { font-size: 24px; color: #8696a0; }
+
+        .date-divider {
+            text-align: center;
+            margin: 12px 0;
+            opacity: 0;
+        }
+
+        .date-divider.visible { opacity: 1; }
+
+        .date-divider span {
+            background: #182229;
+            color: #8696a0;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .click-hint {
+            position: fixed;
+            bottom: 80px;
+            right: 40px;
+            background: rgba(0,168,132,0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 15px;
+            z-index: 100;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.03); }
+        }
+
+        .click-hint.hidden { display: none; }
+
+        /* Scrollbar */
+        .messages-area::-webkit-scrollbar { width: 6px; }
+        .messages-area::-webkit-scrollbar-thumb { background: #374045; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="wa-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-avatar">G</div>
+                <div class="sidebar-icons">
+                    <span>⊕</span>
+                    <span>⋮</span>
+                </div>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Buscar o empezar un chat nuevo">
+            </div>
+            <!-- Active chat -->
+            <div class="chat-list-item">
+                <div class="avatar" style="background: linear-gradient(135deg, #1a3a5c, #2d6da8);">⚖️</div>
+                <div class="chat-info">
+                    <div class="chat-name">Arriola Abogados</div>
+                    <div class="chat-preview">Escribiendo...</div>
+                </div>
+                <div class="chat-time">ahora</div>
+            </div>
+            <!-- Other chats -->
+            <div class="chat-list-item">
+                <div class="avatar" style="background: linear-gradient(135deg, #6a4c93, #b185db);">🏢</div>
+                <div class="chat-info">
+                    <div class="chat-name">Verticali Real Estate</div>
+                    <div class="chat-preview">Estoy al pendiente...</div>
+                </div>
+                <div class="chat-time">9:15</div>
+            </div>
+            <div class="chat-list-item">
+                <div class="avatar" style="background: linear-gradient(135deg, #2d6a4f, #52b788);">🏠</div>
+                <div class="chat-info">
+                    <div class="chat-name">Lic. Moisés Campos</div>
+                    <div class="chat-preview">Buenos días...</div>
+                </div>
+                <div class="chat-time">8:47</div>
+            </div>
+            <div class="chat-list-item">
+                <div class="avatar" style="background: linear-gradient(135deg, #e07a5f, #f4845f);">🍽️</div>
+                <div class="chat-info">
+                    <div class="chat-name">Restaurante El Cielo</div>
+                    <div class="chat-preview">Me interesa la propuesta</div>
+                </div>
+                <div class="chat-time">ayer</div>
+            </div>
+            <div class="chat-list-item">
+                <div class="avatar" style="background: linear-gradient(135deg, #457b9d, #a8dadc);">🦷</div>
+                <div class="chat-info">
+                    <div class="chat-name">DentaLux Clínica</div>
+                    <div class="chat-preview">¿Cuánto cuesta el servicio?</div>
+                </div>
+                <div class="chat-time">ayer</div>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="main-chat">
+            <div class="chat-header">
+                <div class="avatar">⚖️</div>
+                <div class="chat-header-info">
+                    <div class="name">Arriola Abogados</div>
+                    <div class="status" id="headerStatus">en línea</div>
+                </div>
+                <div class="chat-header-icons">
+                    <span>🔍</span>
+                    <span>📎</span>
+                    <span>⋮</span>
+                </div>
+            </div>
+
+            <div class="messages-area" id="messagesArea">
+                <div class="date-divider visible"><span>HOY</span></div>
+            </div>
+
+            <div class="input-bar">
+                <span class="emoji">😊</span>
+                <span class="emoji">📎</span>
+                <input type="text" placeholder="Escribe un mensaje" id="inputField" readonly>
+                <span class="mic">🎤</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="click-hint" id="clickHint">👆 Haz clic en cualquier lugar para avanzar</div>
+
+    <script>
+        const messages = [
+            // Mensaje 1: Cliente escribe
+            { type: 'sent', text: 'Buenas tardes, quisiera información sobre los servicios legales de su despacho', time: '12:31' },
+            
+            // Mensaje 2: Bot responde
+            { type: 'typing', duration: 1800 },
+            { type: 'received', text: '¡Buenas tardes! 👋 Bienvenido al Despacho Arriola Abogados. Soy Aria, su Asistente Virtual Inteligente. Será un placer atenderle. ¿Me podría compartir su nombre, por favor?', time: '12:31' },
+
+            // Mensaje 3: Cliente responde
+            { type: 'sent', text: 'Roberto Garza, soy director general de una empresa mediana aquí en Monterrey', time: '12:32' },
+
+            // Mensaje 4: Bot responde
+            { type: 'typing', duration: 2000 },
+            { type: 'received', text: 'Mucho gusto, Lic. Garza. ⚖️ Para poder canalizarlo con el especialista más adecuado de nuestro equipo, ¿me podría indicar en qué área legal requiere asesoría? (Corporativo, fiscal, familiar, laboral, penal, etc.)', time: '12:32' },
+
+            // Mensaje 5: Cliente responde
+            { type: 'sent', text: 'Necesitamos asesoría en derecho corporativo, estamos por cerrar un contrato importante con un proveedor internacional y queremos blindar bien toda la operación', time: '12:33' },
+
+            // Mensaje 6: Bot responde
+            { type: 'typing', duration: 2200 },
+            { type: 'received', text: 'Perfecto, Lic. Garza. Derecho corporativo internacional es precisamente una de nuestras especialidades más fuertes. 📋\n\nPara asignarle un socio del despacho que se ajuste a la dimensión de su caso, ¿me podría indicar si ya cuentan con un presupuesto estimado para este proceso legal?', time: '12:33' },
+
+            // Mensaje 7: Cliente responde
+            { type: 'sent', text: 'Sí claro, manejamos un presupuesto de entre 3,000 y 5,000 USD para este tema', time: '12:34' },
+
+            // Mensaje 8: Bot Pre-cierre
+            { type: 'typing', duration: 2500 },
+            { type: 'received', text: 'Excelente. Su perfil es idóneo para una atención prioritaria con nuestros socios especialistas en corporativo. ✅\n\nHe habilitado un espacio exclusivo en la agenda del Lic. Arriola para una llamada de diagnóstico gratuita de 15 minutos donde evaluará su caso personalmente.\n\n📅 Seleccione el horario que mejor le acomode:\nhttps://cal.com/arriola-abogados/diagnostico\n\n¿Le reservo el espacio?', time: '12:34' },
+
+            // Mensaje 9: Cliente cierra
+            { type: 'sent', text: 'Perfecto, me parece muy bien. Agendo para esta semana sin falta. Muchas gracias Aria 👍', time: '12:35' },
+
+            // Mensaje 10: Bot despedida
+            { type: 'typing', duration: 1500 },
+            { type: 'received', text: '¡Con todo gusto, Lic. Garza! Quedo al pendiente de su confirmación. Le enviará un recordatorio automático 24 horas antes de la reunión. ¡Que tenga excelente tarde! ⚖️✨', time: '12:35' },
+        ];
+
+        let currentStep = 0;
+        let isTyping = false;
+        const messagesArea = document.getElementById('messagesArea');
+        const inputField = document.getElementById('inputField');
+        const clickHint = document.getElementById('clickHint');
+        const headerStatus = document.getElementById('headerStatus');
+
+        function scrollToBottom() {
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const typing = document.createElement('div');
+            typing.className = 'typing-indicator visible';
+            typing.id = 'typingBubble';
+            typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+            messagesArea.appendChild(typing);
+            headerStatus.textContent = 'escribiendo...';
+            scrollToBottom();
+        }
+
+        function removeTypingIndicator() {
+            const typing = document.getElementById('typingBubble');
+            if (typing) typing.remove();
+            headerStatus.textContent = 'en línea';
+        }
+
+        function addMessage(msg) {
+            const div = document.createElement('div');
+            div.className = `message ${msg.type}`;
+
+            let checkMark = '';
+            if (msg.type === 'sent') {
+                checkMark = '<span class="check">✓✓</span>';
+            }
+
+            div.innerHTML = `${msg.text.replace(/\n/g, '<br>')}<span class="time">${msg.time} ${checkMark}</span>`;
+            messagesArea.appendChild(div);
+
+            // Trigger animation
+            requestAnimationFrame(() => {
+                div.classList.add('visible');
+            });
+
+            scrollToBottom();
+        }
+
+        function simulateTypingInInput(text) {
+            inputField.value = '';
+            let i = 0;
+            const speed = 35;
+            return new Promise(resolve => {
+                const interval = setInterval(() => {
+                    inputField.value = text.substring(0, i + 1);
+                    i++;
+                    if (i >= text.length) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            inputField.value = '';
+                            resolve();
+                        }, 300);
+                    }
+                }, speed);
+            });
+        }
+
+        async function processStep() {
+            if (currentStep >= messages.length || isTyping) return;
+
+            const msg = messages[currentStep];
+            currentStep++;
+
+            if (msg.type === 'typing') {
+                isTyping = true;
+                showTypingIndicator();
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    isTyping = false;
+                    // Auto-advance to show the actual response
+                    processStep();
+                }, msg.duration);
+            } else if (msg.type === 'sent') {
+                // Simulate typing in input
+                isTyping = true;
+                await simulateTypingInInput(msg.text);
+                addMessage(msg);
+                isTyping = false;
+            } else if (msg.type === 'received') {
+                addMessage(msg);
+            }
+
+            if (currentStep >= messages.length) {
+                clickHint.classList.add('hidden');
+            }
+        }
+
+        document.addEventListener('click', async (e) => {
+            if (!isTyping) {
+                processStep();
+            }
+        });
+
+        // Prevent click on input from triggering
+        inputField.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    </script>
+</body>
+</html>

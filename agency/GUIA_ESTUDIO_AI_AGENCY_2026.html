@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía de Estudio AI Agency 2026 — GenerArise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --surface2: #1a1a28;
+            --border: #2a2a3a;
+            --text: #e0e0ef;
+            --text-dim: #8888aa;
+            --accent: #00e5a0;
+            --accent2: #00b8d4;
+            --accent3: #7c4dff;
+            --danger: #ff4444;
+            --warning: #ffb300;
+            --gradient: linear-gradient(135deg, #00e5a0 0%, #00b8d4 50%, #7c4dff 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header */
+        .hero {
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0a1a2e 100%);
+            padding: 60px 20px 40px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(0,229,160,0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 50%, rgba(124,77,255,0.08) 0%, transparent 50%);
+        }
+
+        .hero h1 {
+            font-size: 2.5em;
+            font-weight: 900;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .hero p {
+            color: var(--text-dim);
+            font-size: 1.1em;
+            position: relative;
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            overflow-x: auto;
+            white-space: nowrap;
+            backdrop-filter: blur(20px);
+        }
+
+        .nav a {
+            color: var(--text-dim);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .nav a:hover {
+            color: var(--accent);
+            background: rgba(0,229,160,0.1);
+        }
+
+        /* Main container */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Sections */
+        .section {
+            padding: 50px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-number {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .section h2 {
+            font-size: 1.8em;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .section-desc {
+            color: var(--text-dim);
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,229,160,0.1);
+        }
+
+        .card-icon {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        .card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .card p {
+            color: var(--text-dim);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .card .tag {
+            display: inline-block;
+            background: rgba(0,229,160,0.1);
+            color: var(--accent);
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        /* Tables */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead th {
+            background: var(--surface2);
+            color: var(--accent);
+            font-weight: 600;
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        tbody td {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        tbody tr:hover {
+            background: rgba(0,229,160,0.03);
+        }
+
+        /* Objection blocks */
+        .objection {
+            background: var(--surface);
+            border-left: 3px solid var(--accent3);
+            border-radius: 0 12px 12px 0;
+            padding: 20px 24px;
+            margin: 16px 0;
+        }
+
+        .objection-q {
+            color: var(--danger);
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .objection-a {
+            color: var(--text);
+            font-style: italic;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Price highlight */
+        .price-box {
+            background: linear-gradient(135deg, rgba(0,229,160,0.05), rgba(124,77,255,0.05));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .price-box .label {
+            color: var(--text-dim);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .price-box .amount {
+            font-size: 2.5em;
+            font-weight: 900;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .price-box .sub {
+            color: var(--text-dim);
+            font-size: 14px;
+        }
+
+        /* News Banner Section */
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .news-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: block;
+        }
+
+        .news-card:hover {
+            border-color: var(--accent2);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,184,212,0.15);
+        }
+
+        .news-banner {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: 900;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .news-card-body {
+            padding: 20px;
+        }
+
+        .news-card-body h3 {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .news-card-body p {
+            color: var(--text-dim);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .news-card-body .freq {
+            display: inline-block;
+            margin-top: 10px;
+            background: rgba(0,184,212,0.1);
+            color: var(--accent2);
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Vocab */
+        .vocab-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .vocab-term {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 14px;
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+
+        .vocab-def {
+            color: var(--text-dim);
+            font-size: 14px;
+        }
+
+        /* Golden rule box */
+        .golden {
+            background: linear-gradient(135deg, rgba(255,179,0,0.05), rgba(255,68,68,0.05));
+            border: 1px solid rgba(255,179,0,0.2);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .golden h3 {
+            color: var(--warning);
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .golden p {
+            color: var(--text);
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .golden .big-num {
+            font-size: 3em;
+            font-weight: 900;
+            color: var(--warning);
+            display: block;
+            margin: 15px 0 5px;
+        }
+
+        /* Routine */
+        .routine-item {
+            display: flex;
+            gap: 20px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+            align-items: flex-start;
+        }
+
+        .routine-time {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 14px;
+            min-width: 70px;
+            padding-top: 2px;
+        }
+
+        .routine-info h4 {
+            color: #fff;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .routine-info p {
+            color: var(--text-dim);
+            font-size: 13px;
+        }
+
+        /* Country flags */
+        .country-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 16px 0;
+        }
+
+        .country-card h3 {
+            font-size: 1.2em;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .country-card .detail {
+            color: var(--text-dim);
+            font-size: 14px;
+            margin: 4px 0;
+        }
+
+        .country-card .detail strong {
+            color: var(--text);
+        }
+
+        .country-card .niches {
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .country-card .niche-tag {
+            background: rgba(124,77,255,0.1);
+            color: var(--accent3);
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 13px;
+            border-top: 1px solid var(--border);
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 1.8em; }
+            .section h2 { font-size: 1.4em; }
+            .card-grid { grid-template-columns: 1fr; }
+            .news-grid { grid-template-columns: 1fr; }
+            .container { padding: 0 16px; }
+            .vocab-item { flex-direction: column; gap: 4px; }
+            .routine-item { flex-direction: column; gap: 4px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HERO -->
+    <div class="hero">
+        <h1>🧠 AI Agency — Guía de Estudio 2026</h1>
+        <p>Todo lo que necesitás saber para vender, entregar y escalar servicios de Inteligencia Artificial</p>
+    </div>
+
+    <!-- NAV -->
+    <nav class="nav">
+        <a href="#servicios">Servicios</a>
+        <a href="#stack">Stack Tech</a>
+        <a href="#mercados">Mercados</a>
+        <a href="#precios">Precios</a>
+        <a href="#competidores">Competidores</a>
+        <a href="#vocabulario">Vocabulario</a>
+        <a href="#objeciones">Objeciones</a>
+        <a href="#rutina">Rutina</a>
+        <a href="#numeros">Números</a>
+        <a href="#noticias">Noticias IA</a>
+        <a href="#recursos">Recursos</a>
+    </nav>
+
+    <div class="container">
+
+        <!-- 1. SERVICIOS -->
+        <div class="section" id="servicios">
+            <div class="section-number">01 — SERVICIOS</div>
+            <h2>Qué vendés exactamente</h2>
+            <p class="section-desc">Empleados digitales que trabajan 24/7 sin sueldo, sin vacaciones, sin errores humanos.</p>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-icon">💬</div>
+                    <h3>Asistente WhatsApp IA</h3>
+                    <p>Responde mensajes, filtra curiosos, agenda citas automáticamente.</p>
+                    <span class="tag">Más vendido</span>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🎯</div>
+                    <h3>Cazador de Leads</h3>
+                    <p>Encuentra clientes en Google Maps y les envía mensajes automáticos.</p>
+                    <span class="tag">Prospección</span>
+                </div>
+                <div class="card">
+                    <div class="card-icon">📧</div>
+                    <h3>Email Marketing IA</h3>
+                    <p>Genera y envía correos personalizados con inteligencia artificial.</p>
+                    <span class="tag">Seguimiento</span>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🌐</div>
+                    <h3>Chatbot Web</h3>
+                    <p>Atiende visitantes de su sitio web en tiempo real.</p>
+                    <span class="tag">Conversión</span>
+                </div>
+                <div class="card">
+                    <div class="card-icon">📞</div>
+                    <h3>Agente de Voz IA</h3>
+                    <p>Realiza y recibe llamadas telefónicas con voz artificial vía VAPI.</p>
+                    <span class="tag">USA/Europa</span>
+                </div>
+                <div class="card">
+                    <div class="card-icon">⚙️</div>
+                    <h3>Automatización de Procesos</h3>
+                    <p>Conecta sus herramientas (CRM, calendario, facturación).</p>
+                    <span class="tag">Enterprise</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. STACK -->
+        <div class="section" id="stack">
+            <div class="section-number">02 — STACK TECNOLÓGICO</div>
+            <h2>Lo que usás por dentro</h2>
+            <p class="section-desc">Tu costo operativo real por cliente: ~$10-30 USD/mes. Lo que cobrás: $200-500 USD/mes.</p>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Herramienta</th><th>Para qué</th><th>Costo</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>n8n</strong> (self-hosted)</td><td>Motor de automatización</td><td>~$5/mes (VPS)</td></tr>
+                        <tr><td><strong>Evolution API</strong></td><td>WhatsApp sin API oficial</td><td>Gratis</td></tr>
+                        <tr><td><strong>Groq</strong></td><td>IA ultra-rápida (Llama/Mixtral)</td><td>Gratis/barato</td></tr>
+                        <tr><td><strong>OpenAI GPT-4o</strong></td><td>IA premium para respuestas complejas</td><td>$5-20/mes</td></tr>
+                        <tr><td><strong>OpenRouter</strong></td><td>Acceso a múltiples LLMs</td><td>Pago por uso</td></tr>
+                        <tr><td><strong>VAPI</strong></td><td>Agentes de voz (llamadas)</td><td>$0.05-0.10/min</td></tr>
+                        <tr><td><strong>Supabase</strong></td><td>Base de datos</td><td>Gratis hasta 500MB</td></tr>
+                        <tr><td><strong>Brevo</strong></td><td>Emails transaccionales</td><td>Gratis 300/día</td></tr>
+                        <tr><td><strong>Cal.com</strong></td><td>Calendario de citas</td><td>Gratis</td></tr>
+                        <tr><td><strong>PayPal / MercadoPago</strong></td><td>Cobrar a clientes</td><td>Comisión</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. MERCADOS -->
+        <div class="section" id="mercados">
+            <div class="section-number">03 — MERCADOS POR REGIÓN</div>
+            <h2>Dónde vender y a quién</h2>
+
+            <div class="country-card">
+                <h3>🇲🇽 México</h3>
+                <p class="detail"><strong>Economía:</strong> 2ª más grande de LATAM. 70% de PyMEs atienden WhatsApp manualmente.</p>
+                <p class="detail"><strong>Trato:</strong> "Usted" siempre. Formal y respetuoso. Decisión del dueño.</p>
+                <p class="detail"><strong>Cobro:</strong> USD aceptable para empresas premium. MXN para el resto.</p>
+                <p class="detail"><strong>Competencia IA:</strong> Casi nula en WhatsApp IA para PyMEs. Mercado virgen.</p>
+                <div class="niches">
+                    <span class="niche-tag">Abogados CDMX/MTY</span>
+                    <span class="niche-tag">Inmobiliarias de Lujo</span>
+                    <span class="niche-tag">Clínicas Estéticas</span>
+                    <span class="niche-tag">Restaurantes Turísticos</span>
+                </div>
+            </div>
+
+            <div class="country-card">
+                <h3>🇪🇸 España</h3>
+                <p class="detail"><strong>Economía:</strong> 4ª de Europa. Costos laborales altísimos (~€2,000/mes un recepcionista).</p>
+                <p class="detail"><strong>Trato:</strong> "Vosotros". Directo y profesional. Valoran casos de éxito.</p>
+                <p class="detail"><strong>Cobro:</strong> Euros. Mayor ticket promedio que LATAM.</p>
+                <p class="detail"><strong>Competencia IA:</strong> Más agencias digitales, pocas en WhatsApp IA para PyMEs.</p>
+                <div class="niches">
+                    <span class="niche-tag">Clínicas Odontología</span>
+                    <span class="niche-tag">Inmobiliarias Marbella</span>
+                    <span class="niche-tag">Despachos Premium</span>
+                    <span class="niche-tag">Hoteles Boutique</span>
+                </div>
+            </div>
+
+            <div class="country-card">
+                <h3>🇺🇸 USA Hispano</h3>
+                <p class="detail"><strong>Oportunidad:</strong> 62 millones de hispanos. Prefieren comunicarse en español.</p>
+                <p class="detail"><strong>Cobro:</strong> USD. Precios de mercado americano ($1,000-5,000 setup).</p>
+                <p class="detail"><strong>Canal:</strong> Menos WhatsApp, más SMS y llamadas. Usar VAPI para voz.</p>
+                <div class="niches">
+                    <span class="niche-tag">Abogados Inmigración</span>
+                    <span class="niche-tag">Clínicas Dentales</span>
+                    <span class="niche-tag">Restaurantes Latinos</span>
+                    <span class="niche-tag">Tax Preparers</span>
+                </div>
+            </div>
+
+            <div class="country-card">
+                <h3>🇨🇱 Chile · 🇨🇴 Colombia · 🇵🇪 Perú</h3>
+                <p class="detail"><strong>Chile:</strong> Economía estable, alto poder adquisitivo. Las Condes, Vitacura.</p>
+                <p class="detail"><strong>Colombia:</strong> Medellín hub tech. Turismo médico. Mayor adopción de WhatsApp Business de LATAM.</p>
+                <p class="detail"><strong>Perú:</strong> San Isidro, Miraflores. Clínicas y servicios profesionales.</p>
+            </div>
+        </div>
+
+        <!-- 4. PRECIOS -->
+        <div class="section" id="precios">
+            <div class="section-number">04 — PRECIOS RECOMENDADOS</div>
+            <h2>Cuánto cobrar</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Servicio</th><th>Setup (único)</th><th>Mensualidad</th><th>Mercado</th></tr></thead>
+                    <tbody>
+                        <tr><td>Asistente WhatsApp IA</td><td>$300-500 USD</td><td>$100-200/mes</td><td>LATAM</td></tr>
+                        <tr><td>Asistente WhatsApp IA</td><td>€500-1,000</td><td>€150-300/mes</td><td>España</td></tr>
+                        <tr><td>Cazador de Leads</td><td>$200-400 USD</td><td>$100-150/mes</td><td>LATAM</td></tr>
+                        <tr><td>Chatbot Web + WhatsApp</td><td>$500-800 USD</td><td>$150-250/mes</td><td>LATAM</td></tr>
+                        <tr><td>Agente de Voz (VAPI)</td><td>$500-1,000 USD</td><td>$200-400/mes</td><td>USA/España</td></tr>
+                        <tr><td><strong>Paquete Completo</strong></td><td><strong>$1,000-2,000</strong></td><td><strong>$300-500/mes</strong></td><td><strong>Todos</strong></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="price-box">
+                <div class="label">Ingreso semanal esperado</div>
+                <div class="amount">$500 - $2,000 USD</div>
+                <div class="sub">Con 1-2 clientes cerrados por semana</div>
+            </div>
+        </div>
+
+        <!-- 5. COMPETIDORES -->
+        <div class="section" id="competidores">
+            <div class="section-number">05 — COMPETIDORES</div>
+            <h2>Los gigantes del mercado y tu ventaja</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Empresa</th><th>Qué ofrecen</th><th>Precio</th><th>Tu ventaja</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Zapier</strong></td><td>Automatización sin código</td><td>$20-100/mes</td><td>No tiene IA ni WhatsApp</td></tr>
+                        <tr><td><strong>Make</strong></td><td>Similar a Zapier</td><td>$9-30/mes</td><td>No tiene IA integrada</td></tr>
+                        <tr><td><strong>Botpress</strong></td><td>Chatbots con IA</td><td>Gratis-$500</td><td>Complejo, vos lo hacés llave en mano</td></tr>
+                        <tr><td><strong>ManyChat</strong></td><td>Bots Instagram/WA</td><td>$15-100/mes</td><td>Limitado, no personalizable</td></tr>
+                        <tr><td><strong>HubSpot</strong></td><td>CRM + automatización</td><td>$50-800/mes</td><td>Carísimo para PyMEs</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 6. VOCABULARIO -->
+        <div class="section" id="vocabulario">
+            <div class="section-number">06 — VOCABULARIO TÉCNICO</div>
+            <h2>Conceptos que tenés que dominar</h2>
+            <p class="section-desc">Si decís estas palabras con seguridad, el cliente asume que sos experto.</p>
+            <div class="vocab-item"><span class="vocab-term">LLM</span><span class="vocab-def">Large Language Model. El cerebro de la IA. Genera las respuestas (GPT, Claude, Llama).</span></div>
+            <div class="vocab-item"><span class="vocab-term">Prompt</span><span class="vocab-def">Las instrucciones que le das a la IA para que se comporte de cierta forma.</span></div>
+            <div class="vocab-item"><span class="vocab-term">RAG</span><span class="vocab-def">Retrieval Augmented Generation. La IA consulta documentos del cliente para dar respuestas precisas.</span></div>
+            <div class="vocab-item"><span class="vocab-term">Agente</span><span class="vocab-def">Una IA que no solo responde sino que EJECUTA acciones (agendar, buscar, enviar emails).</span></div>
+            <div class="vocab-item"><span class="vocab-term">Webhook</span><span class="vocab-def">Un puente entre dos sistemas. Cuando pasa algo en uno, se activa el otro automáticamente.</span></div>
+            <div class="vocab-item"><span class="vocab-term">API</span><span class="vocab-def">La puerta de entrada para que dos sistemas hablen entre sí.</span></div>
+            <div class="vocab-item"><span class="vocab-term">Token</span><span class="vocab-def">Unidad de medida de texto que procesa la IA. 1 token ≈ 0.75 palabras.</span></div>
+            <div class="vocab-item"><span class="vocab-term">Latencia</span><span class="vocab-def">Tiempo que tarda la IA en responder. Menos = mejor experiencia para el cliente.</span></div>
+            <div class="vocab-item"><span class="vocab-term">Fine-tuning</span><span class="vocab-def">Entrenar la IA con datos específicos del cliente. Avanzado, mayor costo.</span></div>
+            <div class="vocab-item"><span class="vocab-term">Embedding</span><span class="vocab-def">Convertir texto en números para que la IA busque información similar.</span></div>
+        </div>
+
+        <!-- 7. OBJECIONES -->
+        <div class="section" id="objeciones">
+            <div class="section-number">07 — OBJECIONES DE VENTA</div>
+            <h2>Cómo responder cuando te dicen NO</h2>
+            <div class="objection">
+                <div class="objection-q">❌ "¿Y si se equivoca la IA?"</div>
+                <div class="objection-a">"La IA no toma decisiones por usted. Solo filtra, organiza y agenda. La decisión final siempre la toma su equipo. Es como un recepcionista que nunca se distrae ni llega tarde."</div>
+            </div>
+            <div class="objection">
+                <div class="objection-q">❌ "Ya tenemos a alguien que contesta WhatsApp"</div>
+                <div class="objection-a">"Perfecto, ¿cuánto le cuesta esa persona al mes? ¿Atiende de noche y fines de semana? La IA no reemplaza a su equipo, libera su tiempo para que hagan lo que realmente genera dinero."</div>
+            </div>
+            <div class="objection">
+                <div class="objection-q">❌ "Es muy caro"</div>
+                <div class="objection-a">"¿Cuánto le cuesta perder un cliente que escribió a las 11 de la noche y nadie le respondió? Un solo cliente perdido al mes ya supera el costo del sistema completo."</div>
+            </div>
+            <div class="objection">
+                <div class="objection-q">❌ "¿Es seguro? ¿Los datos de mis clientes?"</div>
+                <div class="objection-a">"Los datos se procesan en servidores privados, no se comparten con terceros. Usted tiene acceso completo a toda la información en todo momento."</div>
+            </div>
+            <div class="objection">
+                <div class="objection-q">❌ "Necesito pensarlo / consultarlo"</div>
+                <div class="objection-a">"Por supuesto, tómese su tiempo. Le dejo la propuesta por escrito. ¿Le parece si le escribo el jueves para ver cómo va?"</div>
+            </div>
+            <div class="objection">
+                <div class="objection-q">❌ "¿Me puedes mostrar un caso de éxito?"</div>
+                <div class="objection-a">"Le muestro ahora mismo cómo funciona con un negocio similar al suyo. Trabajamos con despachos, clínicas e inmobiliarias en México y España que ya tienen el sistema operando."</div>
+            </div>
+        </div>
+
+        <!-- 8. RUTINA -->
+        <div class="section" id="rutina">
+            <div class="section-number">08 — RUTINA DIARIA</div>
+            <h2>Tu día productivo</h2>
+            <div class="routine-item"><span class="routine-time">09:00</span><div class="routine-info"><h4>Revisar respuestas</h4><p>Leads del día anterior en WhatsApp Web</p></div></div>
+            <div class="routine-item"><span class="routine-time">09:30</span><div class="routine-info"><h4>Follow-ups</h4><p>Máximo 3 mensajes a leads tibios</p></div></div>
+            <div class="routine-item"><span class="routine-time">10:00</span><div class="routine-info"><h4>Activar cazador España</h4><p>Allá es la mañana, horario ideal para emails</p></div></div>
+            <div class="routine-item"><span class="routine-time">12:00</span><div class="routine-info"><h4>Revisar leads nuevos</h4><p>Lo que encontró el cazador en Google Sheets</p></div></div>
+            <div class="routine-item"><span class="routine-time">13:00</span><div class="routine-info"><h4>Activar cazador México/LATAM</h4><p>Allá es la mañana, mejor momento</p></div></div>
+            <div class="routine-item"><span class="routine-time">15:00</span><div class="routine-info"><h4>Estudiar 30 min</h4><p>YouTube, newsletters, comunidades</p></div></div>
+            <div class="routine-item"><span class="routine-time">16:00</span><div class="routine-info"><h4>Responder leads mexicanos</h4><p>Tarde allá, están revisando mensajes</p></div></div>
+            <div class="routine-item"><span class="routine-time">18:00</span><div class="routine-info"><h4>Métricas y planificación</h4><p>Revisar el día, preparar mañana</p></div></div>
+        </div>
+
+        <!-- 9. NÚMEROS -->
+        <div class="section" id="numeros">
+            <div class="section-number">09 — EL JUEGO DE LOS NÚMEROS</div>
+            <h2>La regla de oro de la prospección</h2>
+            <div class="golden">
+                <h3>La clave no es que TODOS te compren.<br>Es contactar a SUFICIENTES.</h3>
+                <span class="big-num">250</span>
+                <p>leads contactados por semana (50/día × 5 días)</p>
+                <span class="big-num">7-8</span>
+                <p>respuestas (3% tasa de respuesta)</p>
+                <span class="big-num">1-2</span>
+                <p>clientes cerrados (15% conversión)</p>
+                <span class="big-num">$500+</span>
+                <p>USD por semana mínimo (1 cliente × $500 setup)</p>
+            </div>
+        </div>
+
+        <!-- 10. NOTICIAS IA -->
+        <div class="section" id="noticias">
+            <div class="section-number">10 — NOTICIAS & ACTUALIZACIONES</div>
+            <h2>Mantenete actualizado cada semana</h2>
+            <p class="section-desc">Seguí estas fuentes para saber antes que tus clientes qué está pasando en la IA.</p>
+
+            <div class="news-grid">
+                <a href="https://therundown.ai" target="_blank" class="news-card">
+                    <div class="news-banner" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">🤖 The Rundown AI</div>
+                    <div class="news-card-body">
+                        <h3>The Rundown AI</h3>
+                        <p>El resumen diario #1 de noticias de IA. Lo que pasó hoy en OpenAI, Google, Meta y más, en 5 minutos.</p>
+                        <span class="freq">📬 Diario</span>
+                    </div>
+                </a>
+                <a href="https://tldr.tech/ai" target="_blank" class="news-card">
+                    <div class="news-banner" style="background: linear-gradient(135deg, #0f3460, #16213e);">📰 TLDR AI</div>
+                    <div class="news-card-body">
+                        <h3>TLDR AI Newsletter</h3>
+                        <p>Las 5 noticias más importantes de IA cada día. Brevísimo y directo al punto.</p>
+                        <span class="freq">📬 Diario</span>
+                    </div>
+                </a>
+                <a href="https://bensbites.com" target="_blank" class="news-card">
+                    <div class="news-banner" style="background: linear-gradient(135deg, #e94560, #533483);">🍔 Ben's Bites</div>
+                    <div class="news-card-body">
+                        <h3>Ben's Bites</h3>
+                        <p>Herramientas nuevas, inversiones, lanzamientos. El newsletter más popular de la industria IA.</p>
+                        <span class="freq">📬 Diario</span>
+                    </div>
+                </a>
+                <a href="https://www.superhuman.ai" target="_blank" class="news-card">
+                    <div class="news-banner" style="background: linear-gradient(135deg, #7c4dff, #1a237e);">⚡ Superhuman AI</div>
+                    <div class="news-card-body">
+                        <h3>Superhuman AI</h3>
+                        <p>Prompts, herramientas y noticias curadas para productividad con IA. Ideal para aplicar al negocio.</p>
+                        <span class="freq">📬 Semanal</span>
+                    </div>
+                </a>
+                <a href="https://www.futuretools.io" target="_blank" class="news-card">
+                    <div class="news-banner" style="background: linear-gradient(135deg, #00b8d4, #006064);">🔧 Future Tools</div>
+                    <div class="news-card-body">
+                        <h3>Future Tools (Matt Wolfe)</h3>
+                        <p>Directorio actualizado de TODAS las herramientas de IA. Filtrable por categoría. Tu biblia de tools.</p>
+                        <span class="freq">🔄 Actualización constante</span>
+                    </div>
+                </a>
+                <a href="https://www.producthunt.com/topics/artificial-intelligence" target="_blank" class="news-card">
+                    <div class="news-banner" style="background: linear-gradient(135deg, #ff6d00, #ff3d00);">🚀 Product Hunt AI</div>
+                    <div class="news-card-body">
+                        <h3>Product Hunt — AI</h3>
+                        <p>Lanzamientos diarios de productos de IA. Ve qué están creando las startups del mundo antes que nadie.</p>
+                        <span class="freq">🔄 Diario</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 11. RECURSOS -->
+        <div class="section" id="recursos">
+            <div class="section-number">11 — RECURSOS DE APRENDIZAJE</div>
+            <h2>Canales, comunidades y cuentas clave</h2>
+
+            <h3 style="color: #fff; margin: 20px 0 10px;">📺 YouTube</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Canal</th><th>Contenido</th><th>Idioma</th></tr></thead>
+                    <tbody>
+                        <tr><td><a href="https://youtube.com/@maboroshi1983" target="_blank" style="color: var(--accent); text-decoration: none;">Matt Wolfe</a></td><td>Noticias IA semanales, herramientas nuevas</td><td>🇺🇸 EN</td></tr>
+                        <tr><td><a href="https://youtube.com/@AIJason" target="_blank" style="color: var(--accent); text-decoration: none;">AI Jason</a></td><td>Tutoriales agentes IA, n8n, automatización</td><td>🇺🇸 EN</td></tr>
+                        <tr><td><a href="https://youtube.com/@leonvanzyl" target="_blank" style="color: var(--accent); text-decoration: none;">Leon van Zyl</a></td><td>n8n avanzado, agentes para negocios</td><td>🇺🇸 EN</td></tr>
+                        <tr><td><a href="https://youtube.com/@ColeMedin" target="_blank" style="color: var(--accent); text-decoration: none;">Cole Medin</a></td><td>Agentes IA con n8n, casos reales de negocio</td><td>🇺🇸 EN</td></tr>
+                        <tr><td><a href="https://youtube.com/@DotCSV" target="_blank" style="color: var(--accent); text-decoration: none;">Dot CSV</a></td><td>Noticias IA explicadas en español</td><td>🇪🇸 ES</td></tr>
+                        <tr><td><a href="https://youtube.com/@TheAIAdvantage" target="_blank" style="color: var(--accent); text-decoration: none;">The AI Advantage</a></td><td>Herramientas IA prácticas para negocios</td><td>🇺🇸 EN</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="color: #fff; margin: 20px 0 10px;">💬 Comunidades</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Comunidad</th><th>Plataforma</th><th>Para qué</th></tr></thead>
+                    <tbody>
+                        <tr><td><a href="https://community.n8n.io" target="_blank" style="color: var(--accent); text-decoration: none;">n8n Community</a></td><td>Foro oficial</td><td>Resolver dudas de workflows</td></tr>
+                        <tr><td><a href="https://reddit.com/r/artificial" target="_blank" style="color: var(--accent); text-decoration: none;">r/artificial</a></td><td>Reddit</td><td>Noticias generales IA</td></tr>
+                        <tr><td><a href="https://reddit.com/r/LocalLLaMA" target="_blank" style="color: var(--accent); text-decoration: none;">r/LocalLLaMA</a></td><td>Reddit</td><td>Modelos open source</td></tr>
+                        <tr><td><a href="https://www.skool.com" target="_blank" style="color: var(--accent); text-decoration: none;">Skool AI Automation</a></td><td>Skool</td><td>Comunidad agencias IA</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="color: #fff; margin: 20px 0 10px;">🐦 X/Twitter — Cuentas clave</h3>
+            <div class="card-grid">
+                <div class="card"><h3>@OpenAI</h3><p>Anuncios oficiales de GPT y DALL·E</p></div>
+                <div class="card"><h3>@AnthropicAI</h3><p>Claude y avances en seguridad IA</p></div>
+                <div class="card"><h3>@GoogleDeepMind</h3><p>Gemini y modelos de Google</p></div>
+                <div class="card"><h3>@LangChainAI</h3><p>Framework para construir agentes IA</p></div>
+                <div class="card"><h3>@naborsky</h3><p>Fundador de n8n</p></div>
+                <div class="card"><h3>@VapiAI</h3><p>Agentes de voz (llamadas IA)</p></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>🧠 <strong>GenerArise AI</strong> — Guía de Estudio 2026<br>
+        Actualizado: Marzo 2026 | <a href="https://generarise.space">generarise.space</a></p>
+        <p style="margin-top: 10px; font-size: 11px; color: #444;">No necesitás ser perfecto. Necesitás ser constante. El sistema ya está construido.</p>
+    </footer>
+
+</body>
+</html>

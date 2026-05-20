@@ -1,0 +1,175 @@
+{
+  "name": "Chatwoot_IG_Auto_Reply",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chatwoot-ig-webhook",
+        "options": {}
+      },
+      "name": "Webhook Chatwoot",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "chatwoot-ig-auto-reply"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.body.event === 'message_created' }}",
+              "value2": true
+            },
+            {
+              "value1": "={{ $json.body.message_type === 'incoming' }}",
+              "value2": true
+            },
+            {
+              "value1": "={{ $json.body.private === false }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Es Mensaje Entrante?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ JSON.stringify($json.body.conversation.labels) }}",
+              "operation": "notContains",
+              "value2": "bot-paused"
+            }
+          ]
+        }
+      },
+      "name": "Bot Pausado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        650,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer TU_API_KEY_DE_OPENROUTER_AQUI"
+            },
+            {
+              "name": "HTTP-Referer",
+              "value": "https://generarise.space"
+            },
+            {
+              "name": "X-Title",
+              "value": "GenerArise Instagram AI"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"meta-llama/llama-3-8b-instruct:free\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are Alex, an elite AI Sales Partner for Neurova. You handle high-stakes multi-channel chat conversations (Instagram) with business owners. You are sophisticated, consultative, empathetic, and direct. You are an expert at identifying revenue leaks. CRITICAL RULES: 1. LANGUAGE MIRRORING: Respond EXCLUSIVELY in the language used by the lead. 2. BREVITY: Max 2 short paragraphs. Max 50 words per message. 3. AUTHORITY: Speak as a peer to the business owner. DO NOT use emojis excessively.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Mensaje del cliente en Instagram: {{ $json.body.content }}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "name": "OpenRouter LLM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        850,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://woot.generarise.space/api/v1/accounts/1/conversations/{{ $node['Webhook Chatwoot'].json.body.conversation.id }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_access_token",
+              "value": "TU_CHATWOOT_API_TOKEN_AQUI"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"{{ $json.choices[0].message.content }}\",\n  \"message_type\": \"outgoing\",\n  \"private\": false\n}",
+        "options": {}
+      },
+      "name": "Enviar Respuesta a Chatwoot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1050,
+        260
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Chatwoot": {
+      "main": [
+        [
+          {
+            "node": "Es Mensaje Entrante?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es Mensaje Entrante?": {
+      "main": [
+        [
+          {
+            "node": "Bot Pausado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bot Pausado?": {
+      "main": [
+        [
+          {
+            "node": "OpenRouter LLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter LLM": {
+      "main": [
+        [
+          {
+            "node": "Enviar Respuesta a Chatwoot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "pinData": {}
+}

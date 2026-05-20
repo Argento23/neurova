@@ -1,0 +1,54 @@
+{
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "webhook/SEND_LEAD_EMAIL",
+                "options": {}
+            },
+            "name": "Webhook Confirmacion Pago",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                460,
+                480
+            ],
+            "logoUrl": "https://cdn-icons-png.flaticon.com/512/2885/2885419.png"
+        },
+        {
+            "parameters": {
+                "resource": "message",
+                "subject": "🚀 Plan de Acción IA para {{ $json.body.company }}",
+                "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<body style=\"margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background-color: #f4f4f7;\">\n    <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color: #f4f4f7; padding: 40px 20px;\">\n        <tr>\n            <td align=\"center\">\n                <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);\">\n                    <!-- Header -->\n                    <tr>\n                        <td style=\"background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%); padding: 40px 30px; text-align: center;\">\n                            <h1 style=\"margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;\">GenerArise AI</h1>\n                            <p style=\"margin: 10px 0 0 0; color: rgba(255,255,255,0.95);\">Automatización & Revenue</p>\n                        </td>\n                    </tr>\n                    \n                    <!-- Content -->\n                    <tr>\n                        <td style=\"padding: 40px 30px;\">\n                            <p style=\"font-size: 16px; color: #333;\">Estimado/a <strong>{{ $json.body.name }}</strong>,</p>\n                            \n                            <p style=\"font-size: 16px; color: #333;\">Confirmamos la recepción de su pago y hemos procesado el <strong>Análisis Preliminar</strong> para <strong>{{ $json.body.company }}</strong>.</p>\n                            \n                            <!-- AI TEASER SECTION -->\n                            <p style=\"font-size: 14px; text-transform: uppercase; color: #666; font-weight: 700; margin-top: 25px;\">Diagnóstico Inicial de IA:</p>\n                            \n                            {{ $json.body.teaser }}\n                            \n                            <p style=\"font-size: 16px; color: #333; margin-top: 25px;\">Para implementar la solución completa, agende su sesión de Discovery ahora:</p>\n                            \n                            <!-- CTA -->\n                            <table width=\"100%\" style=\"margin: 30px 0;\">\n                                <tr>\n                                    <td align=\"center\">\n                                        \u003ca href=\\\"https://cal.com/gustavo-a.-dornhofer-nqjqos/auditoria-ia-gratuita-free-ai-audit-kostenloses-ki-audit\\\" style=\\\"background: #6366f1; color: white; padding: 16px 40px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;\\\"\u003e📅 Agendar Implementación\u003c/a\u003e\n                                    </td>\n                                </tr>\n                            </table>\n                        </td>\n                    </tr>\n                </table>\n            </td>\n        </tr>\n    </table>\n</body>\n</html>",
+                "html": true,
+                "toEmail": "={{ $json.body.email }}"
+            },
+            "name": "Enviar Email HTML",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2,
+            "position": [
+                680,
+                480
+            ],
+            "credentials": {
+                "gmailOAuth2": {
+                    "id": "TU_CREDENCIAL_GMAIL_ID_AQUI",
+                    "name": "Gmail Account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook Confirmacion Pago": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Email HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

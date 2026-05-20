@@ -1,0 +1,266 @@
+{
+    "name": "ALEX_HYBRID_V5_1_ATOMIC",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "whatsapp-alex-v5-1",
+                "options": {},
+                "responseMode": "responseNode"
+            },
+            "id": "ax-webhook-v5-1",
+            "name": "Webhook Alex",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "v5-1-is-wa",
+                            "name": "is_whatsapp_source",
+                            "value": "={{ !!($json.body?.event || $json.body?.data?.key || $json.body?.data?.message) }}",
+                            "type": "boolean"
+                        },
+                        {
+                            "id": "v5-1-phone",
+                            "name": "phone",
+                            "value": "={{ ($json.body?.data?.key?.remoteJid || $json.body?.key?.remoteJid || $json.body?.message?.toolCalls?.[0]?.function?.arguments?.phone || \"\").toString().replace(/[^0-9@s.whatsapp.net]/g, '') }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "v5-1-user-txt",
+                            "name": "user_text",
+                            "value": "={{ $json.body?.data?.message?.conversation || $json.body?.data?.message?.extendedTextMessage?.text || $json.body?.data?.message?.buttonsResponseMessage?.selectedDisplayText || $json.body?.data?.message?.listResponseMessage?.title || $json.body?.message?.conversation || \"\" }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "v5-1-tool-id",
+                            "name": "toolCallId",
+                            "value": "={{ $json.body?.message?.toolCalls?.[0]?.id || \"no-id\" }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "v5-1-msg-vapi",
+                            "name": "msg_vapi",
+                            "value": "={{ ($json.body?.message?.toolCalls?.[0]?.function?.arguments?.message || \"\").toString() }}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "ax-set-v5-1",
+            "name": "Normalize Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                220,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeFilter": "string"
+                    },
+                    "conditions": [
+                        {
+                            "id": "v5-1-branch",
+                            "leftValue": "={{ $json.is_whatsapp_source }}",
+                            "rightValue": true,
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "true"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                }
+            },
+            "id": "ax-if-v5-1",
+            "name": "Branching?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                440,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $json.toolCallId }}\",\n      \"result\": \"SUCCESS: Alex sent the WhatsApp message.\"\n    }\n  ]\n}",
+                "options": {}
+            },
+            "id": "ax-resp-vapi-v5-1",
+            "name": "Respond to Vapi",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                660,
+                360
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "{\"status\":\"success\",\"source\":\"whatsapp\"}",
+                "options": {}
+            },
+            "id": "ax-resp-wa-v5-1",
+            "name": "Respond to WA",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                660,
+                120
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile",
+                "options": {
+                    "temperature": 0.7
+                }
+            },
+            "id": "ax-groq-v5-1",
+            "name": "Groq Alex",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                880,
+                0
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres Alex, Senior SDR de GenerArise AI. \n\nIDENTIDAD: Directo, experto, ventas agresivas. Habla como un humano experto comercial. \n\nUSUARIO DICE: {{ $json.user_text || \"Hola\" }}\n\nTAREA: Responde de forma PERSUASIVA. Tu objetivo es que agenden la auditoría AQUÍ: https://cal.com/gustavo-a.-dornhofer-nqjqos/argenterio\n\nINSTRUCCIONES: Responde siempre saludando y teniendo una breve charla antes de soltar el link. SOLO TEXTO.",
+                "hasOutputParser": true
+            },
+            "id": "ax-ai-v5-1",
+            "name": "AI SDR Alex",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1050,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "GenerArise",
+                "options_message": {
+                    "number": "={{ $json.phone.includes('@') ? $json.phone : $json.phone + '@s.whatsapp.net' }}",
+                    "textMessage": {
+                        "text": "={{ $node[\"AI SDR Alex\"]?.json?.text || $json.msg_vapi }}"
+                    }
+                }
+            },
+            "id": "ax-evo-v5-1",
+            "name": "Evolution Alex",
+            "type": "n8n-nodes-base.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                1320,
+                240
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook Alex": {
+            "main": [
+                [
+                    {
+                        "node": "Normalize Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Normalize Data": {
+            "main": [
+                [
+                    {
+                        "node": "Branching?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Branching?": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to WA",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Groq Alex",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Respond to Vapi",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Evolution Alex",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Alex": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI SDR Alex",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI SDR Alex": {
+            "main": [
+                [
+                    {
+                        "node": "Evolution Alex",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

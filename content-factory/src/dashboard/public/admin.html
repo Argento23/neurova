@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="GenerArise Content Factory — Panel de control para publicación autónoma de contenido en redes sociales con IA.">
+  <title>GenerArise Content Factory — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a28;
+      --bg-card-hover: #22223a;
+      --border: #2a2a40;
+      --text-primary: #e8e8f0;
+      --text-secondary: #8888a8;
+      --text-muted: #555570;
+      --accent-primary: #6366f1;
+      --accent-secondary: #8b5cf6;
+      --accent-glow: rgba(99, 102, 241, 0.15);
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --info: #3b82f6;
+      --partial: #f97316;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Background ambient glow */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 20%, rgba(99, 102, 241, 0.04) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 60%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header .subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .header-right {
+      text-align: right;
+    }
+
+    .server-time {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      margin-right: 6px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-value.success { color: var(--success); }
+    .stat-value.warning { color: var(--warning); }
+    .stat-value.error { color: var(--error); }
+    .stat-value.info { color: var(--info); }
+    .stat-value.accent { color: var(--accent-primary); }
+
+    /* Platforms */
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .platforms-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .platform-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .platform-badge.active { border-color: var(--success); }
+    .platform-badge.inactive { border-color: var(--text-muted); opacity: 0.5; }
+
+    .platform-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .platform-dot.active { background: var(--success); }
+    .platform-dot.inactive { background: var(--text-muted); }
+
+    /* Actions */
+    .actions-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-color: transparent;
+    }
+
+    .btn.primary:hover { opacity: 0.9; }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Posts Table */
+    .posts-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .posts-table th {
+      text-align: left;
+      padding: 12px 16px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 11px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .posts-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(42, 42, 64, 0.5);
+      vertical-align: middle;
+    }
+
+    .posts-table tr:hover td {
+      background: var(--bg-card);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-badge.pending { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+    .status-badge.generating { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .status-badge.ready { background: rgba(99, 102, 241, 0.15); color: var(--accent-primary); }
+    .status-badge.publishing { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .status-badge.published { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+    .status-badge.partial { background: rgba(249, 115, 22, 0.15); color: var(--partial); }
+    .status-badge.error { background: rgba(239, 68, 68, 0.15); color: var(--error); }
+
+    .platform-icons { font-size: 16px; }
+
+    .platform-result {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      margin-right: 6px;
+      font-size: 14px;
+    }
+    .platform-result .check { color: var(--success); font-size: 11px; }
+    .platform-result .cross { color: var(--error); font-size: 11px; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--accent-primary);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      max-width: 400px;
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.error { border-color: var(--error); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container { padding: 16px; }
+      .header { flex-direction: column; gap: 12px; }
+      .header-right { text-align: left; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <img src="/logo.png" alt="Logo" style="width: 32px; height: 32px; border-radius: 8px; object-fit: contain;">
+          <h1>GenerArise Content Factory</h1>
+        </div>
+        <div class="subtitle" id="brandName">GenerArise — Autonomous Publishing Engine</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <a href="/admin" style="padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;color:#e8e8f0;background:#1a1a28;border:1px solid #6366f1;text-decoration:none;box-shadow:0 0 12px rgba(99,102,241,0.12)">📡 Content</a>
+        <a href="/sales.html" style="padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;color:#8888a8;background:#1a1a28;border:1px solid #2a2a40;text-decoration:none;transition:all .2s" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='#2a2a40'">🎯 Sales Engine</a>
+      </div>
+      <div class="header-right">
+        <div><span class="status-dot"></span><span id="serverTime">Loading...</span></div>
+        <div class="server-time" id="uptime"></div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Publicados hoy</div>
+        <div class="stat-value success" id="statPublished">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pendientes</div>
+        <div class="stat-value warning" id="statPending">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Listos</div>
+        <div class="stat-value accent" id="statReady">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Errores</div>
+        <div class="stat-value error" id="statErrors">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Esta semana</div>
+        <div class="stat-value info" id="statWeekly">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total histórico</div>
+        <div class="stat-value" id="statTotal" style="color: var(--text-secondary)">0</div>
+      </div>
+    </div>
+
+    <!-- Platforms -->
+    <div class="section-title">Plataformas</div>
+    <div class="platforms-row" id="platformsRow"></div>
+
+    <!-- Actions -->
+    <div class="section-title">Acciones manuales</div>
+    <div class="actions-row">
+      <button class="btn primary" id="btnGenerate" onclick="triggerGenerate()">🧠 Generar contenido</button>
+      <button class="btn" id="btnPublish" onclick="triggerPublish()">📤 Publicar ahora</button>
+      <button class="btn" id="btnReport" onclick="triggerReport()">📊 Enviar reporte</button>
+      <button class="btn" id="btnRefresh" onclick="refreshData()">🔄 Refrescar</button>
+    </div>
+
+    <!-- Posts -->
+    <div class="section-title">Posts recientes</div>
+    <table class="posts-table">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Tipo</th>
+          <th>Tema</th>
+          <th>Plataformas</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody id="postsBody"></tbody>
+    </table>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API = '';
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = 'toast show' + (isError ? ' error' : '');
+      setTimeout(() => { toast.className = 'toast'; }, 4000);
+    }
+
+    function formatUptime(seconds) {
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      return `Uptime: ${h}h ${m}m`;
+    }
+
+    const platformEmojis = { instagram: '📸', facebook: '📘', tiktok: '🎵', youtube: '📺' };
+    const typeLabels = {
+      tip_practico: '💡 Tip',
+      caso_uso: '📊 Case Study',
+      tendencia_ia: '🔮 Tendencia',
+      behind_scenes: '🎬 BTS',
+      quote: '💬 Quote',
+      educacion: '📝 Tutorial',
+      community: '💬 Community',
+      video_corto: '🎥 Video'
+    };
+
+    function renderPlatformResults(post) {
+      if (post.publishResults && post.publishResults.length > 0) {
+        return post.publishResults.map(r =>
+          `<span class="platform-result">${platformEmojis[r.platform] || r.platform}<span class="${r.success ? 'check' : 'cross'}">${r.success ? '✓' : '✗'}</span></span>`
+        ).join('');
+      }
+      return post.platforms?.map(pl => platformEmojis[pl] || pl).join(' ') || '';
+    }
+
+    async function refreshData() {
+      try {
+        const [statusRes, postsRes] = await Promise.all([
+          fetch(`${API}/api/status`),
+          fetch(`${API}/api/posts`)
+        ]);
+
+        if (!statusRes.ok || !postsRes.ok) {
+          showToast('❌ Error al conectar con el servidor', true);
+          return;
+        }
+
+        const status = await statusRes.json();
+        const posts = await postsRes.json();
+
+        // Update stats
+        document.getElementById('statPublished').textContent = status.stats.today.published;
+        document.getElementById('statPending').textContent = status.stats.today.pending;
+        document.getElementById('statReady').textContent = status.stats.today.ready;
+        document.getElementById('statErrors').textContent = status.stats.today.error;
+        document.getElementById('statWeekly').textContent = status.stats.thisWeek.published;
+        document.getElementById('statTotal').textContent = status.stats.total;
+        document.getElementById('serverTime').textContent = status.serverTime;
+        document.getElementById('uptime').textContent = formatUptime(status.uptime);
+
+        // Update platforms
+        const platformsRow = document.getElementById('platformsRow');
+        platformsRow.innerHTML = Object.entries(status.platforms).map(([key, p]) => `
+          <div class="platform-badge ${p.configured ? 'active' : 'inactive'}">
+            <span class="platform-dot ${p.configured ? 'active' : 'inactive'}"></span>
+            ${platformEmojis[key] || ''} ${p.name}
+            ${p.configured ? '✓' : '✗'}
+          </div>
+        `).join('');
+
+        // Update posts table
+        const tbody = document.getElementById('postsBody');
+        tbody.innerHTML = posts.map(p => `
+          <tr>
+            <td>${p.date}</td>
+            <td>${p.publishTime}</td>
+            <td>${typeLabels[p.type] || p.type}</td>
+            <td title="${p.topic}">${p.topic?.substring(0, 45)}${p.topic?.length > 45 ? '...' : ''}</td>
+            <td class="platform-icons">${renderPlatformResults(p)}</td>
+            <td><span class="status-badge ${p.status}">${p.status}</span></td>
+          </tr>
+        `).join('');
+
+      } catch (err) {
+        console.error('Failed to refresh:', err);
+        showToast('❌ No se pudo conectar al servidor', true);
+      }
+    }
+
+    async function triggerGenerate() {
+      const btn = document.getElementById('btnGenerate');
+      btn.disabled = true;
+      try {
+        showToast('🧠 Generando contenido...');
+        const res = await fetch(`${API}/api/actions/generate`, { method: 'POST' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        setTimeout(refreshData, 5000);
+      } catch (err) {
+        showToast(`❌ Error al generar: ${err.message}`, true);
+      } finally {
+        setTimeout(() => { btn.disabled = false; }, 5000);
+      }
+    }
+
+    async function triggerPublish() {
+      const btn = document.getElementById('btnPublish');
+      btn.disabled = true;
+      try {
+        showToast('📤 Publicando...');
+        const res = await fetch(`${API}/api/actions/publish`, { method: 'POST' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        setTimeout(refreshData, 10000);
+      } catch (err) {
+        showToast(`❌ Error al publicar: ${err.message}`, true);
+      } finally {
+        setTimeout(() => { btn.disabled = false; }, 10000);
+      }
+    }
+
+    async function triggerReport() {
+      const btn = document.getElementById('btnReport');
+      btn.disabled = true;
+      try {
+        const res = await fetch(`${API}/api/actions/report`, { method: 'POST' });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || `HTTP ${res.status}`);
+        }
+        showToast('📊 Reporte enviado a Telegram');
+      } catch (err) {
+        showToast(`❌ Error al enviar reporte: ${err.message}`, true);
+      } finally {
+        setTimeout(() => { btn.disabled = false; }, 3000);
+      }
+    }
+
+    // Initial load + auto-refresh every 30s
+    refreshData();
+    setInterval(refreshData, 30000);
+  </script>
+</body>
+</html>

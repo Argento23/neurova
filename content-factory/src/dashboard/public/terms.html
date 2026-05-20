@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>Terms of Service — GenerArise</title>
+  <meta name="description" content="GenerArise Terms of Service. Read our terms for using the AI-powered content automation and social media management platform.">
+  <link rel="icon" type="image/png" href="/logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #030307; --bg2: #08081a; --bg3: #0f0f2a;
+      --glass: rgba(10, 10, 30, 0.65); --border: rgba(255,255,255,0.06);
+      --border2: rgba(255,255,255,0.12); --text: #f8fafc; --muted: #94a3b8;
+      --cyan: #22d3ee; --emerald: #34d399;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif; line-height: 1.8;
+    }
+    .bg-glow {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 600px 400px at 20% 20%, rgba(34,211,238,0.08), transparent),
+        radial-gradient(ellipse 500px 500px at 80% 60%, rgba(167,139,250,0.08), transparent);
+      animation: glowShift 20s ease-in-out infinite alternate;
+    }
+    @keyframes glowShift { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(30deg); } }
+
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 40px; border-bottom: 1px solid var(--border);
+      background: rgba(3,3,7,0.7); backdrop-filter: blur(20px);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .brand img { width: 36px; height: 36px; border-radius: 10px; object-fit: contain; }
+    .brand span { font-size: 18px; font-weight: 800; color: var(--text); }
+    .nav-links { display: flex; gap: 24px; align-items: center; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--cyan); }
+
+    .content {
+      max-width: 800px; margin: 0 auto; padding: 60px 24px 100px;
+      position: relative; z-index: 1;
+    }
+    .page-icon {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 40px;
+      padding-bottom: 32px; border-bottom: 1px solid var(--border2);
+    }
+    .page-icon img { width: 56px; height: 56px; border-radius: 16px; object-fit: contain;
+      border: 1px solid var(--border2); padding: 8px; background: var(--bg3);
+    }
+    .page-icon-text h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+    .page-icon-text p { font-size: 13px; color: var(--muted); }
+
+    h2 {
+      font-size: 20px; font-weight: 700; margin-top: 48px; margin-bottom: 16px;
+      color: var(--cyan); letter-spacing: -0.3px;
+    }
+    p, li { font-size: 15px; color: var(--muted); margin-bottom: 12px; }
+    ul { padding-left: 24px; margin-bottom: 16px; }
+    li { margin-bottom: 8px; }
+    strong { color: var(--text); }
+    a { color: var(--cyan); }
+
+    .scope-card {
+      background: var(--glass); border: 1px solid var(--border2); border-radius: 16px;
+      padding: 24px; margin-bottom: 16px; backdrop-filter: blur(12px);
+    }
+    .scope-card h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .scope-card p { margin-bottom: 0; }
+
+    .footer-legal {
+      text-align: center; padding: 40px; font-size: 13px; color: var(--muted);
+      border-top: 1px solid var(--border); position: relative; z-index: 1;
+    }
+    .footer-legal a { color: var(--cyan); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <header class="header">
+    <a href="/index.html" class="brand">
+      <img src="/logo.png" alt="GenerArise">
+      <span>GenerArise</span>
+    </a>
+    <div class="nav-links">
+      <a href="/index.html">Home</a>
+      <a href="/terms.html" style="color:var(--cyan);">Terms of Service</a>
+      <a href="/privacy.html">Privacy Policy</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="page-icon">
+      <img src="/logo.png" alt="GenerArise Logo">
+      <div class="page-icon-text">
+        <h1>Terms of Service</h1>
+        <p>Last updated: May 13, 2026</p>
+      </div>
+    </div>
+
+    <h2>1. Acceptance of Terms</h2>
+    <p>By accessing and using the services provided by <strong>GenerArise</strong> ("we", "our", or "the Company"), you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you may not use our services.</p>
+
+    <h2>2. Description of Service</h2>
+    <p><strong>GenerArise</strong> is a multi-tenant SaaS (Software as a Service) platform designed for third-party businesses, creators, and brands. Our platform allows independent users to connect their own social media accounts to manage and automate their own content. We do not use these APIs for personal use or internal company operations. Our application provides the following services to our independent users:</p>
+    <ul>
+      <li><strong>Content Factory:</strong> A tool for users to generate automated AI content (text, images, and videos) for their own social media platforms including TikTok, Instagram, Facebook, and YouTube.</li>
+      <li><strong>Multi-Platform Publishing:</strong> Scheduled and automated publishing of user-generated content to the user's connected social media accounts.</li>
+      <li><strong>Lead Marketplace:</strong> Discovery, scoring, and sale of qualified B2B business leads.</li>
+      <li><strong>Sales Engine:</strong> Automated outreach and follow-up sequences for business development.</li>
+    </ul>
+
+    <h2>3. Third-Party Platform Integrations</h2>
+    <p>GenerArise integrates with the following third-party platforms to deliver its services:</p>
+
+    <div class="scope-card">
+      <h3>🎵 TikTok — Login Kit</h3>
+      <p>We use TikTok's Login Kit to securely authenticate your TikTok account. This allows third-party users (you) to connect your own TikTok profile to GenerArise so that you can manage and publish your own content. We request access to your basic profile information (username and avatar) solely for the purpose of identifying your account within our platform. You can revoke this access at any time from your TikTok account settings under <strong>Security → Manage app permissions</strong>.</p>
+    </div>
+    <div class="scope-card">
+      <h3>📤 TikTok — Content Posting API (Share Kit)</h3>
+      <p>We provide a tool for independent users to use TikTok's Content Posting API to upload and publish their own short-form video content directly to their own TikTok accounts. The content is created by our AI engine based on your preferences and niche. GenerArise is a multi-tenant SaaS platform, and this integration is strictly for our third-party users to manage their presence, not for internal company use or personal use by the GenerArise team. You maintain full ownership and editorial control over published content.</p>
+    </div>
+    <div class="scope-card">
+      <h3>📸 Meta — Instagram & Facebook Graph API</h3>
+      <p>We use Meta's Graph API to publish images, Reels, and text posts to your connected Instagram Business Account and Facebook Page. This requires a valid Meta access token that you authorize during the connection process.</p>
+    </div>
+    <div class="scope-card">
+      <h3>📺 Google — YouTube Data API v3</h3>
+      <p>We use the YouTube Data API to upload YouTube Shorts to your channel. OAuth 2.0 is used for secure authentication, and you can revoke access at any time from your Google Account security settings.</p>
+    </div>
+
+    <h2>4. User Accounts</h2>
+    <p>To use GenerArise, you must create an account. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to notify us immediately of any unauthorized use.</p>
+
+    <h2>5. Acceptable Use</h2>
+    <p>You agree not to use the service for any illegal or unauthorized purpose. When using our integrations with third-party platforms (such as TikTok, Meta, or YouTube), you agree to comply with their respective terms of service and community guidelines. Specifically, you agree not to:</p>
+    <ul>
+      <li>Publish content that violates any applicable law or platform policy.</li>
+      <li>Use the service to spam, harass, or deceive other users or businesses.</li>
+      <li>Attempt to reverse-engineer, copy, or replicate the functionality of GenerArise.</li>
+      <li>Share your account credentials with unauthorized third parties.</li>
+    </ul>
+
+    <h2>6. Content Ownership</h2>
+    <p>Content generated by our AI engine on your behalf is considered your property once published. However, you grant GenerArise a non-exclusive license to use anonymized and aggregated data for the purpose of improving our AI models and services.</p>
+
+    <h2>7. Intellectual Property</h2>
+    <p>All original content, features, and functionality of the GenerArise platform are owned by GenerArise and are protected by international copyright, trademark, and intellectual property laws.</p>
+
+    <h2>8. Payment and Billing</h2>
+    <p>Certain features of GenerArise require payment. By subscribing to a paid plan, you agree to pay all applicable fees. Payments are processed securely through PayPal or other payment processors. Refunds are handled on a case-by-case basis.</p>
+
+    <h2>9. Service Availability</h2>
+    <p>We strive to maintain 99.9% uptime, but do not guarantee uninterrupted access. We may perform maintenance or updates that temporarily affect service availability. We will notify users of planned downtime whenever possible.</p>
+
+    <h2>10. Limitation of Liability</h2>
+    <p>GenerArise shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your access to or use of the services, including but not limited to: content not being published, social media account restrictions, or loss of data.</p>
+
+    <h2>11. Termination</h2>
+    <p>We reserve the right to suspend or terminate your account at any time for violations of these terms. You may also delete your account at any time by contacting us. Upon termination, your data will be deleted within 30 days.</p>
+
+    <h2>12. Changes to These Terms</h2>
+    <p>We reserve the right to modify these terms at any time. We will notify users of significant changes through our platform or via email. Continued use of the service after changes constitutes acceptance of the updated terms.</p>
+
+    <h2>13. Governing Law</h2>
+    <p>These Terms shall be governed by and construed in accordance with the laws of Argentina, without regard to its conflict of law provisions.</p>
+
+    <h2>14. Contact Us</h2>
+    <p>If you have any questions about these Terms of Service, please contact us at:</p>
+    <p><strong>Email:</strong> <a href="mailto:soporte@generarise.space">soporte@generarise.space</a></p>
+    <p><strong>Website:</strong> <a href="https://app.generarise.space">https://app.generarise.space</a></p>
+  </main>
+
+  <footer class="footer-legal">
+    <p>© 2026 <a href="/index.html">GenerArise</a> — AI-Powered Content Automation Platform</p>
+    <p style="margin-top:8px;"><a href="/privacy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Service</a> · <a href="mailto:soporte@generarise.space">Contact</a></p>
+  </footer>
+</body>
+</html>

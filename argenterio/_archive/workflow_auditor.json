@@ -1,0 +1,183 @@
+{
+    "name": "Argenterio - Auditor + Checkout MP",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "argenterio-audit-v1",
+                "options": {}
+            },
+            "name": "Webhook Data",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ],
+            "webhookId": "argenterio-audit-v1"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.groq.com/openai/v1/chat/completions",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "contentType": "json",
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "model",
+                            "value": "llama-3.3-70b-versatile"
+                        },
+                        {
+                            "name": "messages",
+                            "value": "={{ [\n  {\n    \"role\": \"system\",\n    \"content\": \"Analista ARGT-26. Tu misión: Analizar finanzas y detectar quiebra. INPUT: Ingr:{{$json.body.ingresos}}, Gasto:{{$json.body.gastos}}, Deuda:{{$json.body.deudas}}. SALIDA HTML dentro de div.risk-report. Sé crudo.\"\n  },\n  {\n    \"role\": \"user\",\n    \"content\": \"Diagnóstico urgente.\"\n  }\n] }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Groq - IA Analyst",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                340,
+                300
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "url": "https://api.mercadopago.com/checkout/preferences",
+                "method": "POST",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer APP_USR-2662030501407901-070617-26cd9e8e4a1f61917e341886b260864c-89801872"
+                        },
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "items",
+                            "value": "={{ [ { \"title\": \"Argenterio Shield Report\", \"quantity\": 1, \"currency_id\": \"ARS\", \"unit_price\": 15000 } ] }}"
+                        },
+                        {
+                            "name": "payer",
+                            "value": "={{ { \"email\": $json[\"body\"][\"email\"] } }}"
+                        },
+                        {
+                            "name": "back_urls",
+                            "value": "={{ { \"success\": \"https://argenterio.com/success\", \"failure\": \"https://argenterio.com\" } }}"
+                        },
+                        {
+                            "name": "auto_return",
+                            "value": "approved"
+                        },
+                        {
+                            "name": "external_reference",
+                            "value": "={{ $json[\"body\"][\"email\"] }}"
+                        }
+                    ]
+                }
+            },
+            "name": "MercadoPago - Crear Link",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                340,
+                500
+            ],
+            "notes": "Crea la preferencia de pago y devuelve el init_point"
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ { \"message\": \"Analisis Completado\", \"mp_link\": $('MercadoPago - Crear Link').item.json[\"init_point\"], \"paypal_link\": \"https://www.paypal.com/ncp/payment/LP2ZBHDAJPLDY\" } }}",
+                "options": {}
+            },
+            "name": "Responder a Web (JSON)",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                600,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "senderEmail": "security@argenterio.com",
+                "toEmail": "={{ $('Webhook Data').item.json[\"body\"][\"email\"] }}",
+                "subject": "Tu Reporte Preliminar Argenterio (Pago Pendiente)",
+                "htmlContent": "<h1>Datos recibidos</h1><p>Hemos generado tu reporte. Para desbloquearlo, completa el pago.</p>"
+            },
+            "name": "Email - Confirmación",
+            "type": "n8n-nodes-base.sendInBlue",
+            "typeVersion": 2,
+            "position": [
+                600,
+                200
+            ],
+            "credentials": {
+                "sendInBlueApi": {
+                    "id": "YOUR_BREVO_CREDENTIAL_ID",
+                    "name": "Brevo/Sendinblue"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook Data": {
+            "main": [
+                [
+                    {
+                        "node": "Groq - IA Analyst",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "MercadoPago - Crear Link",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq - IA Analyst": {
+            "main": [
+                [
+                    {
+                        "node": "Email - Confirmación",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MercadoPago - Crear Link": {
+            "main": [
+                [
+                    {
+                        "node": "Responder a Web (JSON)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

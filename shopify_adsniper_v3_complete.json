@@ -1,0 +1,210 @@
+{
+    "name": "Shopify AdSniper AI - Wealth Multiplier (v3 COMPLETE)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "shopify-adsniper",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "id": "webhook",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "={{ $json.body.product_url }}",
+                "options": {
+                    "redirect": {
+                        "redirect": true
+                    }
+                }
+            },
+            "id": "scrape",
+            "name": "Scrape Product",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                450,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "dataPropertyName": "data",
+                "extractionValues": {
+                    "values": [
+                        {
+                            "key": "title",
+                            "cssSelector": "h1, .product-title, .product_title",
+                            "returnValue": "text",
+                            "returnArray": false
+                        },
+                        {
+                            "key": "price",
+                            "cssSelector": ".price, #price, [itemprop='price'], .product-price",
+                            "returnValue": "text",
+                            "returnArray": false
+                        },
+                        {
+                            "key": "description",
+                            "cssSelector": ".description, #description, [itemprop='description'], .product-description",
+                            "returnValue": "html",
+                            "returnArray": false
+                        },
+                        {
+                            "key": "image",
+                            "cssSelector": "img",
+                            "returnValue": "attribute",
+                            "attribute": "src",
+                            "returnArray": true
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "extract",
+            "name": "Extract Data",
+            "type": "n8n-nodes-base.htmlExtract",
+            "typeVersion": 1,
+            "position": [
+                650,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// Normalización Robusta\nconst rawDesc = $input.item.json.description || '';\nconst cleanDesc = rawDesc.replace(/<[^>]*>/g, ' ').replace(/\\s+/g, ' ').trim().substring(0, 3000);\nconst images = $input.item.json.image || [];\n// Filtrar imagenes de productos\nconst mainImage = images.find(img => (img.includes('products') || img.includes('cdn.shopify.com')) && !img.includes('icon')) || images[0] || '';\n\nreturn {\n  product_url: $('Webhook').item.json.body.product_url,\n  title: $input.item.json.title || 'Producto Sin Nombre',\n  price: $input.item.json.price || 'Consultar',\n  description: cleanDesc,\n  main_image: mainImage\n};"
+            },
+            "id": "normalize",
+            "name": "Normalize",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                850,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq_model",
+            "name": "Groq Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                1050,
+                500
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=SYSTEM ROLE:\nYou are AdSniper, an elite Direct Response Copywriter for E-commerce.\n\nPRODUCT INFO:\nName: {{ $json.title }}\nPrice: {{ $json.price }}\nDescription: {{ $json.description }}\nImage URL: {{ $json.main_image }}\n\nTASK:\nGenerate 3 distinct Facebook Ad Variations.\n\nVARIATION 1: LOGIC & BENEFITS\nVARIATION 2: EMOTIONAL & DESIRE\nVARIATION 3: SCARCITY & FOMO\n\nFOR EACH VARIATION:\n- Headline\n- Primary Text\n- Image Prompt (Visual description for AI generation)\n\nOUTPUT FORMAT:\nReturn ONLY a valid JSON array of objects. NO markdown blocks.\n[\n  { \"type\": \"Logic\", \"headline\": \"...\", \"primary_text\": \"...\", \"image_prompt\": \"...\" },\n  ...\n]",
+                "hasOutputParser": false
+            },
+            "id": "ai_generator",
+            "name": "AdSniper AI Generator",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1050,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// Parsear y Generar URLs de Imagenes\nlet rawText = $input.item.json.text || $input.item.json.response || '';\n\n// Limpieza básica de markdown json\nrawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();\n\nlet ads = [];\ntry {\n  ads = JSON.parse(rawText);\n} catch (e) {\n  // Fallback si el parseo falla, devolver error limpio\n  return [\n    { \n      json: {\n        error: 'Error parsing AI response',\n        raw: rawText\n      }\n    }\n  ];\n}\n\n// Enriquecer con URLs de Pollinations\n// Pollinations URL pattern: https://image.pollinations.ai/prompt/{encoded_prompt}\n\nconst enrichedAds = ads.map(ad => {\n  const prompt = ad.image_prompt || 'product advertisement';\n  // Encode URI component para que sea seguro en URL\n  const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random() * 1000)}`;\n  \n  return {\n    type: ad.type,\n    headline: ad.headline,\n    primary_text: ad.primary_text,\n    image_prompt: prompt,\n    generated_image_url: imageUrl\n  };\n});\n\n// Devolver formato compatible con n8n (array de items)\nreturn enrichedAds.map(ad => ({ json: ad }));"
+            },
+            "id": "format_and_generate",
+            "name": "Format & Gen Images",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1250,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Scrape Product",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Scrape Product": {
+            "main": [
+                [
+                    {
+                        "node": "Extract Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract Data": {
+            "main": [
+                [
+                    {
+                        "node": "Normalize",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Normalize": {
+            "main": [
+                [
+                    {
+                        "node": "AdSniper AI Generator",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AdSniper AI Generator",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AdSniper AI Generator": {
+            "main": [
+                [
+                    {
+                        "node": "Format & Gen Images",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

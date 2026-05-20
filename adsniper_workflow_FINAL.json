@@ -1,0 +1,159 @@
+{
+    "name": "AdSniper Backend (Groq + Pollinations)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "shopify-adsniper",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "id": "a68c1b5d-0d20-4983-b3df-de968c3ff47a",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                380,
+                240
+            ],
+            "webhookId": "46b6a7d8-f89a-406a-8807-e2c16821ab73"
+        },
+        {
+            "parameters": {
+                "url": "={{ $json.body.product_url }}",
+                "options": {
+                    "redirect": {
+                        "redirect": {}
+                    }
+                }
+            },
+            "id": "3862ef17-a624-4b2f-8773-1cc571b1febd",
+            "name": "Scrape Product",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                600,
+                240
+            ],
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "jsCode": "// Robust Extraction Logic (Regex + Schema.org)\nconst item = $input.item.json;\nconst html = item.data || '';\nconst webhookBody = $('Webhook').item.json.body; // Acceso directo al webhook\nconst url = webhookBody.product_url || '';\nconst lang = webhookBody.language || 'es';\nconst brand = webhookBody.brand || {}; // ¡IMPORTANTE: Pasar la marca!\n\nlet title = 'Producto Desconocido';\nlet description = 'Sin descripción disponible due to scraping protection.';\nlet price = 'Consultar';\nlet image = '';\n\n// Check if scraping succeeded\nif (html && typeof html === 'string' && html.length > 100) {\n    // 1. Regex Extraction\n    const titleMatch = html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i);\n    if (titleMatch) title = titleMatch[1].replace(/\\s+/g, ' ').trim();\n    \n    // Image Extraction Priority: Schema > OG > Twitter\n    // A. Schema.org JSON-LD\n    if (!image) {\n        try {\n            const schemaMatches = html.match(/<script type=[\"']application\\/ld\\+json[\"']>([\\s\\S]*?)<\\/script>/gi);\n            if (schemaMatches) {\n                for (const script of schemaMatches) {\n                    const jsonContent = script.replace(/<[^>]+>/g, '').trim();\n                    try {\n                        const data = JSON.parse(jsonContent);\n                        if (data.image) {\n                             image = Array.isArray(data.image) ? data.image[0] : (typeof data.image === 'string' ? data.image : data.image.url);\n                             if(image) break;\n                        }\n                    } catch(e) {}\n                }\n            }\n        } catch(e) {}\n    }\n    \n    // B. Open Graph\n    if (!image) {\n        const ogMatch = html.match(/<meta[^>]*property=[\"']og:image[\"'][^>]*content=[\"']([\\s\\S]*?)[\"']/i);\n        if (ogMatch) image = ogMatch[1];\n    }\n}\n\n// Fallback Title\nif (title === 'Producto Desconocido') {\n    try {\n        const slug = url.split('/').pop().split('?')[0];\n        title = slug.replace(/-/g, ' ').replace(/\\b\\w/g, l => l.toUpperCase());\n    } catch(e) {}\n}\n\nif (image && image.startsWith('//')) image = 'https:' + image;\n\nreturn {\n  language: lang,\n  product_url: url,\n  product_title: title,       // CORREGIDO: coincide con el prompt de IA\n  price: price,\n  product_description: description.substring(0, 3000), // CORREGIDO\n  main_image: image,\n  brand: brand                // CORREGIDO: pasamos la marca a la IA\n};"
+            },
+            "id": "896f2a50-9ba9-4d9a-a225-9f522c2cbe0a",
+            "name": "Extract & Normalize",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                820,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "text": "=Eres un Director Creativo.\nCrea 3 anuncios para Meta y 2 guiones de TikTok.\n\nINPUT:\n- Producto: {{ $json.product_title }}\n- Descripción: {{ $json.product_description }}\n- Marca: {{ $json.brand.name }}\n\nFORMATO JSON OBLIGATORIO:\n{\n  \"ads\": [\n    {\n      \"type\": \"Gancho Visual\",\n      \"headline\": \"Titular\",\n      \"primary_text\": \"Texto\",\n      \"image_prompt\": \"Fotografía realista de [Producto] en [Escenario], iluminación cinematográfica, 8k\" \n    }\n  ],\n  \"scripts\": [...]\n}\n\nRESPOND ONLY WITH RAW JSON. NO MARKDOWN.",
+                "options": {}
+            },
+            "id": "e6d3930c-c236-4339-82ff-1ba9ad459d49",
+            "name": "AI Agent",
+            "type": "@n8n/n8n-nodes-langchain.agent",
+            "typeVersion": 1,
+            "position": [
+                1040,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "model": "openai/gpt-oss-120b",
+                "options": {}
+            },
+            "id": "f3c10188-7a77-4fa0-94ee-6c944b6ad7dd",
+            "name": "Groq Model (API KEY HERE)",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                1080,
+                460
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Obtener respuesta de la IA\nconst item = $input.item.json;\nconst aiResponse = item.output || item.text || item.response || (item.message ? item.message.content : '') || '';\n\nlet result = { ads: [], scripts: [] };\n\ntry {\n    let cleanJson = aiResponse;\n\n    // 1. Limpieza Agresiva de Markdown y Glitch de IA\n    if (typeof cleanJson === 'string') {\n        const firstBrace = cleanJson.indexOf('{');\n        const lastBrace = cleanJson.lastIndexOf('}');\n        \n        if (firstBrace > -1 && lastBrace > -1) {\n             cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);\n        } else {\n             // Limpiar ```json o ``` si no encuentra llaves\n             cleanJson = cleanJson.replace(/```json/gi, '').replace(/```/g, '').trim();\n        }\n    }\n\n    // 2. Intentar Parsear\n    const parsed = JSON.parse(cleanJson);\n    \n    result.ads = Array.isArray(parsed.ads) ? parsed.ads : [];\n    result.scripts = Array.isArray(parsed.scripts) ? parsed.scripts : [];\n\n    // 3. GENERAR IMÁGENES (Pollinations)\n    result.ads = result.ads.map(ad => {\n        if (ad.image_prompt) {\n            const seed = Math.floor(Math.random() * 1000);\n            const safePrompt = encodeURIComponent(ad.image_prompt.substring(0, 200));\n            // URL Mágica de Pollinations (Flux)\n            ad.generated_image_url = `https://image.pollinations.ai/prompt/${safePrompt}?width=1080&height=1080&model=flux&nologo=true&seed=${seed}`;\n        }\n        return ad;\n    });\n\n} catch (error) {\n    // Si falla el parseo, devolvemos un objeto de error bonito\n    result.ads = [{ \n        type: 'Error IA', \n        headline: 'Intenta de nuevo', \n        primary_text: 'La IA devolvió un formato inválido (' + error.message + '). Dale a Generar otra vez.',\n        generated_image_url: 'https://placehold.co/600x600?text=Error+IA'\n    }];\n}\n\n// 4. Recuperar datos del producto original\nlet scrapeData = { main_image: '', product_title: '' };\ntry {\n    if ($('Extract & Normalize').first()) scrapeData = $('Extract & Normalize').first().json;\n} catch(e) {}\n\nreturn {\n    ads: result.ads,\n    scripts: result.scripts,\n    product_image: scrapeData.main_image || '', \n    product_title: scrapeData.product_title || 'Producto'\n};"
+            },
+            "id": "8f702fd8-e2a1-42ce-89da-7bdab9ba93d3",
+            "name": "Format Output",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1260,
+                240
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Scrape Product",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Scrape Product": {
+            "main": [
+                [
+                    {
+                        "node": "Extract & Normalize",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract & Normalize": {
+            "main": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Agent": {
+            "main": [
+                [
+                    {
+                        "node": "Format Output",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Model (API KEY HERE)": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "final-01"
+}

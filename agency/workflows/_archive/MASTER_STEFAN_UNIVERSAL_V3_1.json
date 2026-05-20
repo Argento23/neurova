@@ -1,0 +1,260 @@
+{
+    "name": "STEFAN_UNIVERSAL_HYBRID_V3_1",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "send_whatsapp_stefan",
+                "options": {},
+                "responseMode": "responseNode"
+            },
+            "id": "stefan-webhook-v3",
+            "name": "Universal Webhook Stefan",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "us-phone-v3",
+                            "name": "phone",
+                            "value": "={{ ($json.body?.data?.key?.remoteJid || $json.body.message.toolCalls[0].function.arguments.phone || \"\").toString().replace(/[^0-9@s.whatsapp.net]/g, '') }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "us-msg-vapi-v3",
+                            "name": "msg_vapi",
+                            "value": "={{ ($json.body?.message?.toolCalls?.[0].function.arguments.message || \"\").toString() }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "us-tool-id-v3",
+                            "name": "toolCallId",
+                            "value": "={{ $json.body?.message?.toolCalls?.[0].id || \"no-id\" }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "us-user-txt-v3",
+                            "name": "user_text",
+                            "value": "={{ $json.body?.data?.message?.conversation || $json.body?.data?.message?.extendedTextMessage?.text || $json.body?.data?.message?.listResponseMessage?.title || \"Hola\" }}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "us-stefan-set-v3",
+            "name": "Normalize Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                300,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeFilter": "string"
+                    },
+                    "conditions": [
+                        {
+                            "id": "is-vapi-us-v3",
+                            "leftValue": "={{ $json.toolCallId }}",
+                            "rightValue": "no-id",
+                            "operator": {
+                                "type": "string",
+                                "operation": "notEquals"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                }
+            },
+            "id": "us-stefan-if-v3",
+            "name": "Is Vapi?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                500,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $json.toolCallId }}\",\n      \"result\": \"SUCCESS: Stefan sent the message.\"\n    }\n  ]\n}",
+                "options": {}
+            },
+            "id": "us-stefan-resp-vapi",
+            "name": "Response to Vapi",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                700,
+                360
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "{\"status\":\"received\"}",
+                "options": {}
+            },
+            "id": "us-stefan-resp-wa",
+            "name": "Response to WA",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                700,
+                140
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile",
+                "options": {
+                    "temperature": 0.7
+                }
+            },
+            "id": "us-stefan-groq-v3",
+            "name": "Groq Stefan",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                900,
+                0
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres Stefan, Senior Sales Hunter para \"Turismo 4.0\" en Argenterio (Österreich).\n\nIDENTIDAD: Hotelería de lujo, experto, autoritario pero elegante. Sabes todo sobre software hotelero.\n\nUSUARIO DICE: {{ $json.user_text }}\n\nTAREA: Responde de forma muy profesional y educada. Tu objetivo final es que agenden la auditoría aquí: https://cal.com/gustavo-a.-dornhofer-nqjqos/argenterio\nINSTRUCCIONES: Responde siempre de forma completa y amable antes de poner el link al final. RESPUESTA SOLO TEXTO.",
+                "hasOutputParser": true
+            },
+            "id": "us-stefan-ai-v3",
+            "name": "AI SDR Stefan",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1050,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "Austria",
+                "options_message": {
+                    "number": "={{ $json.phone.includes('@') ? $json.phone : $json.phone + '@s.whatsapp.net' }}",
+                    "textMessage": {
+                        "text": "={{ $node[\"AI SDR Stefan\"]?.json?.text || $json.msg_vapi }}"
+                    }
+                }
+            },
+            "id": "us-stefan-evo-v3",
+            "name": "Evolution Stefan",
+            "type": "n8n-nodes-base.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                1300,
+                140
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "Austria"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Universal Webhook Stefan": {
+            "main": [
+                [
+                    {
+                        "node": "Normalize Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Normalize Data": {
+            "main": [
+                [
+                    {
+                        "node": "Is Vapi?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is Vapi?": {
+            "main": [
+                [
+                    {
+                        "node": "Response to Vapi",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Evolution Stefan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Response to WA",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Groq Stefan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Stefan": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI SDR Stefan",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI SDR Stefan": {
+            "main": [
+                [
+                    {
+                        "node": "Evolution Stefan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

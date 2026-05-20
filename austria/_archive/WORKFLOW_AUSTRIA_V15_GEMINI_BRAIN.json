@@ -1,0 +1,277 @@
+{
+    "name": "Austria Voice Assistant V15 (GEMINI 1.5 BRAIN)",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "webhook-trigger",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                200,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "content": "✅ V15 GEMINI BRAIN\n\nPROBLEMA SOLUCIONADO:\nLlama/Groq se 'pegaba' en español.\n\nSOLUCIÓN:\nCambio a **Google Gemini 1.5 Flash**.\nEs multilingüe nativo y obedece instrucciones complejas (JSON + Idioma) mucho mejor.\n\nInstrucciones:\n1. Conecta tu credencial de Google Gemini.\n2. Pega el Prompt V6 en el nodo 'Gemini Brain'.",
+                "height": 340,
+                "width": 380
+            },
+            "id": "nota-final",
+            "name": "Nota: V15 GEMINI",
+            "type": "n8n-nodes-base.stickyNote",
+            "typeVersion": 1,
+            "position": [
+                1320,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "modelName": "models/gemini-1.5-flash",
+                "options": {
+                    "temperature": 0.3
+                }
+            },
+            "id": "gemini_model",
+            "name": "Google Gemini 1.5 Flash",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+            "typeVersion": 1,
+            "position": [
+                500,
+                520
+            ],
+            "credentials": {
+                "googlePalmApi": {
+                    "id": "YOUR_GEMINI_CREDENTIAL_ID",
+                    "name": "Google Gemini(PaLM) Api account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.body.message || $json.body.data.message.conversationMessage.message || 'Hola' }}",
+                "hasOutputParser": true,
+                "options": {
+                    "systemMessage": "=TU PROMPT V6 VA AQUI (Cópialo del archivo PROMPT_ASISTENTE_AUSTRIA_V6_SETTER.md)"
+                }
+            },
+            "id": "gemini_brain",
+            "name": "Gemini Brain (Basic LLM Chain)",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// ═══════════════════════════════════════════════════════════════\n// FILTRO V14 - SDR MODE (Compatible con Gemini)\n// ═══════════════════════════════════════════════════════════════\n\n// A. OBTENER INPUT (Solo output de AI)\n// Gemini a veces devuelve texto directo\nlet inputData = $input.item.json.text || $input.item.json.response || \"\";\n\n// B. OBTENER REMOTE JID\nlet rawRemoteJid = \"\";\ntry {\n  if ($('Webhook').item.json.body.data && $('Webhook').item.json.body.data.key) {\n      rawRemoteJid = $('Webhook').item.json.body.data.key.remoteJid;\n  }\n  else if ($('Webhook').item.json.body.key) {\n      rawRemoteJid = $('Webhook').item.json.body.key.remoteJid;\n  }\n} catch(e) {\n  console.log(\"⚠️ No se pudo leer el RemoteJid\");\n}\n\n// Variables por defecto\nlet textoVoz = \"\";\nlet accionFinal = \"info\";\nlet mensajeTexto = \"\";\nlet idiomaIA = \"\";\n\n// C. LÓGICA DE PARSEO ROBUSTA\nif (typeof inputData === 'object' && inputData !== null) {\n  textoVoz = inputData.respuesta_voz || \"\";\n  accionFinal = inputData.accion_requerida || \"info\";\n  idiomaIA = inputData.idioma || \"\";\n} \nelse if (typeof inputData === 'string') {\n  let cleanString = inputData.replace(/```json/g, \"\").replace(/```/g, \"\").trim();\n  const firstBrace = cleanString.indexOf('{');\n  const lastBrace = cleanString.lastIndexOf('}');\n  if (firstBrace !== -1 && lastBrace !== -1) {\n      cleanString = cleanString.substring(firstBrace, lastBrace + 1);\n  }\n\n  try {\n    const parsed = JSON.parse(cleanString);\n    textoVoz = parsed.respuesta_voz || cleanString;\n    accionFinal = parsed.accion_requerida || \"info\";\n    idiomaIA = parsed.idioma || \"\";\n  } catch (e) {\n    textoVoz = cleanString;\n    accionFinal = \"info\";\n    idiomaIA = \"\";\n  }\n}\n\n// D. DETECCIÓN DE IDIOMA (Backup)\nfunction detectLanguageBackup(text) {\n  if (!text) return \"es\";\n  const textLower = text.toLowerCase();\n  const deWords = [\"der\", \"die\", \"das\", \"haben\", \"guten\", \"konnen\", \"werden\", \"hotels\", \"preis\", \"danke\", \"bitte\", \"hallo\"];\n  const enWords = [\"the\", \"have\", \"hello\", \"good\", \"hotel\", \"booking\", \"price\", \"would\", \"thanks\", \"please\", \"hi\"];\n  const esWords = [\"los\", \"las\", \"tiene\", \"puede\", \"hola\", \"buenos\", \"reserva\", \"precio\", \"gracias\", \"por favor\"];\n  const itWords = [\"gli\", \"vuole\", \"ciao\", \"buona\", \"prenotazione\", \"prezzo\", \"grazie\", \"per favore\"];\n  \n  let scores = { de: 0, en: 0, es: 0, it: 0 };\n  deWords.forEach(word => { if (textLower.includes(word)) scores.de++; });\n  enWords.forEach(word => { if (textLower.includes(word)) scores.en++; });\n  esWords.forEach(word => { if (textLower.includes(word)) scores.es++; });\n  itWords.forEach(word => { if (textLower.includes(word)) scores.it++; });\n  \n  let maxLang = \"es\";\n  let maxScore = scores.es;\n  if (scores.de > maxScore) { maxLang = \"de\"; maxScore = scores.de; }\n  if (scores.en > maxScore) { maxLang = \"en\"; maxScore = scores.en; }\n  if (scores.it > maxScore) { maxLang = \"it\"; }\n  return maxLang;\n}\n\nlet langCode = \"es\";\nif (idiomaIA && [\"de\", \"en\", \"es\", \"it\"].includes(idiomaIA.toLowerCase())) {\n    langCode = idiomaIA.toLowerCase();\n} else {\n    langCode = detectLanguageBackup(textoVoz);\n}\n\n// E. SELECCIÓN DE VOZ\nconst googleVoices = {\n  de: { languageCode: \"de-DE\", name: \"de-DE-Neural2-F\", ssmlGender: \"FEMALE\" },\n  en: { languageCode: \"en-US\", name: \"en-US-Neural2-F\", ssmlGender: \"FEMALE\" },\n  es: { languageCode: \"es-US\", name: \"es-US-Neural2-B\", ssmlGender: \"MALE\" },\n  it: { languageCode: \"it-IT\", name: \"it-IT-Neural2-A\", ssmlGender: \"FEMALE\" }\n};\n\nconst selectedVoice = googleVoices[langCode] || googleVoices.es;\n\n// F. LIMPIEZA PARA TTS\nfunction cleanForTTS(text) {\n  if (!text) return \"\";\n  return text\n    .replace(/[\\u{1F600}-\\u{1F64F}\\u{1F300}-\\u{1F5FF}]/gu, \"\")\n    .replace(/(https?:\\/\\/[^\\s]+)/g, \"el enlace\")\n    .replace(/[\"*{}\\[\\]_]/g, \"\")\n    .trim();\n}\n\n// G. GENERAR MENSAJE TEXTO (SDR MODE)\nlet urlImagen = \"https://i.imgur.com/example_pricing.png\";\n\nif (accionFinal === \"agendar\") {\n  mensajeTexto = \"🔗 Agenda tu auditoria aqui:\\n\\nhttps://cal.com/gustavo-a.-dornhofer-nqjqos/auditoria-ia-gratuita-free-ai-audit-kostenloses-ki-audit\\n\\nElegi dia y horario. Duracion: 30 min\";\n}\nelse if (accionFinal === \"contacto\") {\n  mensajeTexto = \"Contacto directo:\\n\\n• WhatsApp: +54 9 11 7371-9972\\n• Email: agentes.space@gmail.com\\n\\nEn que mas puedo ayudarte?\";\n}\nelse if (accionFinal === \"derivar\") {\n  mensajeTexto = \"He notificado a un especialista humano sobre tu caso. Te contactaran a la brevedad.\";\n}\nelse if (accionFinal === \"tarifario\") {\n  mensajeTexto = \"Aqui tienes nuestro tarifario actualizado:\\n\\n\" + urlImagen + \"\\n\\n(Abre el enlace para ver los precios)\";\n}\n\nreturn {\n  json: {\n    clean_voice: cleanForTTS(textoVoz),              \n    accion: accionFinal.toLowerCase().trim(),\n    mensaje_texto: mensajeTexto,\n    remote_jid: rawRemoteJid,\n    idioma: langCode,\n    tts_language_code: selectedVoice.languageCode,\n    tts_voice_name: selectedVoice.name,\n    tts_gender: selectedVoice.ssmlGender\n  }\n};"
+            },
+            "id": "filtro-js-v14",
+            "name": "Filtro V14 (SDR Mode)",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                750,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "dataType": "string",
+                "value1": "={{ $json.accion }}",
+                "rules": {
+                    "rules": [
+                        {
+                            "value2": "agendar"
+                        },
+                        {
+                            "value2": "contacto"
+                        },
+                        {
+                            "value2": "derivar"
+                        },
+                        {
+                            "value2": "tarifario"
+                        }
+                    ]
+                }
+            },
+            "id": "switch-accion",
+            "name": "Switch1 (Copia GenerArise)",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 1,
+            "position": [
+                1000,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "USA",
+                "remoteJid": "={{ $('Webhook').item.json.body.data.key.remoteJid }}",
+                "messageText": "={{ $json.mensaje_texto }}"
+            },
+            "id": "evolution-text",
+            "name": "Enviar texto (USA)",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                1300,
+                200
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "mWJjZLDXsIhJxZcX",
+                    "name": "USA"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "text": "={{ $json.clean_voice }}",
+                "languageCode": "={{ $json.tts_language_code }}",
+                "voiceName": "={{ $json.tts_voice_name }}",
+                "voiceGender": "MALE",
+                "options": {}
+            },
+            "id": "tts-node",
+            "name": "Generar Audio (TTS)",
+            "type": "n8n-nodes-google-cloud-tts.googleCloudTts",
+            "typeVersion": 1,
+            "position": [
+                1000,
+                450
+            ],
+            "credentials": {
+                "googleCloudTtsApi": {
+                    "id": "p6gzWofxOKTKQf2l",
+                    "name": "Google Cloud Text-to-Speech account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "operation": "send-audio",
+                "instanceName": "USA",
+                "remoteJid": "={{ $('Webhook').item.json.body.data.key.remoteJid }}",
+                "media": "={{ $json.audioData }}",
+                "options_message": {}
+            },
+            "id": "enviar-audio",
+            "name": "Enviar Audio (USA)",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                1300,
+                450
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "mWJjZLDXsIhJxZcX",
+                    "name": "USA"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Gemini Brain (Basic LLM Chain)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Gemini 1.5 Flash": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Gemini Brain (Basic LLM Chain)",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Gemini Brain (Basic LLM Chain)": {
+            "main": [
+                [
+                    {
+                        "node": "Filtro V14 (SDR Mode)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtro V14 (SDR Mode)": {
+            "main": [
+                [
+                    {
+                        "node": "Switch1 (Copia GenerArise)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Generar Audio (TTS)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Switch1 (Copia GenerArise)": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar texto (USA)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Enviar texto (USA)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Enviar texto (USA)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Enviar texto (USA)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generar Audio (TTS)": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Audio (USA)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

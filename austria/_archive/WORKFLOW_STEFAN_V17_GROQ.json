@@ -1,0 +1,268 @@
+{
+    "name": "Stefan AI Austria V17.1 (GROQ VERSION)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "austria-leads",
+                "options": {}
+            },
+            "id": "webhook-trigger",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// NORMALIZADOR INPUT V17\nlet body = $input.item.json.body || {};\nlet data = body.data || {};\nlet msg = data.message || {};\n\nlet userMessage = \"\";\nif (msg.extendedTextMessage && msg.extendedTextMessage.text) {\n    userMessage = msg.extendedTextMessage.text;\n}\nelse if (msg.conversation) {\n    userMessage = msg.conversation;\n}\nelse if (msg.conversationMessage && msg.conversationMessage.message) {\n    userMessage = msg.conversationMessage.message;\n}\nelse if (body.message) {\n    userMessage = body.message;\n}\n\nif (!userMessage) userMessage = \"Hola\";\n\nreturn {\n  json: {\n    ...$input.item.json,\n    user_message: userMessage\n  }\n};"
+            },
+            "id": "normalizer",
+            "name": "Normalizar Input",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                260,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "model": "llama-3.3-70b-versatile",
+                "options": {
+                    "temperature": 0.2
+                }
+            },
+            "id": "groq_model",
+            "name": "Groq Chat (Llama 3.3 70B)",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                420,
+                520
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq API Account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.user_message }}",
+                "hasOutputParser": true,
+                "options": {
+                    "systemMessage": "=# 🇦🇹 PROMPT STEFAN AI - TURISMO 4.0 AUSTRIA (V1)\n\n## 🤵 IDENTIDAD Y TONO\nEres **Stefan**, Senior Advisor de \"Austria Turismo 4.0\". Tu personalidad es:\n- **Profesional y cálido**: Como un concierge experto en hoteles de lujo.\n- **Eficiente**: No hablas de más, vas al grano pero con elegancia.\n- **Tecnológico**: Entiendes cómo la IA ayuda a los hoteles.\n\n## 🚨 REGLA DE ORO: IDIOMA\n**RESPONDE SIEMPRE EN EL IDIOMA DEL USUARIO.**\n\n## 🎯 PROTOCOLO DE HERRAMIENTAS (ACTIONS)\nEres capaz de ejecutar acciones reales a través de n8n. Debes indicar la acción en el JSON de salida.\n\n### Acciones Disponibles:\n1. **`registrar_lead`**: Cuando el usuario confirme que gestiona un hotel o propiedad.\n2. **`enviar_brochure`**: Cuando el usuario pida materiales, info detallada o \"el brochure\".\n3. **`agendar`**: Cuando el usuario acepte una auditoría rápida o demo.\n4. **`info`**: Para charla general y resolución de dudas iniciales.\n\n## ⚠️ FORMATO DE SALIDA (JSON OBLIGATORIO)\n\n```json\n{\n  \"respuesta_voz\": \"Texto breve para ser leído/escuchado...\",\n  \"mensaje_texto\": \"Texto opcional con links o info para leer (puede ser null)\",\n  \"accion\": \"registrar_lead | enviar_brochure | agendar | info\",\n  \"idioma\": \"de | en | es | it\"\n}\n```\n\n### 🔗 LINKS IMPORTANTES:\n- **Auditoría**: https://cal.com/gustavo-a.-dornhofer-nqjqos/auditoria-ia-gratuita-free-ai-audit-kostenloses-ki-audit\n\n### 🛑 REGLAS DE VOZ:\n- Máximo 2 oraciones.\n- Cero URLs en voz (di \"te lo envío por texto\").\n"
+                }
+            },
+            "id": "ai_brain",
+            "name": "Groq Brain (Stefan V1)",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                420,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// FILTRO STEFAN V17 BULLETPROOF (V3)\n// Este código evita que el workflow se rompa si faltan referencias\n\nconst inputObj = $input.item.json;\nconst inputData = inputObj.text || inputObj.output || inputObj.response || \"\";\n\n// 1. PARSEO DE IA\nlet parsed = {};\nif (typeof inputData === 'string' && inputData.trim() !== \"\") {\n  const clean = inputData.replace(/```json/g, \"\").replace(/```/g, \"\").trim();\n  try { \n    parsed = JSON.parse(clean); \n  } catch(e) {\n    parsed = { respuesta_voz: clean, accion: 'info' }; \n  }\n} else if (typeof inputData === 'object' && inputData !== null) {\n  parsed = inputData;\n}\n\n// 2. SEGURIDAD DE SALIDA (Evita error 3 INVALID_ARGUMENT en TTS)\nconst voiceText = parsed.respuesta_voz || parsed.text || \"Entendido.\";\nconst lang = parsed.idioma || \"de\";\nconst accion = parsed.accion || \"info\";\n\n// 3. IDENTIFICADOR DE USUARIO (WhatsApp/Web)\nlet remoteJid = \"Web-User\";\n\n// Verificamos si existe el nodo Webhook de forma segura\ntry {\n  const webhookNode = $(\"Webhook\");\n  if (webhookNode && webhookNode.item) {\n    const body = webhookNode.item.json.body || {};\n    remoteJid = body.data?.key?.remoteJid || body.remote_jid || \"Web-User\";\n  }\n} catch (e) {\n  // Si el nodo no existe o no ha corrido, usamos el dato local o fallback\n  remoteJid = inputObj.remote_jid || \"Web-User\";\n}\n\nreturn {\n  json: {\n    voice_text: voiceText,\n    display_text: parsed.mensaje_texto || null,\n    lang: lang,\n    accion: accion,\n    remote_jid: remoteJid\n  }\n};"
+            },
+            "id": "logic_filter",
+            "name": "Stefan Logic Filter",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                600,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "dataType": "string",
+                "value1": "={{ $json.accion }}",
+                "rules": {
+                    "rules": [
+                        {
+                            "value2": "registrar_lead"
+                        },
+                        {
+                            "value2": "enviar_brochure"
+                        },
+                        {
+                            "value2": "agendar"
+                        }
+                    ]
+                }
+            },
+            "id": "action_switch",
+            "name": "Action Switch",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 1,
+            "position": [
+                800,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "selection": "sheet",
+                "sheetId": "YOUR_SHEET_ID_HERE",
+                "range": "A:E",
+                "columns": {
+                    "mappingMode": "manual",
+                    "value": {
+                        "Date": "={{ $now }}",
+                        "Phone": "={{ $json.remote_jid }}",
+                        "Action": "={{ $json.accion }}",
+                        "Language": "={{ $json.lang }}"
+                    }
+                }
+            },
+            "id": "sheet_leads",
+            "name": "Google Sheets (Leads)",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4,
+            "position": [
+                1000,
+                50
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GS_CRED_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "operation": "send-audio",
+                "instanceName": "USA",
+                "remoteJid": "={{ $json.remote_jid }}",
+                "media": "={{ $json.audioData }}"
+            },
+            "id": "send_audio",
+            "name": "Send Audio",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                1200,
+                500
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "mWJjZLDXsIhJxZcX",
+                    "name": "USA"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "text": "={{ $json.voice_text }}",
+                "languageCode": "={{ $json.lang === 'de' ? 'de-DE' : ($json.lang === 'en' ? 'en-US' : 'es-US') }}",
+                "voiceName": "={{ $json.lang === 'de' ? 'de-DE-Neural2-F' : ($json.lang === 'en' ? 'en-US-Neural2-F' : 'es-US-Neural2-B') }}"
+            },
+            "id": "tts_stefan",
+            "name": "Stefan TTS",
+            "type": "n8n-nodes-google-cloud-tts.googleCloudTts",
+            "typeVersion": 1,
+            "position": [
+                800,
+                500
+            ],
+            "credentials": {
+                "googleCloudTtsApi": {
+                    "id": "p6gzWofxOKTKQf2l",
+                    "name": "Google Cloud Text-to-Speech account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Normalizar Input",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Normalizar Input": {
+            "main": [
+                [
+                    {
+                        "node": "Groq Brain (Stefan V1)",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Chat (Llama 3.3 70B)": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Groq Brain (Stefan V1)",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Brain (Stefan V1)": {
+            "main": [
+                [
+                    {
+                        "node": "Stefan Logic Filter",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Stefan Logic Filter": {
+            "main": [
+                [
+                    {
+                        "node": "Action Switch",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Stefan TTS",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Action Switch": {
+            "main": [
+                [
+                    {
+                        "node": "Google Sheets (Leads)",
+                        "index": 0
+                    }
+                ],
+                [],
+                []
+            ]
+        },
+        "Stefan TTS": {
+            "main": [
+                [
+                    {
+                        "node": "Send Audio",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

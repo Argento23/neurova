@@ -1,0 +1,160 @@
+{
+  "name": "🤖 Instagram Direct (Bot Autónomo sin Chatwoot)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "instagram-bot-direct",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "e3b6a9c1-5d2f-4a8f-b9c1-8d2a6b4c3d1e",
+      "name": "Verificar Meta Webhook (GET)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [200, 180],
+      "webhookId": "instagram-bot-direct-get"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.query['hub.challenge'] }}",
+        "options": {}
+      },
+      "id": "f8d7c4a1-2b3e-4f5a-9c6d-1e8b2a3c4d5f",
+      "name": "Aprobar Verificación",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [420, 180]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "instagram-bot-direct",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d",
+      "name": "Recibir DM de Instagram (POST)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [200, 380],
+      "webhookId": "instagram-bot-direct-post"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.body.object === 'instagram' || $json.body.object === 'page' }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
+      "name": "¿Es un mensaje válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [420, 380]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_GROQ_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"model\": \"llama-3.1-8b-instant\", \"messages\": [ { \"role\": \"system\", \"content\": \"Eres Alex, un experto agente de ventas de GenerArise. Respondes de manera amigable, cortés y persuasiva a clientes por DM. Tus respuestas deben ser MUY breves (máximo 2 oraciones). REGLA DE PRECIOS CRÍTICA: NUNCA des presupuestos o precios en firme por acá. Si el cliente pregunta el precio, dile que necesitas que complete una auditoría para darle el análisis y presupuesto exacto, y envíale este link: https://generarise.space/?lang=es#contacto (Toma en cuenta que 1 USD = 1400 ARS).\" }, { \"role\": \"user\", \"content\": \"El cliente dice: \" + ($json.body.entry[0].messaging[0].message.text || \"(Mensaje multimedia o vacío)\") } ], \"temperature\": 0.7 } }}",
+        "options": {}
+      },
+      "id": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
+      "name": "Alex (Groq LLM)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [660, 360]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v19.0/me/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer EAALdsduzkTABRT5lZCcDyyveJuxeWdWCDlbQJ08KVKAkfuxy7ADZBAnTzqWgeVSMEiR1RIrDwn5ZB2HJ5YK6WAev0AseVh00mj9svWDFJeFBKiGW695ZCmbTmn9cZAas15bzqK5kNBFAia4tRKZARir3aTZBPm3cRjNgqJOUwFCeRs6Ub75khrN4XliZBCM6rOI8g0oZD"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"recipient\": { \"id\": $('Recibir DM de Instagram (POST)').item.json.body.entry[0].messaging[0].sender.id }, \"message\": { \"text\": ($json.choices[0].message.content || \"Hola, recibimos tu mensaje pero la IA no pudo generar respuesta.\") } } }}",
+        "options": {}
+      },
+      "id": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8g",
+      "name": "Enviar Respuesta por Instagram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 360]
+    }
+  ],
+  "connections": {
+    "Verificar Meta Webhook (GET)": {
+      "main": [
+        [
+          {
+            "node": "Aprobar Verificación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recibir DM de Instagram (POST)": {
+      "main": [
+        [
+          {
+            "node": "¿Es un mensaje válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es un mensaje válido?": {
+      "main": [
+        [
+          {
+            "node": "Alex (Groq LLM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alex (Groq LLM)": {
+      "main": [
+        [
+          {
+            "node": "Enviar Respuesta por Instagram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

@@ -1,0 +1,685 @@
+{
+  "name": "Hunter-Mundial2026_Stefan_FIXED",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "6948bbba-d913-4f53-88ab-eeef36e6b596",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// --- CONFIGURACIÓN GLOBAL: CAZADOR DACH (ALEMANIA & AUSTRIA) ---\n\n// 1. Nichos de Oportunidad (Alta gama en Europa Central)\nconst niches = [\n  \"Luxury 5-star Hotel\",\n  \"Boutique Hotel Design\",\n  \"Wellness and Spa Resort\",\n  \"Ski and Mountain Resort\",\n  \"Business and Conference Hotel\",\n  \"Gourmet Restaurant Michelin\"\n];\n\n// 2. Localidades Clave de Austria y Alemania (Sedes de Negocio y Turismo)\nconst locations = [\n  // --- AUSTRIA ---\n  { name: \"Vienna (Wien), Austria\", tz: \"Europe/Vienna\" },\n  { name: \"Salzburg, Austria\", tz: \"Europe/Vienna\" },\n  { name: \"Innsbruck, Tirol, Austria\", tz: \"Europe/Vienna\" },\n  { name: \"Kitzbühel, Tyrol, Austria\", tz: \"Europe/Vienna\" },\n  { name: \"Graz, Styria, Austria\", tz: \"Europe/Vienna\" },\n  { name: \"Linz, Upper Austria, Austria\", tz: \"Europe/Vienna\" },\n  { name: \"Zell am See, Salzburg State, Austria\", tz: \"Europe/Vienna\" },\n  { name: \"St. Anton am Arlberg, Austria\", tz: \"Europe/Vienna\" },\n  \n  // --- ALEMANIA ---\n  { name: \"Munich (München), Bavaria, Germany\", tz: \"Europe/Berlin\" },\n  { name: \"Berlin, Germany\", tz: \"Europe/Berlin\" },\n  { name: \"Frankfurt am Main, Hesse, Germany\", tz: \"Europe/Berlin\" },\n  { name: \"Hamburg, Germany\", tz: \"Europe/Berlin\" },\n  { name: \"Cologne (Köln), North Rhine-Westphalia, Germany\", tz: \"Europe/Berlin\" },\n  { name: \"Stuttgart, Baden-Württemberg, Germany\", tz: \"Europe/Berlin\" },\n  { name: \"Düsseldorf, North Rhine-Westphalia, Germany\", tz: \"Europe/Berlin\" },\n  { name: \"Baden-Baden, Baden-Württemberg, Germany\", tz: \"Europe/Berlin\" }\n];\n\n// 3. Lógica de Selección Aleatoria\nconst selectedLocation = locations[Math.floor(Math.random() * locations.length)];\nconst selectedNiche = niches[Math.floor(Math.random() * niches.length)];\n\nreturn {\n  search_term: selectedNiche,\n  location: selectedLocation.name,\n  timezone: selectedLocation.tz,\n  campaign: \"DACH_HOTEL_RESILIENCE_2026\",\n  banner_url: \"https://images.unsplash.com/photo-1527004013197-933c4bb611b3?q=80&w=800&auto=format&fit=crop\" \n};\n"
+      },
+      "id": "a90e954f-11f4-4a7b-a72b-b8e598ead76a",
+      "name": "CONFIG GLOBAL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "local_results",
+        "options": {}
+      },
+      "id": "d409e509-40b0-4112-8ed2-ecab7ee8193d",
+      "name": "Dividir",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [
+        608,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let existingRaw = [];\ntry {\n    const sheetData = $('Leer Leads Existentes').all();\n    if (sheetData && sheetData.length > 0) {\n        existingRaw = sheetData.map(x => x.json);\n    }\n} catch(e) {\n    existingRaw = [];\n}\n\nconst existingDomains = existingRaw.map(x => {\n    const url = x.Website || x.Web || x.Link || '';\n    try { if (url) return new URL(url).hostname.replace('www.', ''); } catch(e) { return url; }\n    return '';\n}).filter(d => d);\n\nconst validItems = [];\n\nfor (const item of $input.all()) {\n    const currentUrl = item.json.website || '';\n    \n    let currentDomain = '';\n    try {\n        if (currentUrl) currentDomain = new URL(currentUrl).hostname.replace('www.', '');\n    } catch(e) { \n        currentDomain = currentUrl; \n    }\n    \n    if (!(currentDomain && existingDomains.length > 0 && existingDomains.some(d => d && d.includes(currentDomain)))) {\n        validItems.push(item);\n    }\n}\n\nreturn validItems;\n"
+      },
+      "id": "4552bbbf-6ae9-4635-9aca-bff80950f22c",
+      "name": "Filtrar Duplicados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "22c8e236-4cf8-41a7-8b6a-8a2cc36ec50d",
+      "name": "Loop",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 2,
+      "position": [
+        992,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.website || 'https://www.google.com' }}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "4e7025d1-1726-41c3-9bf3-9d52a97ecfa7",
+      "name": "Visitar Web",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1152,
+        0
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "try {\n  let html = '';\n  if ($input.item && $input.item.json && $input.item.json.data) {\n      html = $input.item.json.data;\n  }\n  \n  const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\\.[a-zA-Z0-9_-]+)/gi;\n  const mailtoRegex = /mailto:([^\\\"'>?]+)/gi;\n  \n  let foundEmails = [];\n  let match;\n  while ((match = mailtoRegex.exec(html)) !== null) {\n      if (match[1]) foundEmails.push(match[1]);\n  }\n  const textMatches = html.match(emailRegex) || [];\n  foundEmails = [...foundEmails, ...textMatches];\n  \n  const uniqueEmails = [...new Set(foundEmails.map(e => e.trim().toLowerCase()))];\n  const validEmails = uniqueEmails.filter(e => !e.match(/\\.(png|jpg|jpeg|gif|css|js|svg)$/i) && e.length < 100 && e.includes('@'));\n  \n  const bestEmail = validEmails.length > 0 ? validEmails[0] : '';\n  const allEmails = validEmails.join(', ');\n  \n  const text = html.replace(/<style[^>]*>[\\s\\S]*?<\\/style>/gi, '').replace(/<script[^>]*>[\\s\\S]*?<\\/script>/gi, '').replace(/<[^>]*>/g, ' ').replace(/\\s+/g, ' ');\n\n  let loopTitle = 'Sin nombre';\n  let loopPhone = '';\n  if ($('Loop') && $('Loop').item && $('Loop').item.json) {\n      loopTitle = $('Loop').item.json.title || 'Sin nombre';\n      loopPhone = $('Loop').item.json.phone || '';\n  }\n  \n  return {\n    text: text.substring(0, 4500),\n    title: loopTitle,\n    phone_from_maps: loopPhone,\n    regex_email: bestEmail,\n    all_emails: allEmails\n  };\n\n} catch (error) {\n  let loopTitle2 = 'Sin nombre';\n  let loopPhone2 = '';\n  try {\n      if ($('Loop') && $('Loop').item && $('Loop').item.json) {\n          loopTitle2 = $('Loop').item.json.title || 'Sin nombre';\n          loopPhone2 = $('Loop').item.json.phone || '';\n      }\n  } catch (e2) {}\n\n  return {\n    text: \"Sitio web no disponible o caido.\",\n    title: loopTitle2,\n    phone_from_maps: loopPhone2,\n    regex_email: '',\n    all_emails: ''\n  };\n}\n"
+      },
+      "id": "3a812fbe-122c-48e1-99f0-6a7041853305",
+      "name": "Limpiar HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let data = $input.item.json;\n\nif (!data.email && !data.phone) {\n    const possibleString = data.text || data.output || data.response || '';\n    if (typeof possibleString === 'string') {\n        try {\n            const first = possibleString.indexOf('{');\n            const last = possibleString.lastIndexOf('}');\n            if (first >= 0 && last > first) {\n                const jsonStr = possibleString.substring(first, last + 1);\n                const parsed = JSON.parse(jsonStr);\n                data = { ...data, ...parsed };\n            }\n        } catch (e) { \n             try {\n                 const match = possibleString.match(/\\{[\\s\\S]*\\}/);\n                 if (match) {\n                     const parsed = JSON.parse(match[0]);\n                     data = { ...data, ...parsed };\n                 }\n             } catch(e2) {}\n        }\n    }\n}\n\nconst cleanStr = (str) => (str || '').toString().replace(/'/g, \"&#39;\").replace(/\\\"/g, \"&quot;\");\n\nconst getSafeNodeData = (nodeName, property, fallback = '') => {\n  try {\n    return $node[nodeName].json[property] || fallback;\n  } catch (e) {\n    return fallback;\n  }\n};\n\nconst titleRaw = getSafeNodeData('Loop', 'title', 'Sin nombre');\nconst title = cleanStr(titleRaw);\nconst phone_maps = getSafeNodeData('Loop', 'phone', '');\n\nlet banner = 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=800&auto=format&fit=crop';\ntry {\n    const globalBanner = getSafeNodeData('CONFIG GLOBAL', 'banner_url');\n    if (globalBanner) banner = globalBanner;\n} catch(e) {}\n\nconst regex_email_input = getSafeNodeData('Limpiar HTML', 'regex_email', 'SIN-EMAIL@nodetectado.local');\n\nconst rawPhone = data.phone || phone_maps || '';\nconst phone = rawPhone.toString().replace(/[^0-9]/g, '');\n\nlet email = (data.email && data.email.trim() !== '' && data.email !== '\"\"') ? data.email : regex_email_input;\nif (!email || email === '' || email === '\"\"' || email === 'SIN-EMAIL@nodetectado.local') email = 'SIN-EMAIL@nodetectado.local';\n\nconst score = data.score || 5;\n\nlet emailBodyRaw = data.email_body || '<p>Hallo Team von <strong>' + title + '</strong>,</p><p>Wir haben eine Möglichkeit entdeckt, Ihre Prozesse mit KI zu automatisieren.</p>';\nconst emailBody = emailBodyRaw.toString();\n\nconst email_html_generarise = '<!DOCTYPE html>' +\n'<html lang=\"de\">' +\n'<head>' +\n'    <meta charset=\"UTF-8\">' +\n'    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">' +\n'    <title>GenerArise AI - Intelligente Automatisierung</title>' +\n'</head>' +\n'<body style=\"margin: 0; padding: 0; font-family: \\'Segoe UI\\', Arial, sans-serif; background-color: #f4f4f7; color: #333;\">' +\n'    <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color: #f4f4f7; padding: 40px 20px;\">' +\n'        <tr>' +\n'            <td align=\"center\">' +\n'                <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #f0f0f0;\">' +\n'                    <tr>' +\n'                        <td style=\"background-image: url(\\'' + banner + '\\'); background-size: cover; background-position: center; height: 180px; position: relative;\">' +\n'                            <div style=\"position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 100%);\"></div>' +\n'                            <div style=\"position: absolute; bottom: 20px; left: 30px; color: #ffffff; font-size: 24px; font-weight: bold; text-shadow: 0 0 10px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.7), 2px 2px 4px rgba(0,0,0,1); letter-spacing: 1px;\">' +\n'                                GENERARISE' +\n'                            </div>' +\n'                        </td>' +\n'                    </tr>' +\n'                    <tr>' +\n'                        <td style=\"padding: 40px 30px; color: #1a202c; line-height: 1.6; font-size: 16px; background-color: #ffffff;\">' +\n                            emailBody +\n'                            <div style=\"text-align: center; margin-top: 30px;\">' +\n'                                <a href=\"https://generarise.space\" style=\"display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; margin-top: 20px;\">' +\n'                                    DEMO ANSEHEN' +\n'                                </a>' +\n'                            </div>' +\n'                        </td>' +\n'                    </tr>' +\n'                    <tr>' +\n'                        <td style=\"background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #eee; font-size: 12px; color: #888;\">' +\n'                            <p style=\"margin-bottom: 5px;\"><strong>GenerArise AI Solutions</strong></p>' +\n'                            <p style=\"margin: 0;\">Buenos Aires, Argentina • <a href=\"https://generarise.space\" style=\"color:#2563eb; text-decoration:none;\">generarise.space</a></p>' +\n'                        </td>' +\n'                    </tr>' +\n'                </table>' +\n'            </td>' +\n'        </tr>' +\n'    </table>' +\n'</body>' +\n'</html>';\n\nlet waMsgRaw = data.wa_msg || 'Hallo Team von ' + title + ', wir sind GenerArise. Wir automatisieren Geschäftsprozesse mit KI. Hätten Sie Interesse an einer Demo?';\nlet waMsg = waMsgRaw.replace(/^(Mensaje|Message|WA|WhatsApp)(:|\\s)+/i, '').replace(/^[\\\"']|[\\\"']$/g, '').trim();\n\nreturn {\n  text: title,\n  score: score,\n  email_address: email,\n  phone: phone,\n  wa_msg: waMsg,\n  email_html: email_html_generarise,\n  search_term: getSafeNodeData('CONFIG GLOBAL', 'search_term', 'N/A'),\n  location: getSafeNodeData('CONFIG GLOBAL', 'location', 'N/A'),\n  raw_ai: JSON.stringify(data)\n};\n"
+      },
+      "id": "6355812f-99f5-4bd9-b114-bf6cbca5906f",
+      "name": "Diseñador Email Premium",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1856,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "text",
+              "value": "={{ $('Diseñador Email Premium').item.json.text }}"
+            },
+            {
+              "name": "score",
+              "value": "={{ $('Diseñador Email Premium').item.json.score }}"
+            },
+            {
+              "name": "email_address",
+              "value": "={{ $('Diseñador Email Premium').item.json.email_address }}"
+            },
+            {
+              "name": "search_term",
+              "value": "={{ $('Diseñador Email Premium').item.json.search_term }}"
+            },
+            {
+              "name": "location",
+              "value": "={{ $('Diseñador Email Premium').item.json.location }}"
+            },
+            {
+              "name": "raw",
+              "value": "={{ $('Diseñador Email Premium').item.json.raw_ai }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3c11f53e-60ed-419d-b68f-5362541ab98b",
+      "name": "Datos Finales",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        2944,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1GkSDUCdgKBEcNsKW5SmHYjlqZUI3rdwt_mbNi5alsvk",
+          "mode": "list",
+          "cachedResultName": "Generarise leads seguimiento",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GkSDUCdgKBEcNsKW5SmHYjlqZUI3rdwt_mbNi5alsvk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GkSDUCdgKBEcNsKW5SmHYjlqZUI3rdwt_mbNi5alsvk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "location": "={{ $json.location }}",
+            "email_address": "={{ $json.email_address }}",
+            "raw": "={{ $json.email_html }}",
+            "search_term": "={{ $json.search_term }}",
+            "score": "={{ $json.score }}",
+            "text": "={{ $json.text }}",
+            "success": "={{ $json.wa_msg }}",
+            "data": "={{ $json.phone }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "success",
+              "displayName": "success",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "text",
+              "displayName": "text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email_address",
+              "displayName": "email_address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "search_term",
+              "displayName": "search_term",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "raw",
+              "displayName": "raw",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "messageId",
+              "displayName": "messageId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "f989c9ab-3980-4a48-8798-2d89f7919e7d",
+      "name": "Guardar en Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2064,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "AiiXT6gBgIve65dy",
+          "name": "Google Sheets account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "sendHTML": true,
+        "subject": "= Steigern Sie den Umsatz von {{ $('Diseñador Email Premium').item.json.text }} mit KI",
+        "htmlContent": "={{ $('Diseñador Email Premium').item.json.email_html }}",
+        "sender": "no-reply@generarise.space",
+        "receipients": "={{ $('Diseñador Email Premium').item.json.email_address }}",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.sendInBlue",
+      "typeVersion": 1,
+      "position": [
+        2736,
+        0
+      ],
+      "id": "10442eed-cb89-41eb-9392-c292cb5909f6",
+      "name": "Send a transactional email",
+      "credentials": {
+        "sendInBlueApi": {
+          "id": "NK5TBleqlXM38h9k",
+          "name": "Brevo account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pausa segura de 60 segundos (sin romper el Loop)\nreturn new Promise((resolve) => {\n  setTimeout(() => {\n    resolve($input.all());\n  }, 60000);\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3120,
+        0
+      ],
+      "id": "1a807986-08c8-4170-8aac-19600c1a0d31",
+      "name": "Pause 1 min"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=TAREA: Actúa como un Auditor de Presencia Digital Senior. Tu objetivo es encontrar \"HUECOS DE DINERO\" (Oportunidades de mejora) en los leads de Google Maps.\n\nREGLA DE ORO (INVIOLABLE):\n1. SUSTITUCIÓN TOTAL: NUNCA dejes corchetes como [business_name] en el mensaje final. Sustitúyelos por el nombre real del negocio del JSON.\n2. NO SEAS UN ROBOT: No listes todas las fallas. Menciona solo UNA que realmente detectes.\n3. TONO HUMANO: Sé amable y \"discreto\". Nada de \"errores graves\", mejor \"un detalle que quizás les convenga ajustar\".\n\nLÓGICA DE DETECCIÓN (Scanneo):\n- CAPA WEB: ¿Falta SSL (http)? ¿Web lenta? ¿Falta botón de reserva?\n- CAPA RRSS: ¿Instagram quieto? (Más de un mes sin post).\n\nREGLA DE IDIOMA SEGÚN 'LOCATION':\n- SI location es USA o Canada -> INGLÉS.\n- SI location es España o LatAm -> ESPAÑOL.\n- SI location es Austria o Germany -> ALEMÁN (German).\n\nEJEMPLOS DE MENSAJE (Adaptar al idioma):\n\n- (ESPAÑOL): \"Hola equipo de [business_name], estuve viendo su sitio y me encantó el diseño, pero noté que para reservar desde el teléfono hay que dar un par de vueltas de más. Eso hoy en día hace que mucha gente abandone. ¿Les puedo pasar una idea rápida de cómo lo simplificaríamos?\"\n\n- (INGLÉS): \"Hi Team at [business_name], I was checking out your website - great layout! I did notice one small thing: the mobile booking process takes a few extra steps, which often leads to customers dropping off. Would you like me to send over a quick 1-minute analysis of how we'd fix that?\"\n\n- (ALEMÁN): \"Hallo Team vom [business_name], ich habe mir Ihre Website angesehen – wirklich schönes Design! Mir ist allerdings eine Kleinigkeit aufgefallen: Die mobile Buchung könnte noch etwas direkter sein, da viele Gäste heutzutage am Handy abbrechen, wenn es zu viele Klicks sind. Darf ich Ihnen eine kurze Analyse schicken, wie wir das lösen würden?\"\n\nRESPONDE SIEMPRE Y ÚNICAMENTE con un JSON válido, sin texto adicional antes o después:\n{\n  \"business_name\": \"...\",\n  \"wa_msg\": \"...\",\n  \"falla_detectada\": \"...\"\n}\n",
+        "hasOutputParser": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1536,
+        0
+      ],
+      "id": "81109363-9e6f-434f-a591-885e91d5436c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "=llama-3.1-8b-instant",
+        "options": {
+          "temperature": 0.5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        208
+      ],
+      "id": "1835bccc-f21f-4e52-8b96-0c303bc2c8bb",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "rhKzjKH11s9HHlQf",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Genera un delay entre 2 y 5 minutos\nreturn { \n  delay_ms: Math.floor(Math.random() * (300000 - 120000 + 1) + 120000) \n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2272,
+        0
+      ],
+      "id": "9cbc101b-3106-49b3-acc6-3f8e3c411a53",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {},
+      "id": "66cc2c79-4095-4715-b76a-c05991e478a4",
+      "name": "Cron Diario (10am)1",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "queryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "9be0d43581dc9220232e9a2819f308c303a32082a1e62f97c9c87b75dfde8d72"
+            },
+            {
+              "name": "engine",
+              "value": "google_maps"
+            },
+            {
+              "name": "q",
+              "value": "={{ $json.search_term + ' in ' + $json.location }}"
+            },
+            {
+              "name": "num",
+              "value": "10"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "927b378d-65c3-467d-a17b-282d78e289cf",
+      "name": "Google Maps1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        432,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "agency_clients",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $('Limpiar HTML').item.json.title }}"
+            },
+            {
+              "fieldId": "phone",
+              "fieldValue": "={{ $('Limpiar HTML').item.json.phone_from_maps }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $('Limpiar HTML').item.json.regex_email }}"
+            },
+            {
+              "fieldId": "company",
+              "fieldValue": "={{ $('Limpiar HTML').item.json.title }}"
+            },
+            {
+              "fieldId": "notes",
+              "fieldValue": "={{ $('Limpiar HTML').item.json.text }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2512,
+        0
+      ],
+      "id": "e67dccbe-b57d-4982-9455-c92f62f72127",
+      "name": "Create a row1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "g5oz3jlWBKPtqTWB",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Dividir": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Duplicados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Duplicados": {
+      "main": [
+        [
+          {
+            "node": "Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop": {
+      "main": [
+        [
+          {
+            "node": "Visitar Web",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Visitar Web": {
+      "main": [
+        [
+          {
+            "node": "Limpiar HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpiar HTML": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Diseñador Email Premium": {
+      "main": [
+        [
+          {
+            "node": "Guardar en Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Datos Finales": {
+      "main": [
+        [
+          {
+            "node": "Pause 1 min",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar en Sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CONFIG GLOBAL": {
+      "main": [
+        [
+          {
+            "node": "Google Maps1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "CONFIG GLOBAL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a transactional email": {
+      "main": [
+        [
+          {
+            "node": "Datos Finales",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pause 1 min": {
+      "main": [
+        [
+          {
+            "node": "Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Diseñador Email Premium",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Create a row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron Diario (10am)1": {
+      "main": [
+        [
+          {
+            "node": "CONFIG GLOBAL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Maps1": {
+      "main": [
+        [
+          {
+            "node": "Dividir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row1": {
+      "main": [
+        [
+          {
+            "node": "Send a transactional email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "FQxKVQbHjPMlHyzB",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "7a8ee443-6e0a-4b65-8fab-1bdd4091bb16",
+  "meta": {
+    "instanceId": "349ba3357c1cd93f7928f653b0487d3f5a751e9169493043e82591f782070192"
+  },
+  "id": "6uxEwnYkczCFQzJk",
+  "tags": []
+}

@@ -1,0 +1,280 @@
+{
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "vapi-bridge-final",
+                "responseMode": "responseNode"
+            },
+            "name": "WebhookVapi",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "keepOnlySet": true,
+                "values": {
+                    "string": [
+                        {
+                            "name": "phone",
+                            "value": "={{ $json[\"body\"][\"message\"][\"toolCalls\"][0][\"function\"][\"arguments\"][\"phone\"] || $json[\"body\"][\"phone\"] }}"
+                        },
+                        {
+                            "name": "message",
+                            "value": "={{ $json[\"body\"][\"message\"][\"toolCalls\"][0][\"function\"][\"arguments\"][\"message\"] || $json[\"body\"][\"message\"] }}"
+                        },
+                        {
+                            "name": "media_url",
+                            "value": "={{ $json[\"body\"][\"message\"][\"toolCalls\"][0][\"function\"][\"arguments\"][\"media_url\"] }}"
+                        },
+                        {
+                            "name": "media_type",
+                            "value": "={{ $json[\"body\"][\"message\"][\"toolCalls\"][0][\"function\"][\"arguments\"][\"media_type\"] || \"text\" }}"
+                        },
+                        {
+                            "name": "toolCallId",
+                            "value": "={{ $json[\"body\"][\"message\"][\"toolCalls\"][0][\"id\"] }}"
+                        },
+                        {
+                            "name": "instanceName",
+                            "value": "={{ $json[\"body\"][\"message\"][\"toolCalls\"][0][\"function\"][\"name\"].indexOf('stefan') > -1 ? 'Argen-Austria' : 'GenerArise' }}"
+                        }
+                    ]
+                }
+            },
+            "name": "PrepareData",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{ $json[\"media_type\"] }}",
+                            "value2": "image"
+                        }
+                    ]
+                }
+            },
+            "name": "Is Image?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                500,
+                150
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{ $json[\"media_type\"] }}",
+                            "value2": "document"
+                        }
+                    ]
+                }
+            },
+            "name": "Is Doc?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                500,
+                450
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "={{ $json[\"instanceName\"] }}",
+                "options_message": {
+                    "number": "={{ $json[\"phone\"] }}",
+                    "textMessage": {
+                        "text": "={{ $json[\"message\"] }}"
+                    }
+                }
+            },
+            "name": "Send Text",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                800,
+                100
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "operation": "sendMedia",
+                "instanceName": "={{ $json[\"instanceName\"] }}",
+                "options_message": {
+                    "number": "={{ $json[\"phone\"] }}",
+                    "mediaMessage": {
+                        "media": "={{ $json[\"media_url\"] }}",
+                        "mediaType": "image",
+                        "caption": "={{ $json[\"message\"] }}"
+                    }
+                }
+            },
+            "name": "Send Image",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                800,
+                250
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "operation": "sendMedia",
+                "instanceName": "={{ $json[\"instanceName\"] }}",
+                "options_message": {
+                    "number": "={{ $json[\"phone\"] }}",
+                    "mediaMessage": {
+                        "media": "={{ $json[\"media_url\"] }}",
+                        "mediaType": "document",
+                        "caption": "={{ $json[\"message\"] }}"
+                    }
+                }
+            },
+            "name": "Send Doc",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                800,
+                400
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $node[\"PrepareData\"].json[\"toolCallId\"] }}\",\n      \"result\": \"Enviado correctamente.\"\n    }\n  ]\n}"
+            },
+            "name": "Respond to Vapi",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                1100,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "WebhookVapi": {
+            "main": [
+                [
+                    {
+                        "node": "PrepareData",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "PrepareData": {
+            "main": [
+                [
+                    {
+                        "node": "Is Image?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is Image?": {
+            "main": [
+                [
+                    {
+                        "node": "Send Image",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Is Doc?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is Doc?": {
+            "main": [
+                [
+                    {
+                        "node": "Send Doc",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send Text",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Text": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Vapi",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Image": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Vapi",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Doc": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Vapi",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

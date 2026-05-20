@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vapi Live Tester v3.2</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            margin: auto;
+        }
+
+        h1 {
+            color: #0f172a;
+            margin-bottom: 8px;
+            font-size: 22px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #64748b;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-weight: 500;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            display: block;
+        }
+
+        .success {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            display: block;
+        }
+
+        pre {
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            overflow-x: auto;
+            max-height: 250px;
+            margin-top: 20px;
+        }
+
+        .highlight {
+            color: #f8fafc;
+            font-weight: 600;
+        }
+
+        .tip {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 20px;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>🔑 Vapi Credential Tester v3.2</h1>
+        <p style="font-size: 14px; color: #64748b; margin-bottom: 24px;">Prueba diferentes llaves sin tener que editar
+            el código cada vez.</p>
+
+        <div class="input-group">
+            <label>Public Key (Empieza por pub-...)</label>
+            <input type="text" id="apiKey" value="3fe2e389-3dc5-4071-bfb5-c91a511af385"
+                placeholder="Pega aquí tu Public Key">
+        </div>
+
+        <div class="input-group">
+            <label>Assistant ID (Es un UUID largo)</label>
+            <input type="text" id="assistantId" value="c500ab0f-ea72-47fd-b66f-e2caf54a0ebf"
+                placeholder="Pega aquí tu Assistant ID">
+        </div>
+
+        <button onclick="runTest()">🚀 Probar Estos Datos</button>
+
+        <div id="statusBox" class="status"></div>
+
+        <pre id="log">Logs de conexión aparecerán aquí...</pre>
+
+        <div class="tip">
+            <strong>Donde encontrar los datos correctos:</strong><br>
+            1. Ve a <a href="https://dashboard.vapi.ai/account" target="_blank">Vapi Dashboard > Account</a>.<br>
+            2. Copia la <strong>Public Key</strong> (NO la Private Key).<br>
+            3. Ve a <strong>Assistants</strong> y copia el ID del asistente (lado derecho).
+        </div>
+    </div>
+
+    <script>
+        const log = document.getElementById('log');
+        const statusBox = document.getElementById('statusBox');
+
+        function addLog(msg, isHeader = false) {
+            const time = new Date().toLocaleTimeString();
+            log.innerHTML += `\n<span class="${isHeader ? 'highlight' : ''}">[${time}] ${msg}</span>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        (function (d, t) {
+            var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
+            g.src = "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
+            g.async = true;
+            s.parentNode.insertBefore(g, s);
+            g.onload = () => addLog("✅ SDK Cargado Correctamente.");
+        })(document, "script");
+
+        function runTest() {
+            const key = document.getElementById('apiKey').value.trim();
+            const assistant = document.getElementById('assistantId').value.trim();
+
+            log.innerHTML = "Iniciando prueba...";
+            statusBox.style.display = "none";
+
+            if (!window.vapiSDK) {
+                addLog("❌ Error: SDK no cargado todavía.");
+                return;
+            }
+
+            addLog(`Intentando con Key: ${key}`, true);
+
+            try {
+                const vInstance = window.vapiSDK.run({
+                    apiKey: key,
+                    assistant: assistant,
+                    config: { position: "bottom-right", title: "Test Vapi" }
+                });
+
+                if (vInstance && vInstance.on) {
+                    vInstance.on('call-start', () => {
+                        addLog("📞 LLAMADA INICIADA", true);
+                        statusBox.innerHTML = "✅ ¡FUNCIONA! La llave es correcta.";
+                        statusBox.className = "status success";
+                    });
+
+                    vInstance.on('error', (e) => {
+                        console.error('Vapi Error:', e);
+                        addLog(`❌ ERROR: ${JSON.stringify(e)}`);
+
+                        if (JSON.stringify(e).includes("Unauthorized") || JSON.stringify(e).includes("Invalid Key")) {
+                            statusBox.innerHTML = "❌ LLAVE INVÁLIDA (401). Esta no es la Public Key correcta.";
+                            statusBox.className = "status error";
+                        } else {
+                            statusBox.innerHTML = "❌ Error de conexión. Revisa el log.";
+                            statusBox.className = "status error";
+                        }
+                    });
+                }
+
+                addLog("Widget activado. Dale click al botón para ver si conecta.");
+
+            } catch (e) {
+                addLog(`CRASH: ${e.message}`);
+            }
+        }
+    </script>
+</body>
+
+</html>

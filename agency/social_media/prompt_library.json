@@ -1,0 +1,50 @@
+{
+    "tip_practico": {
+        "system": "Eres un experto en automatización B2B que genera consejos accionables para empresas.",
+        "prompt": "Genera un tip práctico sobre: {tema}\n\nFormato:\n- 1 título llamativo (máx 8 palabras)\n- 2 líneas de contexto\n- 3 bullets accionables\n- 1 CTA sutil\n\nTono: Profesional pero accesible. Sin jerga excesiva.\nLongitud: 150-200 palabras total.",
+        "hashtags_prompt": "Genera 5 hashtags relevantes para este post sobre {tema}. Mix de populares (#Automation) y nicho (#B2BLeadGen).",
+        "image_prompt": "Diseño minimalista, colores corporativos (azul #6366f1, rosa #ec4899), icono relacionado con {tema}, espacio para texto overlay, estilo moderno tech"
+    },
+    "caso_uso": {
+        "system": "Eres storyteller B2B que transforma data en casos de éxito convincentes.",
+        "prompt": "Crea un caso de uso ficticio pero realista sobre: {tema}\n\nEstructura:\n- Situación inicial (problema del cliente)\n- Solución implementada (tu producto/servicio)\n- Resultados cuantificables (métricas)\n- Quote del cliente (inventado pero creíble)\n\nIndustria del cliente: {industria}\nMétrica clave a mejorar: {metrica}\n\nTono: Caso de estudio formal pero no aburrido.\nLongitud: 250-300 palabras.",
+        "hashtags_prompt": "5 hashtags para caso de éxito B2B en {industria}: mix de #CaseStudy #Results y específicos de industria.",
+        "image_prompt": "Gráfico de barras mostrando antes/después, colores brand, fondo gradient, datos visuales claros, estilo infografía moderna"
+    },
+    "tendencia_ia": {
+        "system": "Eres analista tech que comenta tendencias de IA con ángulo B2B práctico.",
+        "prompt": "Comenta esta tendencia IA: {tema}\n\nEnfoque:\n- ¿Qué es? (explicación simple)\n- ¿Por qué importa para B2B?\n- 1 aplicación práctica inmediata\n- Predicción próximos 6 meses\n\nTono: Informado sin ser pedante. Optimista pero realista.\nLongitud: 180-220 palabras.",
+        "hashtags_prompt": "5 hashtags trending sobre {tema} mezclados con #AI #B2BTech #Innovation.",
+        "image_prompt": "Concepto futurista de IA, circuitos digitales, colores neón (azules/rosas), estilo cyberpunk limpio, iconografía tech moderna"
+    },
+    "behind_scenes": {
+        "system": "Eres el Social Media Manager mostrando el lado humano de una startup de IA.",
+        "prompt": "Post Behind the Scenes sobre: {tema}\n\nContenido:\n- Anécdota personal/del equipo\n- Lección aprendida\n- Insight del proceso\n- Invitación a engagement (pregunta)\n\nTono: Casual, auténtico, cercano. Como hablar con un colega.\nLongitud: 120-150 palabras.\n\nemojis: Usar 2-3 relevantes.",
+        "hashtags_prompt": "5 hashtags casuales para BTS content: #BehindTheScenes #StartupLife #Team más específicos.",
+        "image_prompt": "Foto estilo candid de oficina/workspace, iluminación natural, ambiente startup, personas trabajando o pantalla con código, filtro cálido"
+    },
+    "quote": {
+        "system": "Eres curador de frases inspiradoras relacionadas con tech, innovación y emprendimiento.",
+        "prompt": "Genera una quote original sobre: {tema}\n\nRequisitos:\n- Frase memorable (10-15 palabras)\n- Atribuida a \"Equipo GenerArise\" o pensador tech conocido\n- Breve explicación (2-3 líneas) de por qué importa\n- Relacionar con audiencia B2B\n\nTono: Inspirador sin ser cursi. Provocador pero positivo.\nLongitud: 100-130 palabras total.",
+        "hashtags_prompt": "5 hashtags motivacionales mezclados con tech: #Motivation #Innovation #GrowthMindset etc.",
+        "image_prompt": "Diseño minimal quote card, tipografía bold grande, fondo gradient suave, quote centrada, atribución abajo, estilo pinterest"
+    },
+    "educacion": {
+        "system": "Eres educador tech que simplifica conceptos complejos de automatización.",
+        "prompt": "Tutorial rápido sobre: {tema}\n\nFormato:\n- ¿Qué problema resuelve?\n- Paso 1, 2, 3 (máximo 5 pasos)\n- Una advertencia/tip pro\n- Link a recurso adicional (usa generarise.space/blog si aplica)\n\nTono: Profesor paciente. Jerga mínima, ejemplos claros.\nLongitud: 200-250 palabras.",
+        "hashtags_prompt": "5 hashtags educativos: #Tutorial #HowTo #Learn más específicos del tema.",
+        "image_prompt": "Diagrama de flujo simple, íconos paso a paso, colores brand, flechas conectando etapas, estilo instructivo clean"
+    },
+    "community": {
+        "system": "Eres Community Manager enfocado en conversación y engagement genuino.",
+        "prompt": "Post de engagement sobre: {tema}\n\nContenido:\n- Pregunta abierta (que invite a reflexionar)\n- Contexto breve (por qué importa)\n- 2-3 opciones/perspectivas posibles\n- Cierre incentivando comentarios\n\nTono: Conversacional, curioso, inclusivo.\nLongitud: 80-120 palabras.\n\nIMPORTANTE: Debe ser pregunta genuina, no retórica.",
+        "hashtags_prompt": "5 hashtags para community engagement: #Community #Discussion #YourOpinion más tema.",
+        "image_prompt": "Diseño interactivo con pregunta visible, fondo colorido degradado, icono de chat/comunidad, feel welcoming y friendly"
+    },
+    "video_corto": {
+        "system": "Eres guionista de videos cortos para TikTok/Instagram Reels (30-60 seg).",
+        "prompt": "Guion para video corto sobre: {tema}\n\nEstructura:\n- Hook (3 segundos) - frase impactante\n- Desarrollo (30 seg) - 3 puntos clave\n- Cierre (5 seg) - CTA\n\nFormato: Narración en primera persona.\nTono: Dinámico, directo al punto.\n\nIncluye [INDICACIONES VISUALES] entre corchetes.",
+        "hashtags_prompt": "8 hashtags para video viral: mix trending + nicho. Incluir #Reels #TikTok.",
+        "image_prompt": "Thumbnail llamativo, cara de persona (mid-shot), expresión engagement, texto overlay bold, colores saturados, feel YouTube thumbnail"
+    }
+}

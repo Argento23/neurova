@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CILO Premium AI - Experiencia Interactiva</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        :root {
+            --gold: linear-gradient(135deg, #D4860F, #FFD700, #B87333);
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(-45deg, #D4860F, #B87333, #FFD700, #FFA500);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        .glass-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: slideIn 0.8s ease;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .logo h1 {
+            font-size: 4rem;
+            background: linear-gradient(135deg, #2C1810, #B87333);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            text-shadow: 2px 2px 30px rgba(255, 255, 255, 0.5);
+        }
+
+        .ai-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #D4860F, #FFD700);
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            color: white;
+            font-weight: 700;
+            margin-top: 1rem;
+            box-shadow: 0 5px 15px rgba(212, 134, 15, 0.4);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2C1810;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-desc {
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Chatbot AI Simulado */
+        .chatbot-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+        }
+
+        .chatbot-button {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #D4860F, #FFD700);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(212, 134, 15, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            transition: all 0.3s;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .chatbot-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 35px rgba(212, 134, 15, 0.7);
+        }
+
+        .chatbot-window {
+            position: absolute;
+            bottom: 90px;
+            right: 0;
+            width: 350px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chatbot-window.active {
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, #D4860F, #B87333);
+            color: white;
+            padding: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            padding: 0.75rem 1rem;
+            border-radius: 15px;
+            max-width: 80%;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.bot {
+            background: linear-gradient(135deg, #FFF4E6, #FFE4B5);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #D4860F, #B87333);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .quick-actions {
+            padding: 1rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid #D4860F;
+            background: white;
+            color: #D4860F;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quick-btn:hover {
+            background: #D4860F;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Product Calculator */
+        .calculator {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .calc-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+
+        .calc-input {
+            flex: 1;
+            padding: 0.75rem;
+            border-radius: 10px;
+            border: 2px solid rgba(212, 134, 15, 0.3);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .calc-input:focus {
+            outline: none;
+            border-color: #D4860F;
+            box-shadow: 0 0 0 3px rgba(212, 134, 15, 0.1);
+        }
+
+        .calc-result {
+            background: linear-gradient(135deg, #D4860F, #FFD700);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 1rem;
+            box-shadow: 0 5px 15px rgba(212, 134, 15, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #D4860F, #FFD700);
+            color: white;
+            padding: 1remauto;
+            border-radius: 12px;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(212, 134, 15, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(212, 134, 15, 0.5);
+        }
+
+        .social-proof {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            min-width: 150px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #2C1810, #B87333);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: #333;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .glass-container {
+                padding: 1.5rem;
+            }
+
+            .logo h1 {
+                font-size: 2.5rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chatbot-window {
+                width: 90vw;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="glass-container">
+        <div class="logo">
+            <h1>🍪 CILO</h1>
+            <span class="ai-badge">✨ POWERED BY AI</span>
+        </div>
+
+        <div class="stat-label" style="text-align: center; margin-bottom: 2rem; color: #2C1810; font-size: 1.2rem;">
+            La nueva experiencia B2B con Inteligencia Artificial
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">🤖</span>
+                <div class="feature-title">Chatbot AI 24/7</div>
+                <div class="feature-desc">Asistente inteligente que responde consultas sobre productos, ingredientes y
+                    precios en tiempo real.</div>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">🎯</span>
+                <div class="feature-title">Recomendador Inteligente</div>
+                <div class="feature-desc">Sistema IA que sugiere productos según tu tipo de negocio y volumen de compra.
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">💰</span>
+                <div class="feature-title">Calculadora Dinámica</div>
+                <div class="feature-desc">Cotización instantánea con precios mayoristas y descuentos automáticos.</div>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">🎭</span>
+                <div class="feature-title">Vista 360° 3D</div>
+                <div class="feature-desc">Visualiza productos desde todos los ángulos con tecnología 3D interactiva.
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">📊</span>
+                <div class="feature-title">Dashboard en Tiempo Real</div>
+                <div class="feature-desc">Seguí tus pedidos, historial y sugerencias personalizadas.</div>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">⚡</span>
+                <div class="feature-title">Experiencia Premium</div>
+                <div class="feature-desc">Animaciones sofisticadas, glassmorphism y diseño de vanguardia.</div>
+            </div>
+        </div>
+
+        <div class="calculator">
+            <h3 style="color: #2C1810; margin-bottom: 1.5rem; font-size: 1.8rem;">🧮 Calculadora de Pedidos AI</h3>
+            <div class="calc-row">
+                <input type="text" class="calc-input" placeholder="Tipo de negocio (ej: Kiosco)" id="businessType">
+            </div>
+            <div class="calc-row">
+                <input type="number" class="calc-input" placeholder="Cantidad de paquetes" id="quantity" value="100">
+            </div>
+            <div class="calc-row">
+                <select class="calc-input" id="product">
+                    <option>Lengüitas Bañadas</option>
+                    <option>Pepitas</option>
+                    <option>Chips Premium</option>
+                    <option>Surtidas</option>
+                </select>
+            </div>
+            <button class="btn-primary" onclick="calculateOrder()" style="width: 100%; padding: 1rem;">
+                💡 Calcular con IA
+            </button>
+            <div id="result" class="calc-result" style="display: none;">
+                <div>Precio estimado: <span id="price"></span></div>
+                <div style="font-size: 0.9rem; margin-top: 0.5rem;">Descuento aplicado: <span id="discount"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="social-proof">
+            <div class="stat">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Atención IA</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">+35%</div>
+                <div class="stat-label">Conversión</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">-80%</div>
+                <div class="stat-label">Tiempo Respuesta</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Automatizado</div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+            <a href="https://wa.me/5491157633328?text=Quiero%20actualizar%20mi%20sitio%20a%20la%20versión%20Premium%20AI"
+                class="btn-primary" style="display: inline-block; text-decoration: none; padding: 1.5rem 3rem;">
+                🚀 Contratar Versión Premium AI
+            </a>
+        </div>
+    </div>
+
+    <!-- Chatbot flotante -->
+    <div class="chatbot-container">
+        <button class="chatbot-button" onclick="toggleChatbot()">
+            💬
+        </button>
+        <div class="chatbot-window" id="chatbot">
+            <div class="chatbot-header">
+                <span>🤖</span>
+                <span>Asistente Cilo AI</span>
+            </div>
+            <div class="chatbot-messages" id="messages">
+                <div class="message bot">
+                    ¡Hola! Soy el asistente AI de Cilo. ¿En qué puedo ayudarte hoy?
+                </div>
+            </div>
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="sendMessage('¿Qué productos tienen?')">📦 Productos</button>
+                <button class="quick-btn" onclick="sendMessage('¿Precios mayoristas?')">💰 Precios</button>
+                <button class="quick-btn" onclick="sendMessage('Quiero hacer un pedido')">🛒 Pedido</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chatOpen = false;
+
+        function toggleChatbot() {
+            chatOpen = !chatOpen;
+            const chatbot = document.getElementById('chatbot');
+            chatbot.classList.toggle('active');
+        }
+
+        function sendMessage(text) {
+            const messages = document.getElementById('messages');
+
+            // Mensaje del usuario
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+            userMsg.textContent = text;
+            messages.appendChild(userMsg);
+
+            // Respuesta del bot (simulada)
+            setTimeout(() => {
+                const botMsg = document.createElement('div');
+                botMsg.className = 'message bot';
+
+                if (text.includes('productos')) {
+                    botMsg.innerHTML = '¡Tenemos 27 variedades! 🍪<br>Desde clásicas hasta premium rellenas.<br><br>¿Te interesa alguna categoría en particular?';
+                } else if (text.includes('precios')) {
+                    botMsg.innerHTML = 'Los precios varían según volumen:<br>• 100-500 unidades: precio base<br>• 500-1000: 10% descuento<br>• +1000: 15% descuento<br><br>¿Cuánto necesitás?';
+                } else if (text.includes('pedido')) {
+                    botMsg.innerHTML = 'Perfecto! Te paso con nuestro equipo de ventas:<br><br><a href="https://wa.me/5491157633328" style="color: #D4860F; font-weight: bold;" target="_blank">📱 WhatsApp: +54 9 11 5763-3328</a>';
+                } else {
+                    botMsg.textContent = 'Interesante pregunta! Nuestro equipo puede ayudarte mejor por WhatsApp.';
+                }
+
+                messages.appendChild(botMsg);
+                messages.scrollTop = messages.scrollHeight;
+            }, 800);
+
+            messages.scroll Top = messages.scrollHeight;
+        }
+
+        function calculateOrder() {
+            const quantity = parseInt(document.getElementById('quantity').value) || 0;
+            const business = document.getElementById('businessType').value || 'tu negocio';
+
+            // Simulación de cálculo IA
+            let basePrice = 250; // por paquete
+            let discount = 0;
+
+            if (quantity >= 1000) {
+                discount = 15;
+            } else if (quantity >= 500) {
+                discount = 10;
+            } else if (quantity >= 100) {
+                discount = 5;
+            }
+
+            const finalPrice = basePrice * quantity * (1 - discount / 100);
+
+            document.getElementById('price').textContent = '$' + finalPrice.toLocaleString('es-AR');
+            document.getElementById('discount').textContent = discount + '%';
+            document.getElementById('result').style.display = 'block';
+
+            // Agregar recomendación AI
+            setTimeout(() => {
+                const messages = document.getElementById('messages');
+                const botMsg = document.createElement('div');
+                botMsg.className = 'message bot';
+                botMsg.innerHTML = `🎯 <strong>Recomendación IA:</strong><br>Para ${business}, sugiero agregar Chips Premium (+20% margen) y Surtidas (alta rotación).`;
+                messages.appendChild(botMsg);
+                if (!chatOpen) toggleChatbot();
+            }, 1000);
+        }
+
+        // Auto-mostrar chatbot después de 3 segundos
+        setTimeout(() => {
+            if (!chatOpen) {
+                const messages = document.getElementById('messages');
+                const botMsg = document.createElement('div');
+                botMsg.className = 'message bot';
+                botMsg.textContent = '👋 ¿Necesitás ayuda para cotizar tu pedido?';
+                messages.appendChild(botMsg);
+            }
+        }, 3000);
+    </script>
+</body>
+
+</html>

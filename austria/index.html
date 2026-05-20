@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot für österreichische Hotels | Argenterío</title>
+    <meta name="description"
+        content="Mehrsprachiger KI-Chatbot für Hotels in Österreich. Automatisieren Sie Buchungsanfragen in Deutsch, Englisch, Spanisch und Italienisch.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* Gradients */
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-hero: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 50%, #db2777 100%);
+            --gradient-mesh-1: radial-gradient(at 27% 37%, hsla(215, 98%, 61%, 0.3) 0px, transparent 50%);
+            --gradient-mesh-2: radial-gradient(at 97% 21%, hsla(340, 100%, 76%, 0.3) 0px, transparent 50%);
+            --gradient-mesh-3: radial-gradient(at 52% 99%, hsla(254, 88%, 64%, 0.3) 0px, transparent 50%);
+
+            /* Colors */
+            --dark-bg: #0a0e27;
+            --dark-secondary: #1a1f3a;
+            --accent-cyan: #00f5ff;
+            --accent-purple: #a855f7;
+            --accent-pink: #ec4899;
+            --austria-red: #ed2939;
+            --text-white: #ffffff;
+            --text-gray: #94a3b8;
+
+            /* Glass */
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-white);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: var(--dark-bg);
+        }
+
+        .animated-bg::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-mesh-1), var(--gradient-mesh-2), var(--gradient-mesh-3);
+            animation: gradient-shift 15s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes gradient-shift {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            width: 100%;
+            background: rgba(10, 14, 39, 0.4);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .nav-controls {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .lang-switcher {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.25rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .lang-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            color: var(--text-gray);
+            cursor: pointer;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .lang-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-white);
+        }
+
+        .lang-btn.active {
+            background: rgba(0, 245, 255, 0.1);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.2);
+        }
+
+        .cta-nav {
+            padding: 0.75rem 1.75rem;
+            background: var(--gradient-accent);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(237, 41, 57, 0.4);
+        }
+
+        .cta-nav:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(237, 41, 57, 0.6);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Scroll Margin for Fixed Nav */
+        .lang-content {
+            scroll-margin-top: 100px;
+        }
+
+        .lang-content:not(.active) {
+            display: none;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 0 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: 4rem;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #00f5ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-text .highlight {
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-text p {
+            font-size: 1.25rem;
+            color: var(--text-gray);
+            margin-bottom: 2.5rem;
+            line-height: 1.8;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .btn-primary {
+            padding: 1.25rem 2.5rem;
+            background: var(--gradient-accent);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-primary:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(237, 41, 57, 0.5);
+        }
+
+        .btn-secondary {
+            padding: 1.25rem 2.5rem;
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 245, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+        }
+
+        /* Glass Card in Hero */
+        .hero-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        }
+
+        .hero-card img {
+            width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-header p {
+            font-size: 1.2rem;
+            color: var(--text-gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 2.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .feature-card:hover::before {
+            opacity: 0.05;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 20px 60px rgba(168, 85, 247, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-card p {
+            color: var(--text-gray);
+            line-height: 1.8;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+        }
+
+        .stat-item h3 {
+            font-size: 3.5rem;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-item p {
+            color: var(--text-gray);
+            font-size: 1.1rem;
+        }
+
+        /* Pricing Section */
+        .pricing {
+            padding: 6rem 0;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 3rem;
+            transition: all 0.4s;
+            position: relative;
+        }
+
+        .pricing-card.popular {
+            border: 2px solid transparent;
+            background-image:
+                linear-gradient(var(--dark-bg), var(--dark-bg)),
+                var(--gradient-accent);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            animation: border-glow 3s ease infinite;
+        }
+
+        @keyframes border-glow {
+
+            0%,
+            100% {
+                filter: brightness(1);
+            }
+
+            50% {
+                filter: brightness(1.3);
+            }
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 30px 80px rgba(168, 85, 247, 0.3);
+        }
+
+        .pricing-badge {
+            display: inline-block;
+            padding: 0.5rem 1.25rem;
+            background: var(--gradient-accent);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .pricing-card h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .pricing-price {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .pricing-price span {
+            font-size: 1.2rem;
+            color: var(--text-gray);
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin: 2rem 0;
+        }
+
+        .pricing-features li {
+            padding: 0.75rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-gray);
+        }
+
+        .pricing-features li::before {
+            content: '✓';
+            color: var(--accent-cyan);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .pricing-cta {
+            width: 100%;
+            padding: 1.25rem;
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pricing-card.popular .pricing-cta {
+            background: var(--gradient-accent);
+            border: none;
+        }
+
+        .pricing-cta:hover {
+            transform: scale(1.05);
+        }
+
+        /* CTA Section */
+        .final-cta {
+            padding: 6rem 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .final-cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 800px;
+            height: 100%;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.2) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        .final-cta h2 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .final-cta p {
+            font-size: 1.3rem;
+            color: var(--text-gray);
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .contact-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin: 3rem 0;
+            flex-wrap: wrap;
+        }
+
+        .contact-btn {
+            padding: 1.5rem 3rem;
+            border-radius: 16px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .contact-btn-whatsapp {
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+            box-shadow: 0 8px 30px rgba(37, 211, 102, 0.3);
+        }
+
+        .contact-btn-whatsapp:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(37, 211, 102, 0.5);
+        }
+
+        .contact-btn-email {
+            background: var(--gradient-accent);
+            color: white;
+            box-shadow: 0 8px 30px rgba(237, 41, 57, 0.3);
+        }
+
+        .contact-btn-email:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(237, 41, 57, 0.5);
+        }
+
+        .form-container {
+            max-width: 500px;
+            margin: 3rem auto 0;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+        }
+
+        .form-container p {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .email-form {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .email-form input {
+            flex: 1;
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .email-form input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.2);
+        }
+
+        .email-form input::placeholder {
+            color: var(--text-gray);
+        }
+
+        .email-form button {
+            padding: 1.25rem 2rem;
+            background: var(--gradient-accent);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .email-form button:hover {
+            transform: scale(1.05);
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 0;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-gray);
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-cta {
+                flex-direction: column;
+            }
+
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .contact-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .final-cta h2 {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* Float WhatsApp */
+        .whatsapp-float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 40px;
+            right: 40px;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: #FFF;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            backdrop-filter: blur(5px);
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1) translateY(-5px);
+            box-shadow: 0 10px 25px rgba(37, 211, 102, 0.6);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg"></div>
+
+    <nav>
+        <div class="nav-container">
+            <div class="logo" style="display: flex; align-items: center; gap: 12px;">
+                <img src="logo.png" alt="Argenterío" style="height: 42px;">
+                Argenterío
+            </div>
+            <div class="nav-controls">
+                <div class="lang-switcher">
+                    <button class="lang-btn active" onclick="switchLang('de')">🇦🇹 DE</button>
+                    <button class="lang-btn" onclick="switchLang('en')">🇬🇧 EN</button>
+                    <button class="lang-btn" onclick="switchLang('es')">🇪🇸 ES</button>
+                </div>
+                <button class="cta-nav" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                    Kontakt
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- GERMAN VERSION -->
+    <div class="lang-content active" data-lang="de">
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1>
+                            Mehrsprachiger <span class="highlight">KI-Chatbot</span> für österreichische Hotels
+                        </h1>
+                        <p>
+                            Automatisieren Sie Buchungsanfragen in Deutsch, Englisch, Spanisch und Italienisch.
+                            Perfekt für Hotels mit lateinamerikanischen Gästen.
+                        </p>
+                        <div class="hero-cta">
+                            <button class="btn-primary"
+                                onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                                Kostenloser Demo-Call
+                            </button>
+                            <button class="btn-secondary"
+                                onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">
+                                Mehr erfahren
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hero-card">
+                        <img src="./assets/flag-austria-with-ensign.jpg" alt="Österreich Flagge">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <h3>40%</h3>
+                        <p>mehr Direktbuchungen</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>24/7</h3>
+                        <p>Automatisierte Antworten</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>4</h3>
+                        <p>Sprachen gleichzeitig</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>8</h3>
+                        <p>Tage bis zur Aktivierung</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features" id="features">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Warum österreichische Hotels uns wählen</h2>
+                    <p>Entwickelt speziell für den europäischen Hotelmarkt mit mehrsprachigen Gästen</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <span class="feature-icon">🌍</span>
+                        <h3>Mehrsprachige KI</h3>
+                        <p>Deutsch, Englisch, Spanisch und Italienisch. Automatische Spracherkennung und Antworten in
+                            der Sprache des Gastes.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">📅</span>
+                        <h3>Buchungs-Automatisierung</h3>
+                        <p>Integration mit PMS-Systemen. Prüfung von Verfügbarkeit und direkte Buchungsbestätigung.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">🎯</span>
+                        <h3>Lateinamerikanische Gäste</h3>
+                        <p>Spezialisiert auf die Betreuung von Touristen aus Lateinamerika. Kulturell angepasste
+                            Kommunikation.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">📊</span>
+                        <h3>Analytics Dashboard</h3>
+                        <p>Echtzeit-Metriken über Anfragen, Conversion-Raten und häufigste Fragen.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">🔗</span>
+                        <h3>WhatsApp + Web + Email</h3>
+                        <p>Ein chatbot für alle Ihre Kanäle. Zentralisierte Verwaltung.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">⚡</span>
+                        <h3>Sofortige Antworten</h3>
+                        <p>Durchschnittliche Antwortzeit: < 2 Sekunden. Ihre Gäste warten nie.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="pricing">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Transparente Preise</h2>
+                    <p>Wählen Sie den Plan, der am besten zu Ihrem Hotel passt</p>
+                </div>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <h3>Starter</h3>
+                        <div class="pricing-price">€299<span>/Monat</span></div>
+                        <p style="color: var(--text-gray); margin-bottom: 2rem;">Für Boutique-Hotels</p>
+                        <ul class="pricing-features">
+                            <li>Bis zu 500 Konversationen/Monat</li>
+                            <li>2 Sprachen (DE + EN)</li>
+                            <li>WhatsApp + Web</li>
+                            <li>Basis-Analytics</li>
+                            <li>Email-Support</li>
+                        </ul>
+                        <button class="pricing-cta"
+                            onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                            Starten
+                        </button>
+                    </div>
+
+                    <div class="pricing-card popular">
+                        <span class="pricing-badge">🔥 BELIEBT</span>
+                        <h3>Professional</h3>
+                        <div class="pricing-price">€599<span>/Monat</span></div>
+                        <p style="color: var(--text-gray); margin-bottom: 2rem;">Für mittelgroße Hotels</p>
+                        <ul class="pricing-features">
+                            <li>Bis zu 2000 Konversationen/Monat</li>
+                            <li>4 Sprachen (DE + EN + ES + IT)</li>
+                            <li>WhatsApp + Web + Email</li>
+                            <li>PMS Integration</li>
+                            <li>Erweiterte Analytics</li>
+                            <li>Prioritäts-Support</li>
+                        </ul>
+                        <button class="pricing-cta"
+                            onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                            Jetzt buchen
+                        </button>
+                    </div>
+
+                    <div class="pricing-card">
+                        <h3>Enterprise</h3>
+                        <div class="pricing-price">Custom</div>
+                        <p style="color: var(--text-gray); margin-bottom: 2rem;">Für Hotelketten</p>
+                        <ul class="pricing-features">
+                            <li>Unbegrenzte Konversationen</li>
+                            <li>Alle Sprachen</li>
+                            <li>Alle Kanäle</li>
+                            <li>Custom PMS Integration</li>
+                            <li>Dedizierter Account Manager</li>
+                            <li>SLA-Garantie (99.9% uptime)</li>
+                        </ul>
+                        <button class="pricing-cta"
+                            onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                            Demo Personalizado
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="final-cta" id="cta">
+            <div class="container">
+                <h2>Erfassen Sie mehr lateinamerikanische Gäste</h2>
+                <p>
+                    Buchen Sie einen kostenlosen 20-Minuten Demo-Call. Wir zeigen Ihnen, wie Hotels in Wien bereits 40%
+                    mehr Direktbuchungen erzielen.
+                </p>
+
+                <div class="contact-buttons">
+                    <a href="https://wa.me/5491173719972?text=Hola%2C%20quiero%20información%20sobre%20el%20chatbot%20para%20hoteles"
+                        class="contact-btn contact-btn-whatsapp">
+                        <span style="font-size: 1.5rem;">💬</span>
+                        WhatsApp kontaktieren
+                    </a>
+                    <a href="mailto:agentes.space@gmail.com?subject=Demo-Anfrage%20Hotel&body=Hallo%2C%0A%0AIch%20interessiere%20mich%20f%C3%BCr%20eine%20Demo%20des%20mehrsprachigen%20Chatbots%20f%C3%BCr%20mein%20Hotel."
+                        class="contact-btn contact-btn-email">
+                        <span style="font-size: 1.5rem;">✉️</span>
+                        Email schreiben
+                    </a>
+                </div>
+
+                <div class="form-container">
+                    <p style="margin-top: 20px; color: var(--text-gray); font-size: 0.95rem;">
+                        Oder füllen Sie das Formular aus:
+                    </p>
+                    <form class="email-form" onsubmit="handleSubmit(event)">
+                        <input type="email" placeholder="ihre-email@hotel.at" required>
+                        <button type="submit">Senden</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ENGLISH VERSION -->
+    <div class="lang-content" data-lang="en">
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1>
+                            Multilingual <span class="highlight">AI Chatbot</span> for Austrian Hotels
+                        </h1>
+                        <p>
+                            Automate booking inquiries in German, English, Spanish and Italian.
+                            Perfect for hotels with Latin American guests.
+                        </p>
+                        <div class="hero-cta">
+                            <button class="btn-primary"
+                                onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                                Free Demo Call
+                            </button>
+                            <button class="btn-secondary"
+                                onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">
+                                Learn More
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hero-card">
+                        <img src="../assets/flag-austria-with-ensign.jpg" alt="Austria Flag">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <h3>40%</h3>
+                        <p>more direct bookings</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>24/7</h3>
+                        <p>Automated responses</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>4</h3>
+                        <p>Languages simultaneously</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>8</h3>
+                        <p>Days to activation</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features" id="features">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Why Austrian Hotels Choose Us</h2>
+                    <p>Built specifically for the European hotel market with multilingual guests</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <span class="feature-icon">🌍</span>
+                        <h3>Multilingual AI</h3>
+                        <p>German, English, Spanish and Italian. Automatic language detection and responses in guest's
+                            language.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">📅</span>
+                        <h3>Booking Automation</h3>
+                        <p>Integration with PMS systems. Availability checking and direct booking confirmation.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">🎯</span>
+                        <h3>Latin American Guests</h3>
+                        <p>Specialized in serving tourists from Latin America. Culturally adapted communication.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">📊</span>
+                        <h3>Analytics Dashboard</h3>
+                        <p>Real-time metrics on inquiries, conversion rates and most frequent questions.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">🔗</span>
+                        <h3>WhatsApp + Web + Email</h3>
+                        <p>One chatbot for all your channels. Centralized management.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">⚡</span>
+                        <h3>Instant Responses</h3>
+                        <p>Average response time: < 2 seconds. Your guests never wait.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="pricing">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Transparent Pricing</h2>
+                    <p>Choose the plan that best fits your hotel</p>
+                </div>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <h3>Starter</h3>
+                        <div class="pricing-price">€299<span>/month</span></div>
+                        <p style="color: var(--text-gray); margin-bottom: 2rem;">For boutique hotels</p>
+                        <ul class="pricing-features">
+                            <li>Up to 500 conversations/month</li>
+                            <li>2 languages (DE + EN)</li>
+                            <li>WhatsApp + Web</li>
+                            <li>Basic Analytics</li>
+                            <li>Email Support</li>
+                        </ul>
+                        <button class="pricing-cta"
+                            onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                            Get Started
+                        </button>
+                    </div>
+
+                    <div class="pricing-card popular">
+                        <span class="pricing-badge">🔥 POPULAR</span>
+                        <h3>Professional</h3>
+                        <div class="pricing-price">€599<span>/month</span></div>
+                        <p style="color: var(--text-gray); margin-bottom: 2rem;">For mid-size hotels</p>
+                        <ul class="pricing-features">
+                            <li>Up to 2000 conversations/month</li>
+                            <li>4 languages (DE + EN + ES + IT)</li>
+                            <li>WhatsApp + Web + Email</li>
+                            <li>PMS Integration</li>
+                            <li>Advanced Analytics</li>
+                            <li>Priority Support</li>
+                        </ul>
+                        <button class="pricing-cta"
+                            onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                            Book Now
+                        </button>
+                    </div>
+
+                    <div class="pricing-card">
+                        <h3>Enterprise</h3>
+                        <div class="pricing-price">Custom</div>
+                        <p style="color: var(--text-gray); margin-bottom: 2rem;">For hotel chains</p>
+                        <ul class="pricing-features">
+                            <li>Unlimited conversations</li>
+                            <li>All languages</li>
+                            <li>All channels</li>
+                            <li>Custom PMS Integration</li>
+                            <li>Dedicated Account Manager</li>
+                            <li>SLA Guarantee (99.9% uptime)</li>
+                        </ul>
+                        <button class="pricing-cta"
+                            onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                            Personalized Demo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="final-cta" id="cta">
+            <div class="container">
+                <h2>Capture More Latin American Guests</h2>
+                <p>
+                    Book a free 20-minute demo call. We'll show you how hotels in Vienna are already achieving 40%
+                    more direct bookings.
+                </p>
+
+                <div class="contact-buttons">
+                    <a href="https://wa.me/5491173719972?text=Hello%2C%20I%20want%20information%20about%20the%20chatbot%20for%20hotels"
+                        class="contact-btn contact-btn-whatsapp">
+                        <span style="font-size: 1.5rem;">💬</span>
+                        Contact via WhatsApp
+                    </a>
+                    <a href="mailto:agentes.space@gmail.com?subject=Hotel%20Demo%20Request&body=Hello%2C%0A%0AI'm%20interested%20in%20a%20demo%20of%20the%20multilingual%20chatbot%20for%20my%20hotel."
+                        class="contact-btn contact-btn-email">
+                        <span style="font-size: 1.5rem;">✉️</span>
+                        Send Email
+                    </a>
+                </div>
+
+                <div class="form-container">
+                    <p style="margin-top: 20px; color: var(--text-gray); font-size: 0.95rem;">
+                        Or fill out the form:
+                    </p>
+                    <form class="email-form" onsubmit="handleSubmit(event)">
+                        <input type="email" placeholder="your-email@hotel.com" required>
+                        <button type="submit">Send</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- SPANISH VERSION -->
+    <div class="lang-content" data-lang="es">
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1>
+                            Chatbot <span class="highlight">IA Multilingüe</span> para Hoteles Austriacos
+                        </h1>
+                        <p>
+                            Automatiza consultas de reserva en alemán, inglés, español e italiano.
+                            Perfecto para hoteles con huéspedes latinoamericanos.
+                        </p>
+                        <div class="hero-cta">
+                            <button class="btn-primary"
+                                onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                                Demo Gratuita
+                            </button>
+                            <button class="btn-secondary"
+                                onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">
+                                Saber más
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hero-card">
+                        <img src="../assets/flag-austria-with-ensign.jpg" alt="Bandera de Austria">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <h3>40%</h3>
+                        <p>más reservas directas</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>24/7</h3>
+                        <p>Respuestas automáticas</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>4</h3>
+                        <p>Idiomas simultáneos</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>8</h3>
+                        <p>Días hasta activación</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features" id="features">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Por qué los Hoteles Austriacos nos Eligen</h2>
+                    <p>Desarrollado específicamente para el mercado hotelero europeo con huéspedes multilingües</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <span class="feature-icon">🌍</span>
+                        <h3>IA Multilingüe</h3>
+                        <p>Alemán, inglés, español e italiano. Detección automática de idioma y respuestas en el idioma
+                            del huésped.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">📅</span>
+                        <h3>Automatización de Reservas</h3>
+                        <p>Integración con sistemas PMS. Verificación de disponibilidad y confirmación directa de
+                            reservas.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">🎯</span>
+                        <h3>Huéspedes Latinoamericanos</h3>
+                        <p>Especializado en atender turistas de Latinoamérica. Comunicación culturalmente adaptada.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">📊</span>
+                        <h3>Dashboard de Analytics</h3>
+                        <p>Métricas en tiempo real sobre consultas, tasas de conversión y preguntas más frecuentes.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">🔗</span>
+                        <h3>WhatsApp + Web + Email</h3>
+                        <p>Un chatbot para todos tus canales. Gestión centralizada.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">⚡</span>
+                        <h3>Respuestas Instantáneas</h3>
+                        <p>Tiempo de respuesta promedio: < 2 segundos. Tus huéspedes nunca esperan.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="pricing">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Precios Transparentes</h2>
+                    <p>Elige el plan que mejor se adapte a tu hotel</p>
+                </div>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <h3>Starter</h3>
+                        <div class="pricing-price">€299<span>/mes</span></div>
+                        <p style="color: var(--text-gray); margin-bottom: 2rem;">Para hoteles boutique</p>
+                        <ul class="pricing-features">
+                            <li>Hasta 500 conversaciones/mes</li>
+                            <li>2 idiomas (DE + EN)</li>
+                            <li>WhatsApp + Web</li>
+                            <li>Analytics básicos</li>
+                            <li>Soporte por email</li>
+                        </ul>
+                        <button class="pricing-cta"
+                            onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                            Comenzar
+                        </button>
+                    </div>
+
+                    <div class="pricing-card popular">
+                        <span class="pricing-badge">🔥 POPULAR</span>
+                        <h3>Professional</h3>
+                        <div class="pricing-price">€599<span>/mes</span></div>
+                        <p style="color: var(--text-gray); margin-bottom: 2rem;">Para hoteles medianos</p>
+                        <ul class="pricing-features">
+                            <li>Hasta 2000 conversaciones/mes</li>
+                            <li>4 idiomas (DE + EN + ES + IT)</li>
+                            <li>WhatsApp + Web + Email</li>
+                            <li>Integración PMS</li>
+                            <li>Analytics avanzados</li>
+                            <li>Soporte prioritario</li>
+                        </ul>
+                        <button class="pricing-cta"
+                            onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                            Reservar Ahora
+                        </button>
+                    </div>
+
+                    <div class="pricing-card">
+                        <h3>Enterprise</h3>
+                        <div class="pricing-price">Custom</div>
+                        <p style="color: var(--text-gray); margin-bottom: 2rem;">Para cadenas hoteleras</p>
+                        <ul class="pricing-features">
+                            <li>Conversaciones ilimitadas</li>
+                            <li>Todos los idiomas</li>
+                            <li>Todos los canales</li>
+                            <li>Integración PMS personalizada</li>
+                            <li>Account Manager dedicado</li>
+                            <li>Garantía SLA (99.9% uptime)</li>
+                        </ul>
+                        <button class="pricing-cta"
+                            onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                            Demo Personalizada
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="final-cta" id="cta">
+            <div class="container">
+                <h2>Captura Más Huéspedes Latinoamericanos</h2>
+                <p>
+                    Agenda una demo gratuita de 20 minutos. Te mostraremos cómo hoteles en Viena ya logran 40%
+                    más reservas directas.
+                </p>
+
+                <div class="contact-buttons">
+                    <a href="https://wa.me/5491173719972?text=Hola%2C%20quiero%20información%20sobre%20el%20chatbot%20para%20hoteles"
+                        class="contact-btn contact-btn-whatsapp">
+                        <span style="font-size: 1.5rem;">💬</span>
+                        Contactar por WhatsApp
+                    </a>
+                    <a href="mailto:agentes.space@gmail.com?subject=Solicitud%20Demo%20Hotel&body=Hola%2C%0A%0AEstoy%20interesado%20en%20una%20demo%20del%20chatbot%20multilingüe%20para%20mi%20hotel."
+                        class="contact-btn contact-btn-email">
+                        <span style="font-size: 1.5rem;">✉️</span>
+                        Enviar Email
+                    </a>
+                </div>
+
+                <div class="form-container">
+                    <p style="margin-top: 20px; color: var(--text-gray); font-size: 0.95rem;">
+                        O completa el formulario:
+                    </p>
+                    <form class="email-form" onsubmit="handleSubmit(event)">
+                        <input type="email" placeholder="tu-email@hotel.com" required>
+                        <button type="submit">Enviar</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Argenterio AI. Alle Rechte vorbehalten.</p>
+        </div>
+    </footer>
+
+    </footer>
+
+    <!-- WhatsApp Floating Button (Stefan AI - Austria/Hospitality) -->
+    <a href="https://wa.me/5491173585449?text=Hallo%20Stefan%2C%20ich%20interessiere%20mich%20f%C3%BCr%20den%20Chatbot%20in%20Österreich."
+        class="whatsapp-float" target="_blank" id="whatsapp-float" title="Contact Stefan on WhatsApp">
+        <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" viewBox="0 0 16 16">
+            <path
+                d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z" />
+        </svg>
+    </a>
+
+    <script>
+        function switchLang(lang) {
+            // Ocultar todos los contenidos
+            document.querySelectorAll('.lang-content').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Mostrar el contenido del idioma seleccionado
+            const targetContent = document.querySelector(`.lang-content[data-lang="${lang}"]`);
+            targetContent.classList.add('active');
+
+            // Actualizar botones
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Marcar botón activo usando event.target
+            event.target.classList.add('active');
+
+            // Actualizar idioma del HTML
+            document.documentElement.lang = lang;
+
+            // Scroll suave al contenido con delay
+            setTimeout(() => {
+                targetContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+
+            // Update WhatsApp Float Message based on language
+            const waBtn = document.getElementById('whatsapp-float');
+            const waMsgs = {
+                de: "Hallo, ich interessiere mich für den Chatbot.",
+                en: "Hello, I am interested in the chatbot.",
+                es: "Hola, me interesa el chatbot."
+            };
+            const newMsg = waMsgs[lang] || waMsgs.de;
+            waBtn.href = `https://wa.me/5491173585449?text=${encodeURIComponent(newMsg)}`;
+        }
+
+        // Real-time Lead Tracking
+        document.addEventListener('DOMContentLoaded', () => {
+            const emailInput = document.querySelector('.email-form input[type="email"]');
+            let debounceTimer;
+
+            // Restore progress
+            const savedEmail = sessionStorage.getItem('austria_form_email');
+            if (savedEmail && emailInput) {
+                emailInput.value = savedEmail;
+            }
+
+            // Save progress and auto-send tracking
+            if (emailInput) {
+                emailInput.addEventListener('input', () => {
+                    const value = emailInput.value;
+                    sessionStorage.setItem('austria_form_email', value);
+
+                    // Anti-abandonment: Send partial data if inactive for 15s
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => {
+                        if (value && value.includes('@')) {
+                            const currentLang = document.documentElement.lang || 'de';
+                            fetch('https://manager.generarise.space/webhook/hotel-leads', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    email: value,
+                                    lang: currentLang,
+                                    partial_lead: true,
+                                    origen: 'Landing Austria Abandonment'
+                                })
+                            }).catch(err => console.log('Abandonment tracking silent error:', err));
+                        }
+                    }, 15000);
+                });
+            }
+        });
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            const email = e.target.querySelector('input').value;
+
+            // Detectar idioma actual
+            const currentLang = document.querySelector('.lang-content.active').getAttribute('data-lang');
+
+            // Mensajes según idioma
+            const messages = {
+                de: 'Vielen Dank! Wir kontaktieren Sie an: gustavodornhofer@gmail.com\n\nIhre Anfrage wurde erfolgreich gesendet.',
+                en: 'Thank you! We will contact you at: gustavodornhofer@gmail.com\n\nYour request has been successfully sent.',
+                es: '¡Gracias! Le contactaremos en: gustavodornhofer@gmail.com\n\nSu solicitud ha sido enviada correctamente.'
+            };
+
+            // Enviar a webhook n8n
+            fetch('https://manager.generarise.space/webhook/hotel-leads', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: email,
+                    lang: currentLang,
+                    fecha: new Date().toISOString(),
+                    origen: 'Landing Austria Hotels'
+                })
+            }).catch(err => console.log('Webhook error:', err));
+
+            alert(messages[currentLang] || messages.de);
+
+            // Limpiar formulario
+            e.target.reset();
+        }
+    </script>
+
+    <!-- Vapi.ai Widget Integration -->
+    <script>
+        (function (d, t) {
+            var g = d.createElement(t),
+                s = d.getElementsByTagName(t)[0];
+            g.src = "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
+            g.async = true;
+            s.parentNode.insertBefore(g, s);
+
+            g.onload = function () {
+                if (window.vapiSDK) {
+                    window.vapiSDK.run({
+                        apiKey: "3fe2e389-3dc5-4071-bfb5-c91a511af385",
+                        assistant: "c500ab0f-ea72-47fd-b66f-e2caf54a0ebf", // Stefan New
+                        config: {
+                            position: "bottom-right",
+                            title: "Stefan - AI Concierge",
+                            subtitle: "Austria Turismo 4.0",
+                            color: "#ed2939",
+                        },
+                    });
+                }
+            };
+        })(document, "script");
+    </script>
+    <!-- IMPRESSUM — Gesetzlich vorgeschrieben in Österreich (ECG §5) -->
+    <footer id="impressum"
+        style="background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.08); padding: 3rem 0; margin-top: 4rem;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2.5rem; font-size: 0.85rem; color: #94a3b8; line-height: 1.8;">
+
+                <!-- Impressum DE -->
+                <div class="lang-impressum" data-lang="de">
+                    <h3
+                        style="color: #e2e8f0; font-size: 1rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px;">
+                        Impressum</h3>
+                    <p><strong style="color:#cbd5e1;">Angaben gemäß ECG §5</strong></p>
+                    <p>Diensteanbieter: <strong style="color:#cbd5e1;">GenerArise / Neurova Labs</strong><br>
+                        Inhaber: Gustavo Dornhofer<br>
+                        E-Mail: <a href="mailto:legal@generarise.space"
+                            style="color:#00f5ff;">legal@generarise.space</a><br>
+                        Website: austria.generarise.space</p>
+                    <p style="margin-top:1rem;"><strong style="color:#cbd5e1;">Datenschutz (DSGVO)</strong></p>
+                    <p>Wir erheben nur die für die Dienstleistung notwendigen Daten (E-Mail, Kontaktdaten). Diese werden
+                        nicht an Dritte verkauft. Auf Anfrage können Sie Ihre Daten einsehen, korrigieren oder löschen
+                        lassen. Kontakt: <a href="mailto:legal@generarise.space"
+                            style="color:#00f5ff;">legal@generarise.space</a></p>
+                    <p>Haftungsausschluss: Die durch uns erstellten Inhalte sind KI-generiert und dienen als
+                        Orientierungshilfe. Wir übernehmen keine Haftung für unmittelbare oder mittelbare Schäden aus
+                        der Nutzung des Dienstes.</p>
+                </div>
+
+                <!-- Impressum EN -->
+                <div class="lang-impressum" data-lang="en">
+                    <h3
+                        style="color: #e2e8f0; font-size: 1rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px;">
+                        Legal Notice & Privacy</h3>
+                    <p><strong style="color:#cbd5e1;">Service Provider</strong></p>
+                    <p>Company: <strong style="color:#cbd5e1;">GenerArise / Neurova Labs</strong><br>
+                        Owner: Gustavo Dornhofer<br>
+                        Email: <a href="mailto:legal@generarise.space"
+                            style="color:#00f5ff;">legal@generarise.space</a><br>
+                        Website: austria.generarise.space</p>
+                    <p style="margin-top:1rem;"><strong style="color:#cbd5e1;">Privacy (GDPR Compliant)</strong></p>
+                    <p>We collect only data necessary to provide the service (email, contact info). Data is not sold to
+                        third parties. You may request access, correction or deletion of your data at: <a
+                            href="mailto:legal@generarise.space" style="color:#00f5ff;">legal@generarise.space</a>.
+                        AI-generated content is provided for informational purposes only and does not constitute legal
+                        or financial advice.</p>
+                </div>
+
+                <!-- Términos ES -->
+                <div class="lang-impressum" data-lang="es">
+                    <h3
+                        style="color: #e2e8f0; font-size: 1rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px;">
+                        Aviso Legal y Privacidad</h3>
+                    <p><strong style="color:#cbd5e1;">Datos del prestador de servicios</strong></p>
+                    <p>Empresa: <strong style="color:#cbd5e1;">GenerArise / Neurova Labs</strong><br>
+                        Responsable: Gustavo Dornhofer<br>
+                        Email: <a href="mailto:legal@generarise.space" style="color:#00f5ff;">legal@generarise.space</a>
+                    </p>
+                    <p style="margin-top:1rem;"><strong style="color:#cbd5e1;">Privacidad y RGPD</strong></p>
+                    <p>Los datos de contacto proporcionados se utilizan exclusivamente para la prestación del servicio.
+                        No se venden a terceros. Podés solicitar acceso, rectificación o eliminación de tus datos en: <a
+                            href="mailto:legal@generarise.space" style="color:#00f5ff;">legal@generarise.space</a>. El
+                        contenido generado por IA es orientativo y no constituye asesoramiento legal ni financiero.</p>
+                </div>
+
+            </div>
+
+            <div
+                style="text-align: center; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.75rem; color: #475569;">
+                © 2026 Argenterío / GenerArise — Stefan AI Austria Hotel System. Alle Rechte vorbehalten / All rights
+                reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Show the correct Impressum language
+        document.addEventListener('DOMContentLoaded', function () {
+            function updateImpressum(lang) {
+                document.querySelectorAll('.lang-impressum').forEach(el => {
+                    el.style.display = el.getAttribute('data-lang') === lang ? 'block' : 'none';
+                });
+            }
+            // Watch for lang changes
+            const observer = new MutationObserver(() => {
+                const active = document.querySelector('.lang-content.active');
+                if (active) updateImpressum(active.getAttribute('data-lang') || 'de');
+            });
+            observer.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] });
+            updateImpressum('de'); // default
+        });
+    </script>
+</body>
+
+
+</html>

@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CILO - Fábrica de Galletitas | Desde 1980</title>
+    <meta name="description"
+        content="Fábrica de Galletitas desde 1980. Calidad controlada, distribución nacional y entregas en 48hs.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        :root {
+            --primary: #D4860F;
+            --secondary: #B87333;
+            --dark: #2C1810;
+            --light: #FFF4E6;
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(-45deg, #D4860F, #B87333, #FFD700, #FFA500);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color: var(--dark);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: var(--glass-shadow);
+        }
+
+        /* Navbar */
+        nav {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1200px;
+            z-index: 1000;
+            padding: 0.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 60px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+            transition: transform 0.3s;
+        }
+
+        .logo:hover img {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #FFF4E6;
+            transform: translateY(-2px);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-whatsapp-nav {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--primary);
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-whatsapp-nav:hover {
+            background: white;
+            transform: scale(1.05);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 180px 2rem 100px;
+            text-align: center;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+            line-height: 1.1;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+            line-height: 1.6;
+            animation: slideIn 1s ease-out;
+        }
+
+        /* About / Nosotros Section based on Site Text */
+        .about-section {
+            max-width: 1200px;
+            margin: 0 auto 4rem;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            animation: slideIn 1.2s ease-out;
+        }
+
+        .about-card {
+            padding: 2rem;
+            color: var(--dark);
+            height: 100%;
+        }
+
+        .about-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: #8B4513;
+            /* Brownish */
+            font-weight: 800;
+        }
+
+        .about-card p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #444;
+        }
+
+        /* Products Section */
+        .products-section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section-title {
+            text-align: center;
+            color: white;
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 700;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            background: white;
+        }
+
+        .product-image-container {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .product-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+            transition: transform 0.4s;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.1);
+        }
+
+        .product-category {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.8rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .product-name {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .product-desc {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        /* Footer & Contact */
+        footer {
+            margin-top: 4rem;
+            padding: 4rem 2rem;
+            color: white;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .contact-item a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Floating Contact Action */
+        .floating-contact {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 1rem;
+        }
+
+        .contact-bubble {
+            background: white;
+            padding: 1rem;
+            border-radius: 20px 20px 0 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            max-width: 250px;
+            display: none;
+            /* Initially hidden */
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .contact-fab {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: #25D366;
+            /* WhatsApp Green */
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.3s;
+            text-decoration: none;
+        }
+
+        .contact-fab:hover {
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero {
+                padding-top: 140px;
+            }
+
+            .contact-info {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="glass-panel">
+        <a href="#" class="logo">
+            <img src="cilo-b2b/public/logo.png" alt="Cilo" />
+        </a>
+        <div class="nav-links">
+            <a href="#inicio">Inicio</a>
+            <a href="#nosotros">Nosotros</a>
+            <a href="#productos">Productos</a>
+            <a href="#contacto">Contacto</a>
+        </div>
+        <a href="#contacto" class="btn-whatsapp-nav">
+            📞 Contacto
+        </a>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero" id="inicio">
+        <h1>Fábrica de Galletitas<br>CILO</h1>
+        <p>
+            Desde 1980 brindando nuestro mayor esfuerzo para dar siempre
+            la mejor calidad en nuestros productos.
+            <br>
+            <strong>Calidad ● Tradición ● Tecnología</strong>
+        </p>
+
+        <div style="margin-top: 2rem;">
+            <a href="#productos" class="filter-btn active"
+                style="text-decoration: none; padding: 1rem 2rem; font-size: 1.1rem;">
+                Ver Nuestros Productos
+            </a>
+        </div>
+    </section>
+
+    <!-- Nosotros -->
+    <section class="about-section" id="nosotros">
+        <div class="about-card glass-panel">
+            <h3>Nuestros Comienzos</h3>
+            <p>Desde el año 1980, en que establecimos nuestra planta en Parque Chacabuco, Buenos Aires, elaboramos
+                nuestra línea de galletitas dulces Cilo. Actualmente comprende una extensa variedad de gustos.</p>
+        </div>
+        <div class="about-card glass-panel">
+            <h3>Calidad Controlada</h3>
+            <p>Contamos con un laboratorio propio de control de calidad donde profesionales analizan nuestra producción.
+                El proceso, totalmente automatizado, nos permite alcanzar la prestigiosa calidad que nos distingue.</p>
+        </div>
+        <div class="about-card glass-panel">
+            <h3>Siempre Cerca</h3>
+            <p>Nuestra cadena de distribución nos permite llegar a cada rincón del país. Logística propia para entregar
+                en 48hs simpre con productos frescos para la góndola.</p>
+        </div>
+    </section>
+
+    <!-- Productos -->
+    <section class="products-section" id="productos">
+        <h2 class="section-title">Nuestros Productos</h2>
+
+        <div class="filters glass-panel"
+            style="display: inline-flex; padding: 1rem; margin-bottom: 2rem; position: relative; left: 50%; transform: translateX(-50%); width: auto; max-width: 100vw; overflow-x: auto;">
+            <button class="filter-btn active" onclick="filterProducts('Todos')">Todos</button>
+            <button class="filter-btn" onclick="filterProducts('Clásicas')">Clásicas</button>
+            <button class="filter-btn" onclick="filterProducts('Bañadas')">Bañadas</button>
+            <button class="filter-btn" onclick="filterProducts('Rellenas')">Rellenas</button>
+            <button class="filter-btn" onclick="filterProducts('Tradicionales')">Tradicionales</button>
+            <button class="filter-btn" onclick="filterProducts('Premium')">Premium</button>
+        </div>
+
+        <div class="products-grid" id="productGrid">
+            <!-- Rendered via JS -->
+        </div>
+    </section>
+
+    <!-- Contacto -->
+    <footer id="contacto">
+        <h2 style="font-size: 2.5rem; margin-bottom: 2rem;">Contacto</h2>
+
+        <div class="contact-info">
+            <div class="contact-item">
+                <span style="font-size: 1.5rem;">📍</span>
+                <div>
+                    <div>Pirovano 524</div>
+                    <div style="font-size: 0.8rem; opacity: 0.8;">CABA, Buenos Aires</div>
+                </div>
+            </div>
+
+            <div class="contact-item">
+                <span style="font-size: 1.5rem;">📞</span>
+                <a href="tel:49228694">4922-8694</a>
+            </div>
+
+            <div class="contact-item">
+                <span style="font-size: 1.5rem;">📧</span>
+                <a href="mailto:cilo@cilo.com.ar">cilo@cilo.com.ar</a>
+            </div>
+        </div>
+
+        <p style="margin-top: 3rem; opacity: 0.6;">&copy; 2026 Cilo Fábrica de Galletitas | 1980-2026</p>
+    </footer>
+
+    <!-- Floating WhatsApp -->
+    <div class="floating-contact">
+        <div class="contact-bubble" id="contactBubble">
+            <strong>¿Necesita Ayuda?</strong><br>
+            Bienvenido a Cilo Fábrica de galletitas.
+        </div>
+        <a href="https://wa.me/5491157633328?text=Bienvenido a Cilo Fábrica de galletitas" target="_blank"
+            class="contact-fab" onmouseenter="showBubble()" onmouseleave="hideBubble()">
+            <svg width="35" height="35" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.515 2.58-.677c.976.533 1.907.813 2.879.813h.001c3.181 0 5.768-2.586 5.768-5.766.001-3.181-2.587-5.767-5.768-5.767zm6.768 5.767c-.001 3.732-3.036 6.766-6.768 6.766-1.125 0-2.228-.291-3.219-.844l-3.577.938.955-3.486c-.633-1.077-.968-2.263-.969-3.375 0-3.732 3.036-6.767 6.768-6.767 3.732 0 6.768 3.036 6.768 6.768z" />
+            </svg>
+        </a>
+    </div>
+
+    <script>
+        // Data from Demo
+        const products = [
+            { id: 1, name: "Anillos Bañados", category: "Bañadas", description: "Anillos de limón cubiertos con baño de repostería", weight: "300g", image: "ANILL BAÑ 300.png" },
+            { id: 2, name: "Lengüitas Bañadas", category: "Bañadas", description: "Lengüitas de coco rallado con baño de chocolate", weight: "300g", image: "LENG BAÑ 300.png" },
+            { id: 3, name: "Lengüitas Vainilla Bañadas", category: "Bañadas", description: "Lengüitas de vainilla con baño de chocolate", weight: "300g", image: "LENG VAI BAÑ 300.png" },
+            { id: 4, name: "Pepitas Bañadas", category: "Bañadas", description: "Pepitas de vainilla con baño de chocolate", weight: "300g", image: "PEPAS BAÑ 300.png" },
+            { id: 5, name: "Pepitas Semi Bañadas", category: "Bañadas", description: "Pepitas parcialmente cubiertas con chocolate", weight: "", image: "PEPAS SEMI BAÑ.png" },
+            { id: 6, name: "Anillos de Vainilla", category: "Clásicas", description: "Clásicos anillos sabor vainilla", weight: "200g", image: "ANILLOS VAIN 200 GRS.png" },
+            { id: 7, name: "Anillos de Limón", category: "Clásicas", description: "Anillos con sabor a limón", weight: "", image: "anillos limonn.png" },
+            { id: 8, name: "Lengüitas de Coco", category: "Clásicas", description: "Lengüitas con coco rallado", weight: "", image: "LENG COCO.png" },
+            { id: 9, name: "Lengüitas de Vainilla", category: "Clásicas", description: "Lengüitas sabor vainilla clásicas", weight: "200g", image: "LENG VAIN 200 GRS..png" },
+            { id: 10, name: "Pepitas", category: "Clásicas", description: "Pepitas de vainilla tradicionales", weight: "200g", image: "PEPAS 200 GRS..png" },
+            { id: 11, name: "Pepitas Vegetal", category: "Clásicas", description: "Pepitas elaboradas con aceite vegetal", weight: "", image: "PEPAS VEGETAL.png" },
+            { id: 12, name: "Doblinas de Batata", category: "Rellenas", description: "Galletitas rellenas con dulce de batata", weight: "", image: "DOBLIN BATAT.png" },
+            { id: 13, name: "Doblinas de Membrillo", category: "Rellenas", description: "Galletitas rellenas con dulce de membrillo", weight: "", image: "DOBLINAS MEMB.png" },
+            { id: 14, name: "Buquitas de Chocolate", category: "Premium", description: "Bocaditos premium de chocolate", weight: "", image: "BUQUITAS CHOCO.png" },
+            { id: 15, name: "Buquitas de Limón", category: "Premium", description: "Bocaditos premium sabor limón", weight: "", image: "BUQUITAS LIMON.png" },
+            { id: 16, name: "Chips de Chocolate", category: "Premium", description: "Galletitas chips con chocolate", weight: "150g", image: "CHIPS 150 GRS.png" },
+            { id: 17, name: "Chips", category: "Premium", description: "Chips clásicas crujientes", weight: "", image: "CHIPS.png" },
+            { id: 18, name: "Scones", category: "Premium", description: "Scones premium para acompañar", weight: "", image: "SCONS.png" },
+            { id: 19, name: "Surtidas", category: "Premium", description: "Variedad de galletitas surtidas", weight: "", image: "SURTIDAS.png" },
+            { id: 20, name: "Topings", category: "Premium", description: "Galletitas decoradas con topings", weight: "", image: "TOPINGS.png" },
+            { id: 21, name: "Bizcocho con Azúcar", category: "Tradicionales", description: "Bizcochos tradicionales con azúcar", weight: "", image: "BIZCOCH AZUC.png" },
+            { id: 22, name: "Bizcocho de Grasa", category: "Tradicionales", description: "Bizcochos de grasa clásicos", weight: "", image: "BIZCOCH GRASA.png" },
+            { id: 23, name: "Paquete de Miel", category: "Tradicionales", description: "Galletitas sabor miel", weight: "", image: "PAQUETE MIEL.png" },
+            { id: 24, name: "Polvorón", category: "Tradicionales", description: "Polvorones tradicionales argentinos", weight: "", image: "POLVORON.png" },
+            { id: 25, name: "Lengüitas de Membrillo", category: "Tradicionales", description: "Lengüitas con dulce de membrillo", weight: "200g", image: "LENG MEMB 200 GRS..png" },
+            { id: 26, name: "Pepas Light", category: "Clásicas", description: "La versión más liviana de nuestras clásicas pepas.", weight: "", image: "PEPAS VEGETAL.png" },
+            { id: 27, name: "Cereal", category: "Tradicionales", description: "Galletitas con cereales seleccionados.", weight: "", image: "SURTIDAS.png" }
+        ];
+
+        let currentFilter = 'Todos';
+
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            const filtered = currentFilter === 'Todos' ? products : products.filter(p => p.category === currentFilter);
+
+            grid.innerHTML = filtered.map(product => `
+                <div class="product-card glass-panel">
+                    <div class="product-image-container">
+                        <img src="cilo-b2b/public/products/${product.image}" alt="${product.name}" class="product-image" 
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><text x=%2250%%22 y=%2250%%22 font-size=%2240%22 text-anchor=%22middle%22 dy=%22.3em%22>🍪</text></svg>'">
+                    </div>
+                    <span class="product-category">${product.category}</span>
+                    <h3 class="product-name">${product.name}</h3>
+                    <p class="product-desc">${product.description}</p>
+                    ${product.weight ? `<div class="product-weight">⚖ ${product.weight}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function filterProducts(category) {
+            currentFilter = category;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            // Standard approach to find button by text content
+            const buttons = document.querySelectorAll('.filter-btn');
+            for (let btn of buttons) {
+                if (btn.textContent.includes(category)) {
+                    btn.classList.add('active');
+                }
+            }
+            renderProducts();
+        }
+
+        function showBubble() {
+            document.getElementById('contactBubble').style.display = 'block';
+        }
+
+        function hideBubble() {
+            setTimeout(() => {
+                document.getElementById('contactBubble').style.display = 'none';
+            }, 3000);
+        }
+
+        // Init
+        renderProducts();
+
+        // Auto show bubble once
+        setTimeout(() => {
+            showBubble();
+        }, 2000);
+
+    </script>
+</body>
+
+</html>

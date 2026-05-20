@@ -1,0 +1,266 @@
+{
+  "name": "STEFAN_ULTRA_MASTER_V4",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-stefan-hybrid-v4",
+        "options": {},
+        "responseMode": "responseNode"
+      },
+      "id": "st-webhook-v4",
+      "name": "Webhook Stefan V4",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "v4-is-vapi-st",
+              "name": "is_vapi",
+              "value": "={{ ($json.body?.message?.type === 'tool-call' || $json.body?.message?.toolCalls) ? true : false }}",
+              "type": "boolean"
+            },
+            {
+              "id": "v4-phone-st",
+              "name": "phone",
+              "value": "={{ ($json.body?.message?.toolCalls?.[0]?.function?.arguments?.phone || $json.body?.data?.key?.remoteJid || $json.body?.key?.remoteJid || \"\").toString().replace(/[^0-9@s.whatsapp.net]/g, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "v4-tool-id-st",
+              "name": "toolCallId",
+              "value": "={{ $json.body?.message?.toolCalls?.[0]?.id || \"no-id\" }}",
+              "type": "string"
+            },
+            {
+              "id": "v4-msg-vapi-st",
+              "name": "msg_vapi",
+              "value": "={{ ($json.body?.message?.toolCalls?.[0]?.function?.arguments?.message || \"\").toString() }}",
+              "type": "string"
+            },
+            {
+              "id": "v4-user-txt-st",
+              "name": "user_text",
+              "value": "={{ $json.body?.data?.message?.conversation || $json.body?.data?.message?.extendedTextMessage?.text || $json.body?.message?.conversation || $json.body?.message?.extendedTextMessage?.text || \"Hola\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "st-set-v4",
+      "name": "Normalize Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        300,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeFilter": "string"
+          },
+          "conditions": [
+            {
+              "id": "v4-cond-st",
+              "leftValue": "={{ $json.is_vapi }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "st-if-v4",
+      "name": "Is Vapi?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        500,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $json.toolCallId }}\",\n      \"result\": \"SUCCESS: Stefan sent the message.\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "st-resp-vapi-v4",
+      "name": "Respond to Vapi",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        700,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\":\"received\"}",
+        "options": {}
+      },
+      "id": "st-resp-wa-v4",
+      "name": "Respond to WA",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        700,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-3.3-70b-versatile",
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "st-groq-v4",
+      "name": "Groq Stefan",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        900,
+        0
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "t7iYzRwAE19Qfzou",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Eres Stefan, Senior Sales Hunter para \"Turismo 4.0\" en Argenterio (Österreich).\n\nIDENTIDAD: Hotelería de lujo, experto, autoritario pero elegante. Sabes todo sobre software hotelero.\n\nUSUARIO DICE: {{ $json.user_text }}\n\nTAREA: Responde de forma muy profesional y educada. Tu objetivo final es que agenden la auditoría aquí: https://cal.com/gustavo-a.-dornhofer-nqjqos/argenterio\nINSTRUCCIONES: Responde siempre de forma completa y amable antes de poner el link al final. RESPUESTA SOLO TEXTO.",
+        "hasOutputParser": true
+      },
+      "id": "st-ai-v4",
+      "name": "AI SDR Stefan",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        1050,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "Austria",
+        "options_message": {
+          "number": "={{ $json.phone.includes('@') ? $json.phone : $json.phone + '@s.whatsapp.net' }}",
+          "textMessage": {
+            "text": "={{ $node[\"AI SDR Stefan\"]?.json?.text || $json.msg_vapi }}"
+          }
+        }
+      },
+      "id": "st-evo-v4",
+      "name": "Evolution Stefan V4",
+      "type": "n8n-nodes-base.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        140
+      ],
+      "credentials": {
+        "evolutionApi": {
+          "id": "bzWosesjRnlSmCBY",
+          "name": "Austria"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Stefan V4": {
+      "main": [
+        [
+          {
+            "node": "Normalize Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Data": {
+      "main": [
+        [
+          {
+            "node": "Is Vapi?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Vapi?": {
+      "main": [
+        [
+          {
+            "node": "Respond to Vapi",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Evolution Stefan V4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to WA",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Groq Stefan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Stefan": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI SDR Stefan",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI SDR Stefan": {
+      "main": [
+        [
+          {
+            "node": "Evolution Stefan V4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

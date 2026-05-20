@@ -1,0 +1,691 @@
+{
+    "name": "AI Appointment Setter - Full Pipeline",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "new-lead",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "id": "webhook_lead",
+            "name": "Webhook: Nuevo Lead",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                240,
+                400
+            ],
+            "notes": "Recibe leads de: Phantombuster, Apollo, formularios web, etc."
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "nombre",
+                            "name": "nombre",
+                            "value": "={{ $json.body.nombre || $json.body.first_name }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "empresa",
+                            "name": "empresa",
+                            "value": "={{ $json.body.empresa || $json.body.company }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "email",
+                            "name": "email",
+                            "value": "={{ $json.body.email }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "linkedin",
+                            "name": "linkedin",
+                            "value": "={{ $json.body.linkedin_url || '' }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "industria",
+                            "name": "industria",
+                            "value": "={{ $json.body.industria || $json.body.industry || '' }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "cargo",
+                            "name": "cargo",
+                            "value": "={{ $json.body.cargo || $json.body.title || '' }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "extract_lead",
+            "name": "Extraer Info Lead",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                460,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "cliente_nombre",
+                            "name": "cliente_nombre",
+                            "value": "NOMBRE_CLIENTE",
+                            "type": "string"
+                        },
+                        {
+                            "id": "servicio",
+                            "name": "servicio",
+                            "value": "Marketing Digital / Google Ads / Meta Ads",
+                            "type": "string"
+                        },
+                        {
+                            "id": "icp_criteria",
+                            "name": "icp_criteria",
+                            "value": "- Empresa 10-100 empleados\n- Industria: ecommerce, retail, servicios\n- Presupuesto ads: $50K+/mes\n- Ya usan ads (buscan mejor agencia)",
+                            "type": "string"
+                        },
+                        {
+                            "id": "calendly_link",
+                            "name": "calendly_link",
+                            "value": "https://calendly.com/cliente/reunion-30min",
+                            "type": "string"
+                        },
+                        {
+                            "id": "email_cliente",
+                            "name": "email_cliente",
+                            "value": "ventas@cliente.com",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "config",
+            "name": "CONFIG Cliente",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                680,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq_qualify",
+            "name": "Groq AI Qualification",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                680,
+                420
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres un SDR experto calificando leads B2B.\n\nCRITERIOS ICP (Ideal Customer Profile):\n{{ $('CONFIG Cliente').item.json.icp_criteria }}\n\nLEAD A CALIFICAR:\n- Nombre: {{ $('Extraer Info Lead').item.json.nombre }}\n- Empresa: {{ $('Extraer Info Lead').item.json.empresa }}\n- Cargo: {{ $('Extraer Info Lead').item.json.cargo }}\n- Industria: {{ $('Extraer Info Lead').item.json.industria }}\n- LinkedIn: {{ $('Extraer Info Lead').item.json.linkedin }}\n\nCALIFICA el lead con scoring BANT:\n- Budget (presupuesto aparente): 1-10\n- Authority (nivel decisión): 1-10\n- Need (encaja con ICP): 1-10\n- Timeline (urgencia): 1-10\n\nResponde JSON:\n{\n  \"budget_score\": 1-10,\n  \"authority_score\": 1-10,\n  \"need_score\": 1-10,\n  \"timeline_score\": 1-10,\n  \"total_score\": suma/4,\n  \"tier\": \"A\" (8-10) | \"B\" (6-7.9) | \"C\" (<6),\n  \"reasoning\": \"breve justificación\"\n}\n\nSolo JSON:",
+                "hasOutputParser": true
+            },
+            "id": "qualify_lead",
+            "name": "Calificar Lead (BANT)",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                900,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const scoring = JSON.parse($input.item.json.output);\nconst lead = $('Extraer Info Lead').item.json;\n\nreturn [{\n  json: {\n    ...lead,\n    ...scoring,\n    qualified: scoring.tier === 'A' || scoring.tier === 'B'\n  }\n}];"
+            },
+            "id": "process_score",
+            "name": "Procesar Score",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1120,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.qualified }}",
+                            "rightValue": "true",
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_qualified",
+            "name": "Lead Calificado?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1340,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "fromEmail": "{{ $('CONFIG Cliente').item.json.email_cliente }}",
+                "toEmail": "={{ $('Extraer Info Lead').item.json.email }}",
+                "subject": "=Hola {{ $('Extraer Info Lead').item.json.nombre }}, agendemos una llamada",
+                "emailType": "html",
+                "message": "=<html>\n<body style=\"font-family: Arial; max-width: 600px; margin: 0 auto;\">\n  <h2>Hola {{ $('Extraer Info Lead').item.json.nombre }},</h2>\n  \n  <p>Vi tu perfil y creo que {{ $('CONFIG Cliente').item.json.cliente_nombre }} puede ayudarte con {{ $('CONFIG Cliente').item.json.servicio }}.</p>\n  \n  <p>¿Tenés 30 minutos esta semana para una llamada sobre cómo optimizar tus campañas?</p>\n  \n  <div style=\"margin: 30px 0; text-align: center;\">\n    <a href=\"{{ $('CONFIG Cliente').item.json.calendly_link }}\" \n       style=\"background: #667eea; color: white; padding: 15px 30px; \n              text-decoration: none; border-radius: 8px; font-weight: bold;\">\n      📅 Agendar Reunión (30 min)\n    </a>\n  </div>\n  \n  <p>Sin compromiso, solo para ver si podemos ayudarte.</p>\n  \n  <p>Saludos,<br>\n  Equipo {{ $('CONFIG Cliente').item.json.cliente_nombre }}</p>\n</body>\n</html>",
+                "options": {}
+            },
+            "id": "send_calendly_email",
+            "name": "Enviar Email con Calendly",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2.1,
+            "position": [
+                1560,
+                200
+            ],
+            "credentials": {
+                "gmailOAuth2": {
+                    "id": "YOUR_GMAIL_CREDENTIAL_ID",
+                    "name": "Gmail account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_CRM_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "leads_pipeline",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Fecha": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+                        "Nombre": "={{ $json.nombre }}",
+                        "Empresa": "={{ $json.empresa }}",
+                        "Email": "={{ $json.email }}",
+                        "Cargo": "={{ $json.cargo }}",
+                        "Score_Total": "={{ $json.total_score }}",
+                        "Tier": "={{ $json.tier }}",
+                        "Estado": "={{ $json.qualified ? 'Email Enviado' : 'No Calificado' }}",
+                        "Reasoning": "={{ $json.reasoning }}"
+                    }
+                }
+            },
+            "id": "log_crm",
+            "name": "Log en CRM",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                1780,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "message",
+                            "name": "message",
+                            "value": "=Lead {{ $json.tier }} no alcanzó threshold. Agregado a nurturing campaign.",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "nurture_low_score",
+            "name": "A Nurturing Campaign",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                1560,
+                400
+            ],
+            "notes": "Leads C van a secuencia de emails educativos"
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\"success\": true, \"lead_tier\": \"{{ $json.tier }}\", \"qualified\": \"{{ $json.qualified }}\"}",
+                "options": {}
+            },
+            "id": "response",
+            "name": "Response OK",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                2000,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "calendly-booked",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "id": "webhook_booking",
+            "name": "Webhook: Calendly Booked",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                240,
+                800
+            ],
+            "notes": "Calendly webhook cuando lead agenda reunión"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "invitee_name",
+                            "name": "invitee_name",
+                            "value": "={{ $json.body.payload.invitee.name }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "invitee_email",
+                            "name": "invitee_email",
+                            "value": "={{ $json.body.payload.invitee.email }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "event_time",
+                            "name": "event_time",
+                            "value": "={{ $json.body.payload.event.start_time }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "event_uri",
+                            "name": "event_uri",
+                            "value": "={{ $json.body.payload.event.uri }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "extract_booking",
+            "name": "Extraer Info Booking",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                460,
+                800
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_CRM_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "leads_pipeline",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Estado": "Reunión Agendada",
+                        "Fecha_Reunion": "={{ $json.event_time }}",
+                        "Calendly_URI": "={{ $json.event_uri }}"
+                    }
+                },
+                "options": {
+                    "lookupColumn": "Email",
+                    "lookupValue": "={{ $json.invitee_email }}"
+                }
+            },
+            "id": "update_crm_booked",
+            "name": "Actualizar CRM (Agendado)",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                680,
+                800
+            ]
+        },
+        {
+            "parameters": {
+                "fromEmail": "{{ $('CONFIG Cliente').item.json.email_cliente }}",
+                "toEmail": "={{ $('CONFIG Cliente').item.json.email_cliente }}",
+                "subject": "=🎉 Nueva reunión agendada: {{ $json.invitee_name }}",
+                "emailType": "html",
+                "message": "=<html>\n<body style=\"font-family: Arial;\">\n  <h2>✅ Nuevo Lead Agendó Reunión</h2>\n  \n  <p><strong>Nombre:</strong> {{ $json.invitee_name }}</p>\n  <p><strong>Email:</strong> {{ $json.invitee_email }}</p>\n  <p><strong>Fecha/Hora:</strong> {{ $json.event_time }}</p>\n  \n  <p><strong>Próximos pasos:</strong></p>\n  <ul>\n    <li>Revisar LinkedIn del lead</li>\n    <li>Preparar preguntas de discovery</li>\n    <li>Reminder automático enviado al lead</li>\n  </ul>\n  \n  <p><a href=\"{{ $json.event_uri }}\">Ver en Calendly</a></p>\n</body>\n</html>",
+                "options": {}
+            },
+            "id": "notify_client",
+            "name": "Notificar Cliente",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2.1,
+            "position": [
+                900,
+                800
+            ]
+        },
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "cronExpression",
+                            "expression": "0 9 * * *"
+                        }
+                    ]
+                }
+            },
+            "id": "cron_reminders",
+            "name": "Cron: Reminders Diarios",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1.2,
+            "position": [
+                240,
+                1200
+            ],
+            "notes": "Chequea reuniones hoy y mañana para enviar reminders"
+        },
+        {
+            "parameters": {
+                "operation": "getAll",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_CRM_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "leads_pipeline",
+                    "mode": "list"
+                },
+                "options": {
+                    "filter": "Estado = 'Reunión Agendada'"
+                }
+            },
+            "id": "get_scheduled",
+            "name": "Obtener Reuniones Agendadas",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                460,
+                1200
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const now = new Date();\nconst tomorrow = new Date(now);\ntomorrow.setDate(tomorrow.getDate() + 1);\n\nconst items = $input.all();\nconst needsReminder = [];\n\nfor (const item of items) {\n  const meetingDate = new Date(item.json.Fecha_Reunion);\n  const hoursDiff = (meetingDate - now) / (1000 * 60 * 60);\n  \n  // Reminder 24hs antes\n  if (hoursDiff > 23 && hoursDiff < 25) {\n    needsReminder.push({\n      ...item.json,\n      reminder_type: '24hs'\n    });\n  }\n  \n  // Reminder 1 hora antes\n  if (hoursDiff > 0.9 && hoursDiff < 1.1) {\n    needsReminder.push({\n      ...item.json,\n      reminder_type: '1hora'\n    });\n  }\n}\n\nreturn needsReminder.map(item => ({ json: item }));"
+            },
+            "id": "check_reminders",
+            "name": "Filtrar Reuniones con Reminder",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                680,
+                1200
+            ]
+        },
+        {
+            "parameters": {
+                "fromEmail": "{{ $('CONFIG Cliente').item.json.email_cliente }}",
+                "toEmail": "={{ $json.Email }}",
+                "subject": "=Recordatorio: Reunión {{ $json.reminder_type === '24hs' ? 'mañana' : 'en 1 hora' }}",
+                "emailType": "html",
+                "message": "=<html>\n<body style=\"font-family: Arial;\">\n  <h2>👋 Hola {{ $json.Nombre }},</h2>\n  \n  <p>Te recordamos tu reunión con {{ $('CONFIG Cliente').item.json.cliente_nombre }}:</p>\n  \n  <div style=\"background: #f0f0f0; padding: 20px; border-radius: 8px; margin: 20px 0;\">\n    <p><strong>📅 Fecha:</strong> {{ $json.Fecha_Reunion }}</p>\n    <p><strong>⏰ Duración:</strong> 30 minutos</p>\n  </div>\n  \n  <p>Te esperamos!</p>\n  \n  <p>Si necesitás reprogramar: <a href=\"{{ $json.Calendly_URI }}\">click aquí</a></p>\n</body>\n</html>",
+                "options": {}
+            },
+            "id": "send_reminder",
+            "name": "Enviar Reminder",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2.1,
+            "position": [
+                900,
+                1200
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\"reminders_sent\": {{ $input.all().length }}}",
+                "options": {}
+            },
+            "id": "response_cron",
+            "name": "Response Cron",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                1120,
+                1200
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook: Nuevo Lead": {
+            "main": [
+                [
+                    {
+                        "node": "Extraer Info Lead",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extraer Info Lead": {
+            "main": [
+                [
+                    {
+                        "node": "Calificar Lead (BANT)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "CONFIG Cliente",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq AI Qualification": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Calificar Lead (BANT)",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Calificar Lead (BANT)": {
+            "main": [
+                [
+                    {
+                        "node": "Procesar Score",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Procesar Score": {
+            "main": [
+                [
+                    {
+                        "node": "Lead Calificado?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Lead Calificado?": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Email con Calendly",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "A Nurturing Campaign",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar Email con Calendly": {
+            "main": [
+                [
+                    {
+                        "node": "Log en CRM",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "A Nurturing Campaign": {
+            "main": [
+                [
+                    {
+                        "node": "Log en CRM",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Log en CRM": {
+            "main": [
+                [
+                    {
+                        "node": "Response OK",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook: Calendly Booked": {
+            "main": [
+                [
+                    {
+                        "node": "Extraer Info Booking",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extraer Info Booking": {
+            "main": [
+                [
+                    {
+                        "node": "Actualizar CRM (Agendado)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Actualizar CRM (Agendado)": {
+            "main": [
+                [
+                    {
+                        "node": "Notificar Cliente",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Cron: Reminders Diarios": {
+            "main": [
+                [
+                    {
+                        "node": "Obtener Reuniones Agendadas",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Obtener Reuniones Agendadas": {
+            "main": [
+                [
+                    {
+                        "node": "Filtrar Reuniones con Reminder",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtrar Reuniones con Reminder": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Reminder",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar Reminder": {
+            "main": [
+                [
+                    {
+                        "node": "Response Cron",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "appointment-setter-v1"
+}

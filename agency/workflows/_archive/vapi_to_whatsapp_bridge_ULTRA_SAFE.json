@@ -1,0 +1,214 @@
+{
+    "name": "Vapi WhatsApp Bridge - ULTRA SAFE",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "vapi-multimedia-bridge",
+                "responseMode": "responseNode"
+            },
+            "id": "webhook-ultra",
+            "name": "WebhookVapi",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "keepOnlySet": true,
+                "values": {
+                    "string": [
+                        {
+                            "name": "phone",
+                            "value": "={{ $json[\"body\"][\"message\"][\"toolCalls\"][0][\"function\"][\"arguments\"][\"phone\"] || $json[\"body\"][\"phone\"] }}"
+                        },
+                        {
+                            "name": "message",
+                            "value": "={{ $json[\"body\"][\"message\"][\"toolCalls\"][0][\"function\"][\"arguments\"][\"message\"] || $json[\"body\"][\"message\"] }}"
+                        },
+                        {
+                            "name": "media_url",
+                            "value": "={{ $json[\"body\"][\"message\"][\"toolCalls\"][0][\"function\"][\"arguments\"][\"media_url\"] }}"
+                        },
+                        {
+                            "name": "media_type",
+                            "value": "={{ $json[\"body\"][\"message\"][\"toolCalls\"][0][\"function\"][\"arguments\"][\"media_type\"] || \"document\" }}"
+                        },
+                        {
+                            "name": "toolCallId",
+                            "value": "={{ $json[\"body\"][\"message\"][\"toolCalls\"][0][\"id\"] }}"
+                        },
+                        {
+                            "name": "instanceName",
+                            "value": "={{ $json[\"body\"][\"message\"][\"toolCalls\"][0][\"function\"][\"name\"].indexOf('stefan') > -1 ? 'Argenterio' : 'GenerArise' }}"
+                        }
+                    ]
+                }
+            },
+            "id": "set-ultra",
+            "name": "PrepareData",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 1,
+            "position": [
+                350,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{ $json[\"media_url\"] }}",
+                            "operation": "notEmpty"
+                        }
+                    ]
+                }
+            },
+            "id": "if-ultra",
+            "name": "Check Media",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                550,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "={{ $json[\"instanceName\"] }}",
+                "options_message": {
+                    "number": "={{ $json[\"phone\"] }}",
+                    "textMessage": {
+                        "text": "={{ $json[\"message\"] }}"
+                    }
+                }
+            },
+            "id": "evo-text-ultra",
+            "name": "Evolution Text",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                800,
+                450
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "operation": "sendMedia",
+                "instanceName": "={{ $json[\"instanceName\"] }}",
+                "options_message": {
+                    "number": "={{ $json[\"phone\"] }}",
+                    "mediaMessage": {
+                        "media": "={{ $json[\"media_url\"] }}",
+                        "mediaType": "={{ $json[\"media_type\"] }}",
+                        "caption": "={{ $json[\"message\"] }}"
+                    }
+                }
+            },
+            "id": "evo-media-ultra",
+            "name": "Evolution Media",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                800,
+                150
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $node[\"PrepareData\"].json[\"toolCallId\"] }}\",\n      \"result\": \"Material enviado.\"\n    }\n  ]\n}"
+            },
+            "id": "respond-ultra",
+            "name": "Respond to Vapi",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                1100,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "WebhookVapi": {
+            "main": [
+                [
+                    {
+                        "node": "PrepareData",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "PrepareData": {
+            "main": [
+                [
+                    {
+                        "node": "Check Media",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check Media": {
+            "main": [
+                [
+                    {
+                        "node": "Evolution Media",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Evolution Text",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Evolution Media": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Vapi",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Evolution Text": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Vapi",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

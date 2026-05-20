@@ -1,0 +1,181 @@
+{
+    "name": "Argenterio - Auditor V11 (MASTER E2E)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "argenterio-audit-v1",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Data",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                300
+            ],
+            "webhookId": "argenterio-audit-v1"
+        },
+        {
+            "parameters": {
+                "modelName": "models/llama-3.3-70b-versatile",
+                "options": {}
+            },
+            "name": "Chat Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                220,
+                520
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_ID",
+                    "name": "Groq Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Analista ARGT-26. Tu misión: Analizar finanzas para un TEASER de venta. \n\nDATOS DEL USUARIO:\n- Ingresos: {{ $('Webhook Data').item.json.body.ingresos }}\n- Gastos: {{ $('Webhook Data').item.json.body.gastos }}\n- Deuda: {{ $('Webhook Data').item.json.body.deudas }}\n- Miedo Principal: {{ $('Webhook Data').item.json.body.objetivo }}\n\nSALIDA REQUERIDA:\nEscribe un solo párrafo MUY CORTO (máximo 2 líneas) y urgente. Dile directamente el riesgo principal basado en sus números. NO des soluciones."
+            },
+            "name": "AI Teaser",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                220,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.mercadopago.com/checkout/preferences",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "contentType": "json",
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "items",
+                            "value": "={{ [ { \"title\": \"Informe Estratégico Argenterio\", \"quantity\": 1, \"currency_id\": \"ARS\", \"unit_price\": 15000 } ] }}"
+                        },
+                        {
+                            "name": "back_urls",
+                            "value": "={{ { \"success\": \"https://argenterio.com/agency/confirmacion.html\" } }}"
+                        },
+                        {
+                            "name": "auto_return",
+                            "value": "approved"
+                        }
+                    ]
+                },
+                "options": {
+                    "continueOnFail": true
+                }
+            },
+            "name": "MercadoPago Link",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                480,
+                300
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_MP_ID",
+                    "name": "MP Token"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ {\n    \"message\": \"Analisis Completado\",\n    \"mp_link\": $('MercadoPago Link').item.json.init_point || null,\n    \"paypal_link\": \"https://www.paypal.com/ncp/payment/LP2ZBHDAJPLDY\",\n    \"teaser\": $('AI Teaser').item.json.text || \"Análisis disponible en el reporte completo.\"\n} }}",
+                "options": {}
+            },
+            "name": "Response Header",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                750,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "senderEmail": "security@argenterio.com",
+                "toEmail": "={{ $('Webhook Data').item.json[\"body\"][\"email\"] }}",
+                "subject": "⚠️ Tu Pre-Diagnóstico de Eficiencia Operativa",
+                "htmlContent": "=<!DOCTYPE html><html><head><style>body{font-family:'Courier New',monospace;background:#f4f4f4;padding:20px;color:#333}.card{background:#fff;padding:30px;border-top:5px solid #ff3333;max-width:600px;margin:0 auto}</style></head><body><div class=\"card\"><h1>ARGENTERIO STATUS: PENDING</h1><p>Hemos procesado tus datos.</p><div style='background:#ffe6e6; padding:15px; border-left:4px solid red'><strong>DIAGNÓSTICO PRELIMINAR:</strong><br><br>{{ $('AI Teaser').item.json.text }}</div><p>Para desbloquear el reporte completo, completa el pago:</p><a href='{{ $('MercadoPago Link').item.json.init_point || \"#\" }}' style='display:inline-block;padding:10px 20px;background:#009ee3;color:white;text-decoration:none;font-weight:bold;margin-right:10px'>MERCADO PAGO</a> <a href='https://www.paypal.com/ncp/payment/LP2ZBHDAJPLDY' style='display:inline-block;padding:10px 20px;background:#003087;color:white;text-decoration:none;font-weight:bold'>PAYPAL</a></div></body></html>"
+            },
+            "name": "Email - Teaser + Link",
+            "type": "n8n-nodes-base.sendInBlue",
+            "typeVersion": 2,
+            "position": [
+                750,
+                400
+            ],
+            "credentials": {
+                "sendInBlueApi": {
+                    "id": "YOUR_BREVO_ID",
+                    "name": "Brevo API"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook Data": {
+            "main": [
+                [
+                    {
+                        "node": "AI Teaser",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Chat Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Teaser",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Teaser": {
+            "main": [
+                [
+                    {
+                        "node": "MercadoPago Link",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MercadoPago Link": {
+            "main": [
+                [
+                    {
+                        "node": "Response Header",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Email - Teaser + Link",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

@@ -1,0 +1,132 @@
+{
+    "name": "Vapi to WhatsApp Bridge (Pro)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "vapi-whatsapp-bridge",
+                "options": {},
+                "responseMode": "responseNode"
+            },
+            "id": "webhook",
+            "name": "Vapi Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "phone-id",
+                            "name": "phone",
+                            "value": "={{ $json.body?.message?.toolCalls?.[0]?.function?.arguments?.phone || $json.body?.phone || \"5491112345678\" }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "msg-id",
+                            "name": "message",
+                            "value": "={{ $json.body?.message?.toolCalls?.[0]?.function?.arguments?.message || $json.body?.message || \"Hola! En breve te contacto.\" }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "call-id",
+                            "name": "toolCallId",
+                            "value": "={{ $json.body?.message?.toolCalls?.[0]?.id || \"test-call\" }}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-node",
+            "name": "Prepare Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                320,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "LATAM",
+                "options_message": {
+                    "number": "={{ $json.phone }}",
+                    "textMessage": {
+                        "text": "={{ $json.message }}"
+                    }
+                }
+            },
+            "id": "evo",
+            "name": "Evolution API",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                540,
+                300
+            ],
+            "continueOnFail": true,
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "LATAM"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $('Prepare Data').item.json.toolCallId }}\",\n      \"result\": \"Mensaje enviado correctamente por WhatsApp.\"\n    }\n  ]\n}"
+            },
+            "id": "respond",
+            "name": "Respond to Vapi",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.1,
+            "position": [
+                760,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Vapi Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Data": {
+            "main": [
+                [
+                    {
+                        "node": "Evolution API",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Evolution API": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Vapi",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

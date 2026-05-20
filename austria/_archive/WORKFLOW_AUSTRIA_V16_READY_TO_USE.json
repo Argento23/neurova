@@ -1,0 +1,301 @@
+{
+    "name": "Austria Voice Assistant V16 (READY TO USE)",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "webhook-trigger",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                200,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "content": "✅ V16 READY TO USE\n\nPROBLEMA SOLUCIONADO:\nEl Prompt V6 NO estaba cargado (era un texto de ejemplo).\n\nSOLUCIÓN:\nHe **PRE-CARGADO** el Prompt V6 completo dentro del nodo Gemini.\n\nInstrucciones:\n1. Solo conecta tu credencial de Google Gemini.\n2. ¡LISTO! Ya califica y habla alemán.",
+                "height": 340,
+                "width": 380
+            },
+            "id": "nota-final",
+            "name": "Nota: V16 READY",
+            "type": "n8n-nodes-base.stickyNote",
+            "typeVersion": 1,
+            "position": [
+                1320,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// ═══════════════════════════════════════════════════════════════\n// NORMALIZADOR INPUT - V16\n// ═══════════════════════════════════════════════════════════════\n\n// Busca el mensaje del usuario en todas las posibles rutas de Evolution API\nlet body = $input.item.json.body || {};\nlet data = body.data || {};\nlet msg = data.message || {};\n\nlet userMessage = \"\";\n\n// 1. Mensaje de Texto Extendido (Android/iOS)\nif (msg.extendedTextMessage && msg.extendedTextMessage.text) {\n    userMessage = msg.extendedTextMessage.text;\n}\n// 2. Mensaje de Conversación simple (Web)\nelse if (msg.conversation) {\n    userMessage = msg.conversation;\n}\nelse if (msg.conversationMessage && msg.conversationMessage.message) {\n    userMessage = msg.conversationMessage.message;\n}\n// 3. Caption de Imagen (si envían foto)\nelse if (msg.imageMessage && msg.imageMessage.caption) {\n    userMessage = msg.imageMessage.caption;\n}\n// 4. Fallback directo\nelse if (body.message) {\n    userMessage = body.message;\n}\n\n// Si no se encuentra nada, default 'Hola'\nif (!userMessage) userMessage = \"Hola\";\n\nreturn {\n  json: {\n    ...$input.item.json,\n    user_message: userMessage\n  }\n};"
+            },
+            "id": "normalizer",
+            "name": "Normalizar Input",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                350,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "modelName": "models/gemini-1.5-flash",
+                "options": {
+                    "temperature": 0.3
+                }
+            },
+            "id": "gemini_model",
+            "name": "Google Gemini 1.5 Flash",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+            "typeVersion": 1,
+            "position": [
+                500,
+                520
+            ],
+            "credentials": {
+                "googlePalmApi": {
+                    "id": "YOUR_GEMINI_CREDENTIAL_ID",
+                    "name": "Google Gemini(PaLM) Api account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.user_message }}",
+                "hasOutputParser": true,
+                "options": {
+                    "systemMessage": "=# 🇦🇹 PROMPT ASISTENTE DE VOZ - ARGENTERÍO (MODO SDR / APPOINTMENT SETTER)\n\n## 🚨 REGLA NÚMERO 1: IDIOMA (OBLIGATORIO)\n**TU PRIMERA PRIORIDAD ES DETECTAR EL IDIOMA DEL USUARIO Y RESPONDER EN ESE MISMO IDIOMA.**\n- \"Hello\" -> INGLÉS\n- \"Guten Tag\" -> ALEMÁN\n- \"Ciao\" -> ITALIANO\n- \"Hola\" -> ESPAÑOL\n\n**PROHIBIDO RESPONDER EN ESPAÑOL SI EL USUARIO HABLA OTRO IDIOMA.**\n\n---\n\n## 🤵 ROL: SDR (Sales Development Rep) EXPERTO\nEres el **Appointment Setter** de Argenterío. Tu objetivo NO es solo dar información, es **CALIFICAR** y **AGENDAR** una auditoría gratuita con leads cualificados.\n\n### 🎯 TU OBJETIVO (THE GOAL):\n1.  **Enganchar:** Responder dudas brevemente.\n2.  **Calificar:** Hacer 1 pregunta clave para ver si son clientes ideales (Hoteles).\n    -   *\"¿Gestionas un hotel actualmente?\"*\n    -   *\"¿Cuántas habitaciones tiene tu propiedad?\"*\n    -   *\"¿Ya usan IA para responder a huéspedes?\"*\n3.  **Cerrar (Close):** Si califican, mándalos a agendar.\n\n---\n\n### 🕵️ CRITERIOS DE CALIFICACIÓN (ICP):\n- **Ideal:** Dueños/Gerentes de Hoteles en Austria/Europa.\n- **No Ideal:** Estudiantes, curiosos sin hotel.\n\n### 🧠 ESTRATEGIA DE CONVERSACIÓN:\n- **Usuario:** \"¿Cuánto cuesta?\"\n- **Tú (SDR):** \"Tenemos planes desde €797. Para darte el mejor precio, ¿cuántas habitaciones tiene tu hotel?\" (Respuesta + Pregunta de calificación).\n\n- **Usuario:** \"50 habitaciones.\"\n- **Tú (SDR):** \"¡Perfecto! Para ese tamaño, la IA ahorra mucho tiempo. Te envío mi calendario para una demo rápida de 15 min.\" (Agenda).\n\n---\n\n## ⚠️ FORMATO DE SALIDA (JSON)\n\n```json\n{\n  \"respuesta_voz\": \"Texto breve y persuasivo aquí...\",\n  \"accion_requerida\": \"agendar\",\n  \"idioma\": \"de\" \n}\n```\n\n### 🔑 Campo `accion_requerida`:\n- **\"info\"**: Si aun estás calificando o respondiendo dudas básicas.\n- **\"agendar\"**: SI EL LEAD ES IDÓNEO Y QUIERE AVANZAR -> Envía el Link.\n- **\"trabar\"**: (Opcional) Si el lead no califica (ej: es estudiante), despídete amablemente.\n- **\"idioma\"**: `de` | `en` | `es` | `it` (CRÍTICO).\n\n---\n\n### 🛑 REGLAS DE VOZ:\n1.  **CERO URLs:** Di \"te envié el enlace por mensaje\".\n2.  **Brevedad:** Máximo 2 oraciones.\n3.  **Termina con Pregunta:** Si estás calificando, termina siempre con una pregunta.\n\n### ✅ EJEMPLOS FLUIDOS:\n\n**Ejemplo 1 - Lead Alemán (Calificando):**\n*User:* \"Was machst du?\"\n*SDR:*\n```json\n{\n  \"respuesta_voz\": \"Ich automatisiere die Rezeption für Hotels. Sagen Sie mal, nutzen Sie derzeit WhatsApp für Ihre Gäste?\",\n  \"accion_requerida\": \"info\",\n  \"idioma\": \"de\"\n}\n```\n\n**Ejemplo 2 - Lead Inglés (Cierre):**\n*User:* \"Yes, we have 40 rooms and struggle with emails.\"\n*SDR:*\n```json\n{\n  \"respuesta_voz\": \"I understand completely. Our AI handles that 24/7. I just sent you a link to book a free audit. Let's fix this.\",\n  \"accion_requerida\": \"agendar\",\n  \"idioma\": \"en\"\n}\n```\n\n---\n\n## ⚠️ Checklist Final:\n1. ¿Idioma correcto?\n2. ¿Estoy calificando o cerrando?\n3. ¿JSON limpio?"
+                }
+            },
+            "id": "gemini_brain",
+            "name": "Gemini Brain (Basic LLM Chain)",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// ═══════════════════════════════════════════════════════════════\n// FILTRO V14 - SDR MODE (Compatible con Gemini)\n// ═══════════════════════════════════════════════════════════════\n\n// A. OBTENER INPUT (Solo output de AI)\n// Gemini a veces devuelve texto directo\nlet inputData = $input.item.json.text || $input.item.json.response || \"\";\n\n// B. OBTENER REMOTE JID\nlet rawRemoteJid = \"\";\ntry {\n  if ($('Webhook').item.json.body.data && $('Webhook').item.json.body.data.key) {\n      rawRemoteJid = $('Webhook').item.json.body.data.key.remoteJid;\n  }\n  else if ($('Webhook').item.json.body.key) {\n      rawRemoteJid = $('Webhook').item.json.body.key.remoteJid;\n  }\n} catch(e) {\n  console.log(\"⚠️ No se pudo leer el RemoteJid\");\n}\n\n// Variables por defecto\nlet textoVoz = \"\";\nlet accionFinal = \"info\";\nlet mensajeTexto = \"\";\nlet idiomaIA = \"\";\n\n// C. LÓGICA DE PARSEO ROBUSTA\nif (typeof inputData === 'object' && inputData !== null) {\n  textoVoz = inputData.respuesta_voz || \"\";\n  accionFinal = inputData.accion_requerida || \"info\";\n  idiomaIA = inputData.idioma || \"\";\n} \nelse if (typeof inputData === 'string') {\n  let cleanString = inputData.replace(/```json/g, \"\").replace(/```/g, \"\").trim();\n  const firstBrace = cleanString.indexOf('{');\n  const lastBrace = cleanString.lastIndexOf('}');\n  if (firstBrace !== -1 && lastBrace !== -1) {\n      cleanString = cleanString.substring(firstBrace, lastBrace + 1);\n  }\n\n  try {\n    const parsed = JSON.parse(cleanString);\n    textoVoz = parsed.respuesta_voz || cleanString;\n    accionFinal = parsed.accion_requerida || \"info\";\n    idiomaIA = parsed.idioma || \"\";\n  } catch (e) {\n    textoVoz = cleanString;\n    accionFinal = \"info\";\n    idiomaIA = \"\";\n  }\n}\n\n// D. DETECCIÓN DE IDIOMA (Backup)\nfunction detectLanguageBackup(text) {\n  if (!text) return \"es\";\n  const textLower = text.toLowerCase();\n  const deWords = [\"der\", \"die\", \"das\", \"haben\", \"guten\", \"konnen\", \"werden\", \"hotels\", \"preis\", \"danke\", \"bitte\", \"hallo\"];\n  const enWords = [\"the\", \"have\", \"hello\", \"good\", \"hotel\", \"booking\", \"price\", \"would\", \"thanks\", \"please\", \"hi\"];\n  const esWords = [\"los\", \"las\", \"tiene\", \"puede\", \"hola\", \"buenos\", \"reserva\", \"precio\", \"gracias\", \"por favor\"];\n  const itWords = [\"gli\", \"vuole\", \"ciao\", \"buona\", \"prenotazione\", \"prezzo\", \"grazie\", \"per favore\"];\n  \n  let scores = { de: 0, en: 0, es: 0, it: 0 };\n  deWords.forEach(word => { if (textLower.includes(word)) scores.de++; });\n  enWords.forEach(word => { if (textLower.includes(word)) scores.en++; });\n  esWords.forEach(word => { if (textLower.includes(word)) scores.es++; });\n  itWords.forEach(word => { if (textLower.includes(word)) scores.it++; });\n  \n  let maxLang = \"es\";\n  let maxScore = scores.es;\n  if (scores.de > maxScore) { maxLang = \"de\"; maxScore = scores.de; }\n  if (scores.en > maxScore) { maxLang = \"en\"; maxScore = scores.en; }\n  if (scores.it > maxScore) { maxLang = \"it\"; }\n  return maxLang;\n}\n\nlet langCode = \"es\";\nif (idiomaIA && [\"de\", \"en\", \"es\", \"it\"].includes(idiomaIA.toLowerCase())) {\n    langCode = idiomaIA.toLowerCase();\n} else {\n    langCode = detectLanguageBackup(textoVoz);\n}\n\n// E. SELECCIÓN DE VOZ\nconst googleVoices = {\n  de: { languageCode: \"de-DE\", name: \"de-DE-Neural2-F\", ssmlGender: \"FEMALE\" },\n  en: { languageCode: \"en-US\", name: \"en-US-Neural2-F\", ssmlGender: \"FEMALE\" },\n  es: { languageCode: \"es-US\", name: \"es-US-Neural2-B\", ssmlGender: \"MALE\" },\n  it: { languageCode: \"it-IT\", name: \"it-IT-Neural2-A\", ssmlGender: \"FEMALE\" }\n};\n\nconst selectedVoice = googleVoices[langCode] || googleVoices.es;\n\n// F. LIMPIEZA PARA TTS\nfunction cleanForTTS(text) {\n  if (!text) return \"\";\n  return text\n    .replace(/[\\u{1F600}-\\u{1F64F}\\u{1F300}-\\u{1F5FF}]/gu, \"\")\n    .replace(/(https?:\\/\\/[^\\s]+)/g, \"el enlace\")\n    .replace(/[\"*{}\\[\\]_]/g, \"\")\n    .trim();\n}\n\n// G. GENERAR MENSAJE TEXTO (SDR MODE)\nlet urlImagen = \"https://i.imgur.com/example_pricing.png\";\n\nif (accionFinal === \"agendar\") {\n  mensajeTexto = \"🔗 Agenda tu auditoria aqui:\\n\\nhttps://cal.com/gustavo-a.-dornhofer-nqjqos/auditoria-ia-gratuita-free-ai-audit-kostenloses-ki-audit\\n\\nElegi dia y horario. Duracion: 30 min\";\n}\nelse if (accionFinal === \"contacto\") {\n  mensajeTexto = \"Contacto directo:\\n\\n• WhatsApp: +54 9 11 7371-9972\\n• Email: agentes.space@gmail.com\\n\\nEn que mas puedo ayudarte?\";\n}\nelse if (accionFinal === \"derivar\") {\n  mensajeTexto = \"He notificado a un especialista humano sobre tu caso. Te contactaran a la brevedad.\";\n}\nelse if (accionFinal === \"tarifario\") {\n  mensajeTexto = \"Aqui tienes nuestro tarifario actualizado:\\n\\n\" + urlImagen + \"\\n\\n(Abre el enlace para ver los precios)\";\n}\n\nreturn {\n  json: {\n    clean_voice: cleanForTTS(textoVoz),              \n    accion: accionFinal.toLowerCase().trim(),\n    mensaje_texto: mensajeTexto,\n    remote_jid: rawRemoteJid,\n    idioma: langCode,\n    tts_language_code: selectedVoice.languageCode,\n    tts_voice_name: selectedVoice.name,\n    tts_gender: selectedVoice.ssmlGender\n  }\n};"
+            },
+            "id": "filtro-js-v14",
+            "name": "Filtro V14 (SDR Mode)",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                750,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "dataType": "string",
+                "value1": "={{ $json.accion }}",
+                "rules": {
+                    "rules": [
+                        {
+                            "value2": "agendar"
+                        },
+                        {
+                            "value2": "contacto"
+                        },
+                        {
+                            "value2": "derivar"
+                        },
+                        {
+                            "value2": "tarifario"
+                        }
+                    ]
+                }
+            },
+            "id": "switch-accion",
+            "name": "Switch1 (Copia GenerArise)",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 1,
+            "position": [
+                1000,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "USA",
+                "remoteJid": "={{ $('Webhook').item.json.body.data.key.remoteJid }}",
+                "messageText": "={{ $json.mensaje_texto }}"
+            },
+            "id": "evolution-text",
+            "name": "Enviar texto (USA)",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                1300,
+                200
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "mWJjZLDXsIhJxZcX",
+                    "name": "USA"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "text": "={{ $json.clean_voice }}",
+                "languageCode": "={{ $json.tts_language_code }}",
+                "voiceName": "={{ $json.tts_voice_name }}",
+                "voiceGender": "MALE",
+                "options": {}
+            },
+            "id": "tts-node",
+            "name": "Generar Audio (TTS)",
+            "type": "n8n-nodes-google-cloud-tts.googleCloudTts",
+            "typeVersion": 1,
+            "position": [
+                1000,
+                450
+            ],
+            "credentials": {
+                "googleCloudTtsApi": {
+                    "id": "p6gzWofxOKTKQf2l",
+                    "name": "Google Cloud Text-to-Speech account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "operation": "send-audio",
+                "instanceName": "USA",
+                "remoteJid": "={{ $('Webhook').item.json.body.data.key.remoteJid }}",
+                "media": "={{ $json.audioData }}",
+                "options_message": {}
+            },
+            "id": "enviar-audio",
+            "name": "Enviar Audio (USA)",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                1300,
+                450
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "mWJjZLDXsIhJxZcX",
+                    "name": "USA"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Normalizar Input",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Normalizar Input": {
+            "main": [
+                [
+                    {
+                        "node": "Gemini Brain (Basic LLM Chain)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Gemini 1.5 Flash": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Gemini Brain (Basic LLM Chain)",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Gemini Brain (Basic LLM Chain)": {
+            "main": [
+                [
+                    {
+                        "node": "Filtro V14 (SDR Mode)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtro V14 (SDR Mode)": {
+            "main": [
+                [
+                    {
+                        "node": "Switch1 (Copia GenerArise)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Generar Audio (TTS)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Switch1 (Copia GenerArise)": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar texto (USA)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Enviar texto (USA)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Enviar texto (USA)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Enviar texto (USA)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generar Audio (TTS)": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Audio (USA)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

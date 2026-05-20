@@ -1,0 +1,321 @@
+{
+    "name": "Autonomous Sales Agent v7 (Fix Brevo & Loop)",
+    "nodes": [
+        {
+            "parameters": {},
+            "name": "Start Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                0,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "values": {
+                    "string": [
+                        {
+                            "name": "search_term",
+                            "value": "Inmobiliarias"
+                        },
+                        {
+                            "name": "location",
+                            "value": "Buenos Aires, Argentina"
+                        },
+                        {
+                            "name": "target_audience",
+                            "value": "Empresas que necesiten automatización con IA"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Definir Busqueda",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 1,
+            "position": [
+                220,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://serpapi.com/search.json",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "queryAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "api_key",
+                            "value": "9be0d43581dc9220232e9a2819f308c303a32082a1e62f97c9c87b75dfde8d72"
+                        },
+                        {
+                            "name": "engine",
+                            "value": "google_maps"
+                        },
+                        {
+                            "name": "q",
+                            "value": "={{ $json[\"search_term\"] + \" en \" + $json[\"location\"] }}"
+                        },
+                        {
+                            "name": "type",
+                            "value": "search"
+                        },
+                        {
+                            "name": "num",
+                            "value": "10"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "SerpApi - Maps Scraper",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                460,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "local_results",
+                "options": {}
+            },
+            "name": "Separar Resultados",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 1,
+            "position": [
+                680,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "batchSize": 1,
+                "options": {}
+            },
+            "name": "Freno de Mano (Loop)",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 2,
+            "position": [
+                900,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "modelName": "models/gemini-1.5-flash",
+                "options": {}
+            },
+            "name": "Google Gemini Chat Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+            "typeVersion": 1,
+            "position": [
+                1150,
+                550
+            ],
+            "credentials": {
+                "googlePalmApi": {
+                    "id": "YOUR_GEMINI_CREDENTIAL_ID",
+                    "name": "Google Gemini Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Analiza este negocio de Google Maps:\n\nNOMBRE: {{ $json.title }}\nWEB: {{ $json.website }}\nTELEFONO: {{ $json.phone }}\nRATING: {{ $json.rating }}\n\nTAREA:\n1. Califica de 1 a 10 si es buen lead para automatización IA (Score).\n2. Encuentra o deduce un EMAIL de contacto (si no hay, déjalo vacío).\n3. Escribe un email de venta persuasivo en HTML. Firma como 'Gustavo - Neurova AI'.\n\nFORMATO JSON:\n{ \n  \"score\": 8, \n  \"email_address\": \"...\", \n  \"email_subject\": \"...\",\n  \"email_body\": \"<p>Hola...</p>\"\n}",
+                "hasOutputParser": true
+            },
+            "name": "Gemini - Redactor + Buscador Email",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1150,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "number": [
+                        {
+                            "value1": "={{ $json.score }}",
+                            "operation": "largerEqual",
+                            "value2": 7
+                        }
+                    ],
+                    "string": [
+                        {
+                            "value1": "={{ $json.email_address }}",
+                            "operation": "isNotEmpty"
+                        }
+                    ]
+                }
+            },
+            "name": "Filtro de Calidad (Score > 7 + Email)",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                1400,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "senderEmail": "gustavo@generarise.space",
+                "toEmail": "={{ $json.email_address }}",
+                "subject": "={{ $json.email_subject }}",
+                "htmlContent": "={{ $json.email_body }}"
+            },
+            "name": "Brevo - Enviar Email",
+            "type": "n8n-nodes-base.sendInBlue",
+            "typeVersion": 2,
+            "position": [
+                1700,
+                160
+            ],
+            "credentials": {
+                "sendInBlueApi": {
+                    "id": "YOUR_BREVO_CREDENTIAL_ID",
+                    "name": "Brevo/Sendinblue"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "amount": 5,
+                "unit": "seconds"
+            },
+            "name": "Esperar 5s",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                2200,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Start Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Definir Busqueda",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Definir Busqueda": {
+            "main": [
+                [
+                    {
+                        "node": "SerpApi - Maps Scraper",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "SerpApi - Maps Scraper": {
+            "main": [
+                [
+                    {
+                        "node": "Separar Resultados",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Separar Resultados": {
+            "main": [
+                [
+                    {
+                        "node": "Freno de Mano (Loop)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Freno de Mano (Loop)": {
+            "main": [
+                [
+                    {
+                        "node": "Gemini - Redactor + Buscador Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Gemini Chat Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Gemini - Redactor + Buscador Email",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Gemini - Redactor + Buscador Email": {
+            "main": [
+                [
+                    {
+                        "node": "Filtro de Calidad (Score > 7 + Email)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtro de Calidad (Score > 7 + Email)": {
+            "main": [
+                [
+                    {
+                        "node": "Brevo - Enviar Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Esperar 5s",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Brevo - Enviar Email": {
+            "main": [
+                [
+                    {
+                        "node": "Esperar 5s",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Esperar 5s": {
+            "main": [
+                [
+                    {
+                        "node": "Freno de Mano (Loop)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

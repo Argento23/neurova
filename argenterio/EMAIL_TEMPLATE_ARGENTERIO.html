@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación: ARGENTERIO_</title>
+</head>
+
+<body
+    style="margin: 0; padding: 0; background-color: #050505; font-family: 'Courier New', Courier, monospace; color: #e0e0e0; -webkit-font-smoothing: antialiased;">
+
+    <table width="100%" cellpadding="0" cellspacing="0" border="0"
+        style="background-color: #050505; padding: 40px 10px;">
+        <tr>
+            <td align="center">
+                <!-- Main Container -->
+                <table width="600" cellpadding="0" cellspacing="0" border="0"
+                    style="background-color: #111111; border: 1px solid #333; max-width: 600px; width: 100%;">
+
+                    <!-- Header -->
+                    <tr>
+                        <td
+                            style="padding: 20px; border-bottom: 2px solid #00ff41; background-color: #0a0a0a; text-align: left;">
+                            <span style="color: #00ff41; font-weight: bold; font-size: 18px;">> ARGENTERIO_ SYSTEM
+                                ONLINE</span><br>
+                            <span style="color: #666; font-size: 12px;">ID: {{ $json.body.payment_id || 'UNKNOWN' }} //
+                                STATUS: CONFIRMED</span>
+                        </td>
+                    </tr>
+
+                    <!-- Body -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+
+                            <!-- Success Message -->
+                            <h1
+                                style="color: #ffffff; font-size: 24px; margin: 0 0 20px 0; font-family: 'Courier New', Courier, monospace;">
+                                PAGO DETECTADO.</h1>
+
+                            <p style="color: #cccccc; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
+                                <span style="color: #00ff41;">></span> Iniciando protocolo de entrega...<br>
+                                <span style="color: #00ff41;">></span> Desencriptando reporte...<br>
+                                <span style="color: #00ff41;">></span> <strong>ACCESO CONCEDIDO.</strong>
+                            </p>
+
+                            <p
+                                style="color: #aaaaaa; font-size: 14px; line-height: 1.5; margin-bottom: 30px; border-left: 2px solid #333; padding-left: 15px;">
+                                Has tomado la decisión correcta. Mientras otros dejan que la inflación consuma su
+                                capital, tú has activado tu defensa financiera. A continuación encontrarás el enlace
+                                seguro a tu diagnóstico.
+                            </p>
+
+                            <!-- CTA Button -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center" style="padding: 20px 0;">
+                                        <a href="{{ $json.body.report_url }}"
+                                            style="background-color: #00ff41; color: #000000; text-decoration: none; padding: 15px 30px; font-weight: bold; font-size: 16px; display: inline-block; border: 1px solid #00ff41; text-transform: uppercase;">
+                                            [ DESCARGAR REPORTE PDF ]
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="color: #666666; font-size: 12px; margin-top: 30px; text-align: center;">
+                                ENLACE VÁLIDO POR 24 HORAS.<br>
+                                NO COMPARTIR ESTE ACCESO.
+                            </p>
+
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td
+                            style="background-color: #080808; padding: 20px; text-align: center; border-top: 1px solid #333;">
+                            <p style="color: #444444; font-size: 11px; margin: 0;">
+                                ARGENTERIO FINANCIAL DEFENSE AI<br>
+                                © 2026 NEUROVA. ALL RIGHTS RESERVED.<br>
+                                <a href="#" style="color: #444; text-decoration: none;">Términos</a> | <a href="#"
+                                    style="color: #444; text-decoration: none;">Privacidad</a>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</body>
+
+</html>

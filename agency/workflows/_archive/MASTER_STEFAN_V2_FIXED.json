@@ -1,0 +1,306 @@
+{
+    "name": "MASTER_STEFAN_V2_FIXED",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "whatsapp-stefan-chat",
+                "options": {}
+            },
+            "id": "node-stefan-direct-wa",
+            "name": "Incoming Direct WA",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                140
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "send_whatsapp_stefan",
+                "responseMode": "responseNode"
+            },
+            "name": "WebhookVapiStefan",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "id": "wh-stefan-id",
+            "position": [
+                100,
+                340
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "name": "raw_phone",
+                            "value": "={{ $json.body?.data?.key?.remoteJid || ($json.body.message.toolCalls[0].function.arguments.phone || \"\").toString().replace(/\\D/g, '') }}",
+                            "type": "string"
+                        },
+                        {
+                            "name": "message_vapi",
+                            "value": "={{ ($json.body.message.toolCalls[0].function.arguments.message || \"\").toString().replace(/\\\\n/g, '\\n') }}",
+                            "type": "string"
+                        },
+                        {
+                            "name": "media_url",
+                            "value": "={{ ($json.body.message.toolCalls[0].function.arguments.media_url || \"\").toString().trim().replace(/[\\n\\r]/g, '') }}",
+                            "type": "string"
+                        },
+                        {
+                            "name": "toolCallId",
+                            "value": "={{ $json.body?.message?.toolCalls?.[0].id || \"no-id\" }}",
+                            "type": "string"
+                        },
+                        {
+                            "name": "incoming_msg",
+                            "value": "={{ $json.body?.data?.message?.conversation || $json.body?.data?.message?.extendedTextMessage?.text }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "name": "PrepareData",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "id": "pd-stefan-id",
+            "position": [
+                300,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "name": "phone",
+                            "value": "={{ $json.raw_phone.includes('@') ? $json.raw_phone : ($json.raw_phone.length === 10 ? '549' + $json.raw_phone : $json.raw_phone) }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "name": "Sanitize Phone",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "id": "sp-stefan-id",
+            "position": [
+                450,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $json.toolCallId }}\",\n      \"result\": \"SUCCESS: Stefan enviando mensaje.\"\n    }\n  ]\n}",
+                "options": {}
+            },
+            "name": "Instant Response Vapi",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "id": "ir-stefan-id",
+            "position": [
+                600,
+                340
+            ]
+        },
+        {
+            "parameters": {
+                "rules": {
+                    "values": [
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeFilter": "string"
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "vapi-flow",
+                                        "leftValue": "={{ $json.toolCallId }}",
+                                        "rightValue": "no-id",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "notEqual",
+                                            "name": "is not"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameNextTarget": "Vapi Flow"
+                        }
+                    ],
+                    "fallbackResult": "Direct WA Flow"
+                }
+            },
+            "name": "Router Flow",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 3,
+            "id": "router-stefan-id",
+            "position": [
+                600,
+                140
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile",
+                "options": {
+                    "temperature": 0.7
+                }
+            },
+            "name": "Groq Stefan",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "id": "groq-stefan-id",
+            "position": [
+                750,
+                -100
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres Stefan, Senior Sales Hunter para \"Tourismus 4.0\" en Argenterio (Austria).\n\nIDENTIDAD: Elegante, experto en hotelería (Mews, Protel, SIHOT). Vives en Austria y sabes que la IA es el futuro del 5 estrellas.\n\nMENSAJE USUARIO: {{ $json.incoming_msg }}\n\nTAREA: Responde de forma persuasiva. Tu objetivo es que agenden la auditoría de 15 min: https://cal.com/gustavo-a.-dornhofer-nqjqos/auditoria-estrategica-ia\nRESPUESTA SOLO TEXTO.",
+                "hasOutputParser": true
+            },
+            "name": "AI SDR Stefan",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "id": "ai-sdr-stefan-id",
+            "position": [
+                750,
+                60
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "Argenterio",
+                "options_message": {
+                    "number": "={{ $node[\"Sanitize Phone\"].json.phone }}",
+                    "textMessage": {
+                        "text": "={{ $node[\"AI SDR Stefan\"]?.json?.text || $json.message_vapi }}"
+                    }
+                }
+            },
+            "name": "Evolution Stefan",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "id": "evo-stefan-id",
+            "position": [
+                1000,
+                140
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "Argenterio"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Incoming Direct WA": {
+            "main": [
+                [
+                    {
+                        "node": "PrepareData",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "WebhookVapiStefan": {
+            "main": [
+                [
+                    {
+                        "node": "PrepareData",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "PrepareData": {
+            "main": [
+                [
+                    {
+                        "node": "Sanitize Phone",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Sanitize Phone": {
+            "main": [
+                [
+                    {
+                        "node": "Instant Response Vapi",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Router Flow",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Router Flow": {
+            "main": [
+                [
+                    {
+                        "node": "Evolution Stefan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "AI SDR Stefan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Stefan": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI SDR Stefan",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI SDR Stefan": {
+            "main": [
+                [
+                    {
+                        "node": "Evolution Stefan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

@@ -1,0 +1,213 @@
+{
+    "name": "Autonomous Sales Agent v2 (Sheets Integration)",
+    "nodes": [
+        {
+            "parameters": {},
+            "name": "Start Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                0,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "values": {
+                    "string": [
+                        {
+                            "name": "search_query",
+                            "value": "Dueños de PYMES Argentina problemas financieros contacto"
+                        },
+                        {
+                            "name": "agent_mode",
+                            "value": "ARGENTERIO"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Definir Estrategia",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 1,
+            "position": [
+                220,
+                300
+            ],
+            "notesInFlow": true,
+            "notes": "Modifica 'search_query' para cambiar a quién busca el agente.\nEj: 'Gerentes RRHH Bienestar' para MindHafen."
+        },
+        {
+            "parameters": {
+                "url": "https://serpapi.com/search.json",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "queryAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "api_key",
+                            "value": "9be0d43581dc9220232e9a2819f308c303a32082a1e62f97c9c87b75dfde8d72"
+                        },
+                        {
+                            "name": "q",
+                            "value": "={{ $json[\"search_query\"] }}"
+                        },
+                        {
+                            "name": "num",
+                            "value": "10"
+                        },
+                        {
+                            "name": "engine",
+                            "value": "google"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "SerpApi - Cazador",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                460,
+                300
+            ],
+            "notesInFlow": true,
+            "notes": "Busca en Google usando tu API Key."
+        },
+        {
+            "parameters": {
+                "modelName": "models/gemini-1.5-flash",
+                "options": {}
+            },
+            "name": "Google Gemini Chat Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+            "typeVersion": 1,
+            "position": [
+                680,
+                520
+            ],
+            "credentials": {
+                "googlePalmApi": {
+                    "id": "YOUR_GEMINI_CREDENTIAL_ID",
+                    "name": "Google Gemini Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Analiza los siguientes resultados de búsqueda obtenidos de Google:\n\n{{ JSON.stringify($('SerpApi - Cazador').item.json.organic_results) }}\n\nTU TAREA:\nActúa como un 'Sales Development Representative' experto. Filtra y selecciona las mejores oportunidades para contactar.\n\nCRITERIOS DE SELECCIÓN:\n- Buscamos empresas o personas que parezcan tener el problema que resuelve: {{ $('Definir Estrategia').item.json.agent_mode }}.\n- (Si es ARGENTERIO -> Problemas financieros, deudas, pymes en crisis).\n- (Si es MINDHAFEN -> Estrés laboral, burnout, wellness corporativo).\n- (Si es GENERARISE -> Necesidad de clientes, marketing obsoleto).\n\nFORMATO DE SALIDA:\nDevuelve un JSON Array válido con los candidatos seleccionados. Cada objeto debe tener:\n- \"company_name\": Nombre visible.\n- \"url\": Link detectado.\n- \"reason\": Por qué es un buen lead (1 frase).\n- \"outreach_hook\": Una frase personalizada para empezar el email citando algo de su web.",
+                "hasOutputParser": true
+            },
+            "name": "Gemini - Analista de Leads",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                680,
+                300
+            ],
+            "notesInFlow": true,
+            "notes": "Filtra 'basura' y se queda solo con leads potables."
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+                    "mode": "list"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "Hoja 1",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Fecha": "={{ $now.toISO() }}",
+                        "Empresa": "={{ $json[\"company_name\"] }}",
+                        "Web": "={{ $json[\"url\"] }}",
+                        "Notas IA": "={{ $json[\"reason\"] }}",
+                        "Hook Mensaje": "={{ $json[\"outreach_hook\"] }}",
+                        "Estado": "Pendiente Contacto"
+                    }
+                },
+                "options": {}
+            },
+            "name": "Guardar en Google Sheets",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                1000,
+                300
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+                    "name": "Google Sheets"
+                }
+            },
+            "notesInFlow": true,
+            "notes": "Guarda cada lead detectado en una nueva fila."
+        }
+    ],
+    "connections": {
+        "Start Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Definir Estrategia",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Definir Estrategia": {
+            "main": [
+                [
+                    {
+                        "node": "SerpApi - Cazador",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "SerpApi - Cazador": {
+            "main": [
+                [
+                    {
+                        "node": "Gemini - Analista de Leads",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Gemini Chat Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Gemini - Analista de Leads",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Gemini - Analista de Leads": {
+            "main": [
+                [
+                    {
+                        "node": "Guardar en Google Sheets",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

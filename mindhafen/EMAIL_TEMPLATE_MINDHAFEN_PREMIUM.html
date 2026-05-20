@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: 'Outfit', Arial, sans-serif;
+            background: #0f172a;
+            color: #f1f5f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #1e293b;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: white;
+            font-size: 28px;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .button {
+            display: inline-block;
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 20px 0;
+        }
+
+        .footer {
+            background: #0f172a;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 ¡Bienvenido a MindHafen Premium!</h1>
+        </div>
+        <div class="content">
+            <p>Hola <strong>{{ $json.metadata.user_name }}</strong>,</p>
+
+            <p>Tu pago se procesó exitosamente. ¡Tu cuenta premium está lista! 🎉</p>
+
+            <h3>🔐 Accede a tu Dashboard:</h3>
+            <p>Link: <a href="https://mindhafen.generarise.space/dashboard.html"
+                    style="color: #3b82f6;">mindhafen.generarise.space/dashboard.html</a></p>
+            <p>Email: {{ $json.metadata.user_email }}</p>
+            <p>Contraseña temporal: <strong>mindhafen2026</strong></p>
+            <p style="font-size: 14px; color: #94a3b8;">(Cámbiala en tu primer acceso)</p>
+
+            <a href="https://mindhafen.generarise.space/dashboard.html" class="button">Acceder al Dashboard →</a>
+
+            <h3>📚 Tu Programa Incluye:</h3>
+            <ul>
+                <li>✅ 12 módulos de neuroplasticidad (1 por semana)</li>
+                <li>✅ Asistente IA 24/7 personalizado</li>
+                <li>✅ Audios guiados + PDFs descargables</li>
+                <li>✅ Tracker de progreso visual</li>
+                <li>✅ Certificado al finalizar</li>
+            </ul>
+
+            <p><strong>Próximo paso:</strong> Accede a la plataforma y empieza el Módulo 1 hoy mismo.</p>
+
+            <p>Con compromiso científico,<br>Equipo MindHafen</p>
+        </div>
+        <div class="footer">
+            <p>MindHafen - Tu Mente, Tu Refugio</p>
+            <p>Monto pagado: ${{ $json.transaction_amount }} ARS</p>
+            <p>ID de transacción: {{ $json.id }}</p>
+        </div>
+    </div>
+</body>
+
+</html>

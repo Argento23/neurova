@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CILO - Galletitas Premium | Catálogo Mayorista</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --cilo-primary: #e63946;
+            --cilo-secondary: #1d3557;
+            --cilo-accent: #f1faee;
+            --cilo-dark: #1a1a1a;
+            --cilo-light: #ffffff;
+            --cilo-gray: #f8f9fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: var(--cilo-light);
+            color: var(--cilo-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 80vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://cilo.com.ar/wp-content/uploads/2019/11/slider-1.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 0 1rem;
+        }
+
+        .hero-content h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-content p {
+            font-size: 1.25rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            font-weight: 400;
+        }
+
+        /* Filters */
+        .filters {
+            padding: 4rem 1rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.8rem 1.5rem;
+            border: 2px solid var(--cilo-primary);
+            background: transparent;
+            color: var(--cilo-primary);
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: var(--cilo-primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* Product Grid */
+        .products-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem 5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            border: 1px solid #eee;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(230, 57, 70, 0.15);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: contain;
+            padding: 1.5rem;
+            background: white;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-category {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--cilo-primary);
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .product-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--cilo-secondary);
+            margin-bottom: 0.8rem;
+        }
+
+        .product-description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1.2rem;
+            height: 3.6rem;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .product-weight {
+            font-weight: 600;
+            color: var(--cilo-primary);
+            font-size: 1rem;
+        }
+
+        /* Contact Section */
+        .cta-section {
+            background: var(--cilo-secondary);
+            padding: 6rem 1rem;
+            color: white;
+            text-align: center;
+        }
+
+        .cta-content h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-content p {
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            opacity: 0.9;
+        }
+
+        .whatsapp-btn {
+            background: #25d366;
+            color: white;
+            padding: 1.2rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+        }
+
+        .whatsapp-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(37, 211, 102, 0.4);
+        }
+
+        /* Footer */
+        footer {
+            background: #111;
+            color: white;
+            padding: 4rem 1rem 2rem;
+        }
+
+        .footer-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+        }
+
+        .footer-col h4 {
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            color: var(--cilo-primary);
+        }
+
+        .footer-col p,
+        .footer-col a {
+            color: #ccc;
+            text-decoration: none;
+            margin-bottom: 0.8rem;
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero {
+                height: 60vh;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="hero">
+        <div class="hero-content">
+            <h1>Tradición en cada galleta</h1>
+            <p>Descubre nuestra línea completa de galletitas premium para venta mayorista y distribución.</p>
+            <a href="#produccion" class="whatsapp-btn">Ver Catálogo Digital</a>
+        </div>
+    </header>
+
+    <div class="filters" id="filters">
+        <button class="filter-btn active" onclick="setFilter('Todos')">Todos</button>
+        <button class="filter-btn" onclick="setFilter('Bañadas')">Bañadas</button>
+        <button class="filter-btn" onclick="setFilter('Clásicas')">Clásicas</button>
+        <button class="filter-btn" onclick="setFilter('Rellenas')">Rellenas</button>
+        <button class="filter-btn" onclick="setFilter('Premium')">Premium</button>
+        <button class="filter-btn" onclick="setFilter('Tradicionales')">Tradicionales</button>
+    </div>
+
+    <main class="products-container" id="productGrid">
+        <!-- Products will be loaded here by JavaScript -->
+    </main>
+
+    <section class="cta-section" id="produccion">
+        <div class="cta-content">
+            <h2>¿Listo para distribuir Cilo?</h2>
+            <p>Contáctanos para obtener nuestra lista de precios mayoristas y condiciones de distribución en todo el
+                país.</p>
+            <a href="https://wa.me/5491157633328?text=Hola%20Cilo,%20necesito%20información%20de%20productos%20mayoristas"
+                target="_blank" class="whatsapp-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                </svg>
+                Contactar Ventas
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>Navegación</h4>
+                <a href="#">Inicio</a>
+                <a href="#produccion">Catálogo</a>
+                <a href="https://cilo.com.ar" target="_blank">Sitio Web Oficial</a>
+            </div>
+            <div class="footer-col">
+                <h4>Contacto</h4>
+                <p>📍 Buenos Aires, Argentina</p>
+                <p>📞 +54 9 11 5763-3328</p>
+                <p>✉️ ventas@cilo.com.ar</p>
+            </div>
+            <div class="footer-col">
+                <h4>Social</h4>
+                <a href="https://instagram.com/cilo_galletitas" target="_blank">Instagram</a>
+                <a href="#">Facebook</a>
+                <p style="margin-top: 1rem; font-size: 0.8rem;">
+                    <a href="https://cilo.com.ar/wp-content/uploads/2019/11/folleto-cilo.pdf" target="_blank"
+                        style="color: var(--cilo-primary); font-weight: bold;">
+                        Descargar Catálogo</a>
+                </p>
+            </div>
+        </div>
+        <div
+            style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 3rem; padding-top: 2rem; text-align: center; font-size: 0.9rem; color: #888;">
+            <p>&copy; 2024 CILO - Galletitas Premium. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        const products = [
+            { id: 1, name: "Anillos Bañados", category: "Bañadas", description: "Anillos de limón cubiertos con baño de repostería", weight: "300g", image: "ANILL BAÑ 300.png" },
+            { id: 2, name: "Lengüitas Bañadas", category: "Bañadas", description: "Lengüitas de coco rallado con baño de chocolate", weight: "300g", image: "LENG BAÑ 300.png" },
+            { id: 3, name: "Lengüitas Vainilla Bañadas", category: "Bañadas", description: "Lengüitas de vainilla con baño de chocolate", weight: "300g", image: "LENG VAI BAÑ 300.png" },
+            { id: 4, name: "Pepitas Bañadas", category: "Bañadas", description: "Pepitas de vainilla con baño de chocolate", weight: "300g", image: "PEPAS BAÑ 300.png" },
+            { id: 5, name: "Pepitas Semi Bañadas", category: "Bañadas", description: "Pepitas parcialmente cubiertas con chocolate", weight: "", image: "PEPAS SEMI BAÑ.png" },
+            { id: 6, name: "Anillos de Vainilla", category: "Clásicas", description: "Clásicos anillos sabor vainilla", weight: "200g", image: "ANILLOS VAIN 200 GRS.png" },
+            { id: 7, name: "Anillos de Limón", category: "Clásicas", description: "Anillos con sabor a limón", weight: "", image: "anillos limonn.png" },
+            { id: 8, name: "Lengüitas de Coco", category: "Clásicas", description: "Lengüitas con coco rallado", weight: "", image: "LENG COCO.png" },
+            { id: 9, name: "Lengüitas de Vainilla", category: "Clásicas", description: "Lengüitas sabor vainilla clásicas", weight: "200g", image: "LENG VAIN 200 GRS..png" },
+            { id: 10, name: "Pepitas", category: "Clásicas", description: "Pepitas de vainilla tradicionales", weight: "200g", image: "PEPAS 200 GRS..png" },
+            { id: 11, name: "Pepitas Vegetal", category: "Clásicas", description: "Pepitas elaboradas con aceite vegetal", weight: "", image: "PEPAS VEGETAL.png" },
+            { id: 12, name: "Doblinas de Batata", category: "Rellenas", description: "Galletitas rellenas con dulce de batata", weight: "", image: "DOBLIN BATAT.png" },
+            { id: 13, name: "Doblinas de Membrillo", category: "Rellenas", description: "Galletitas rellenas con dulce de membrillo", weight: "", image: "DOBLINAS MEMB.png" },
+            { id: 14, name: "Buquitas de Chocolate", category: "Premium", description: "Bocaditos premium de chocolate", weight: "", image: "BUQUITAS CHOCO.png" },
+            { id: 15, name: "Buquitas de Limón", category: "Premium", description: "Bocaditos premium sabor limón", weight: "", image: "BUQUITAS LIMON.png" },
+            { id: 16, name: "Chips de Chocolate", category: "Premium", description: "Galletitas chips con chocolate", weight: "150g", image: "CHIPS 150 GRS.png" },
+            { id: 17, name: "Chips", category: "Premium", description: "Chips clásicas crujientes", weight: "", image: "CHIPS.png" },
+            { id: 18, name: "Scones", category: "Premium", description: "Scones premium para acompañar", weight: "", image: "SCONS.png" },
+            { id: 19, name: "Surtidas", category: "Premium", description: "Variedad de galletitas surtidas", weight: "", image: "SURTIDAS.png" },
+            { id: 20, name: "Topings", category: "Premium", description: "Galletitas decoradas con topings", weight: "", image: "TOPINGS.png" },
+            { id: 21, name: "Bizcocho con Azúcar", category: "Tradicionales", description: "Bizcochos tradicionales con azúcar", weight: "", image: "BIZCOCH AZUC.png" },
+            { id: 22, name: "Bizcocho de Grasa", category: "Tradicionales", description: "Bizcochos de grasa clásicos", weight: "", image: "BIZCOCH GRASA.png" },
+            { id: 23, name: "Paquete de Miel", category: "Tradicionales", description: "Galletitas sabor miel", weight: "", image: "PAQUETE MIEL.png" },
+            { id: 24, name: "Polvorón", category: "Tradicionales", description: "Polvorones tradicionales argentinos", weight: "", image: "POLVORON.png" },
+            { id: 25, name: "Lengüitas de Membrillo", category: "Tradicionales", description: "Lengüitas con dulce de membrillo", weight: "200g", image: "LENG MEMB 200 GRS..png" }
+        ];
+
+        let currentFilter = 'Todos';
+
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            const filtered = currentFilter === 'Todos' ? products : products.filter(p => p.category === currentFilter);
+            grid.innerHTML = filtered.map(product => `
+                <div class="product-card">
+                    <img src="cilo-b2b/public/products/${product.image}" alt="${product.name}" class="product-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><text x=%2250%%22 y=%2250%%22 font-size=%2240%22 text-anchor=%22middle%22 dy=%22.3em%22>🍪</text></svg>'">
+                    <span class="product-category">${product.category}</span>
+                    <h3 class="product-name">${product.name}</h3>
+                    <p class="product-description">${product.description}</p>
+                    ${product.weight ? `<p class="product-weight">${product.weight}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function setFilter(category) {
+            currentFilter = category;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.textContent === category) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            renderProducts();
+        }
+
+        // Initial render
+        renderProducts();
+    </script>
+</body>
+
+</html>

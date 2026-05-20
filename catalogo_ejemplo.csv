@@ -1,0 +1,4 @@
+id,titulo,descripcion,precio,moneda,link_imagen
+101,"Zapatillas Runner X","Zapatillas deportivas ideales para correr en asfalto con suela antideslizante.",45000,"ARS","https://ejemplo.com/img/runnerx.jpg"
+102,"Auriculares Pro Sound","Auriculares inalámbricos con cancelación de ruido y batería de 24 horas.",28500,"ARS","https://ejemplo.com/img/auriculares.jpg"
+103,"Reloj Inteligente Fit","Smartwatch con medidor de frecuencia cardíaca, pasos y notificaciones.",35000,"ARS","https://ejemplo.com/img/reloj.jpg"

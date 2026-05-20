@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GenerArise — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #030307;
+      --bg-card: #0a0a0f;
+      --border: rgba(255,255,255,0.1);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --cyan: #22d3ee;
+      --emerald: #34d399;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Inter', sans-serif;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh;
+    }
+    .auth-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      width: 100%; max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    .logo {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--cyan), var(--emerald));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; margin: 0 auto 24px;
+    }
+    h1 { text-align: center; font-size: 24px; margin-bottom: 8px; }
+    p.subtitle { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+    
+    .form-group { margin-bottom: 20px; }
+    label { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 8px; }
+    input {
+      width: 100%; padding: 12px 16px; border-radius: 12px;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      color: white; font-family: 'Inter', sans-serif; outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: var(--cyan); }
+    
+    button {
+      width: 100%; padding: 14px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--cyan), var(--emerald));
+      color: #030307; border: none; font-weight: 700; font-size: 15px;
+      cursor: pointer; transition: transform 0.2s;
+    }
+    button:hover { transform: translateY(-2px); }
+    button:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    
+    .toggle {
+      text-align: center; margin-top: 24px; font-size: 13px; color: var(--muted);
+    }
+    .toggle a { color: var(--cyan); text-decoration: none; font-weight: 600; cursor: pointer; }
+    
+    .error-msg {
+      background: rgba(239, 68, 68, 0.1); color: #ef4444;
+      padding: 12px; border-radius: 8px; font-size: 13px;
+      margin-bottom: 20px; display: none; text-align: center;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="auth-container">
+    <div class="logo" style="background: transparent;">
+      <img src="/logo.png" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
+    </div>
+    <h1 id="title">Iniciar Sesión</h1>
+    <p class="subtitle" id="subtitle">Bienvenido a GenerArise SaaS</p>
+    
+    <div class="error-msg" id="errorMsg"></div>
+    
+    <form id="authForm" onsubmit="handleAuth(event)">
+      <div class="form-group" id="nameGroup" style="display: none;">
+        <label>Nombre completo</label>
+        <input type="text" id="name" placeholder="Ej. Juan Pérez">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" required placeholder="tu@email.com">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="password" required placeholder="••••••••">
+      </div>
+      <button type="submit" id="submitBtn">Ingresar</button>
+    </form>
+    
+    <div class="toggle">
+      <span id="toggleText">¿No tenés cuenta?</span> 
+      <a onclick="toggleMode()" id="toggleLink">Registrate acá</a>
+    </div>
+  </div>
+
+  <script>
+    // Supabase config (we fetch it from a public endpoint to avoid hardcoding)
+    let supabaseClient = null;
+    let isLogin = true;
+    
+    async function initSupabase() {
+      try {
+        const res = await fetch('/api/public-config');
+        if (!res.ok) throw new Error('No config');
+        const config = await res.json();
+        supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+        
+        // Check active session
+        const { data } = await supabaseClient.auth.getSession();
+        if (data.session) {
+          const urlParams = new URLSearchParams(window.location.search);
+          const plan = urlParams.get('plan');
+          window.location.href = plan ? `/app.html?plan=${plan}` : '/app.html';
+        }
+      } catch (e) {
+        showError('No se pudo inicializar la conexión. Contactá a soporte.');
+      }
+    }
+    
+    function toggleMode() {
+      isLogin = !isLogin;
+      document.getElementById('title').textContent = isLogin ? 'Iniciar Sesión' : 'Crear Cuenta';
+      document.getElementById('submitBtn').textContent = isLogin ? 'Ingresar' : 'Registrarme';
+      document.getElementById('toggleText').textContent = isLogin ? '¿No tenés cuenta?' : '¿Ya tenés cuenta?';
+      document.getElementById('toggleLink').textContent = isLogin ? 'Registrate acá' : 'Iniciá sesión';
+      document.getElementById('nameGroup').style.display = isLogin ? 'none' : 'block';
+      if (!isLogin) document.getElementById('name').setAttribute('required', 'true');
+      else document.getElementById('name').removeAttribute('required');
+      hideError();
+    }
+    
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+    
+    function hideError() {
+      document.getElementById('errorMsg').style.display = 'none';
+    }
+    
+    async function handleAuth(e) {
+      e.preventDefault();
+      if (!supabaseClient) return showError('Sistema no disponible.');
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const name = document.getElementById('name').value;
+      const btn = document.getElementById('submitBtn');
+      
+      btn.disabled = true;
+      hideError();
+      
+      try {
+        if (isLogin) {
+          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          const urlParams = new URLSearchParams(window.location.search);
+          const plan = urlParams.get('plan');
+          window.location.href = plan ? `/app.html?plan=${plan}` : '/app.html';
+        } else {
+          const { data, error } = await supabaseClient.auth.signUp({
+            email, password, options: { data: { full_name: name } }
+          });
+          if (error) throw error;
+          
+          // Auto login after signup to keep the flow smooth
+          await supabaseClient.auth.signInWithPassword({ email, password });
+          
+          const urlParams = new URLSearchParams(window.location.search);
+          const plan = urlParams.get('plan');
+          window.location.href = plan ? `/app.html?plan=${plan}` : '/app.html';
+        }
+      } catch (error) {
+        showError(error.message === 'Invalid login credentials' ? 'Credenciales incorrectas' : error.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+    
+    initSupabase();
+  </script>
+</body>
+</html>

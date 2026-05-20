@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Financiero Completado</title>
+</head>
+
+<body
+    style="margin: 0; padding: 0; background-color: #050505; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #e0e0e0;">
+
+    <table width="100%" cellpadding="0" cellspacing="0" border="0"
+        style="background-color: #000000; padding: 40px 10px;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" border="0"
+                    style="background-color: #0a0a0a; border: 1px solid #222; max-width: 600px; width: 100%; border-radius: 8px; overflow: hidden;">
+                    <!-- Header -->
+                    <tr>
+                        <td
+                            style="padding: 30px; border-bottom: 2px solid #ff3333; background-color: #0f0f0f; text-align: left;">
+                            <span
+                                style="color: #ffffff; font-weight: 800; font-size: 22px; letter-spacing: 1px;">ARGENTERIO<span
+                                    style="color:#ff3333;">_</span></span>
+                        </td>
+                    </tr>
+
+                    <!-- Body -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <div
+                                style="background-color: rgba(255, 51, 51, 0.03); border-left: 3px solid #ff3333; padding: 15px; margin-bottom: 30px;">
+                                <p
+                                    style="margin: 0; font-family: 'Courier New', monospace; font-size: 14px; color: #ff3333;">
+                                    >> ALERTA_DETECTADA [!]</p>
+                            </div>
+
+                            <p style="color: #cccccc; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+                                Nuestro sistema de IA ha detectado los siguientes indicadores de riesgo en su perfil
+                                financiero:
+                            </p>
+
+                            <!-- TEXTO DE LA IA (TEASER) -->
+                            <div
+                                style="background-color: #111; padding: 20px; border-radius: 4px; border: 1px dashed #444; margin-bottom: 30px; font-family: 'Courier New', monospace; color: #e0e0e0; font-size: 14px; line-height: 1.5;">
+                                {{ $('AI Teaser').item.json.text }}
+                            </div>
+
+                            <p style="color: #cccccc; font-size: 16px; line-height: 1.6; margin-bottom: 35px;">
+                                Este es solo un análisis parcial. El <strong>Reporte Shield Completo</strong> contiene
+                                las estrategias exactas para blindar su patrimonio.
+                            </p>
+
+                            <!-- BOTONES DE PAGO -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center" style="padding: 10px 0;">
+                                        <!-- MercadoPago -->
+                                        <a href="{{ $('MercadoPago Link').item.json.init_point || '#' }}"
+                                            style="background: #009ee3; color: #ffffff; text-decoration: none; padding: 16px 30px; font-weight: 700; font-size: 16px; display: inline-block; border-radius: 4px; width: 220px; text-align: center; margin-bottom: 10px;">
+                                            Pagar con MercadoPago
+                                        </a>
+                                        <br>
+                                        <!-- PayPal -->
+                                        <a href="https://www.paypal.com/ncp/payment/LP2ZBHDAJPLDY"
+                                            style="background: #003087; color: #ffffff; text-decoration: none; padding: 16px 30px; font-weight: 700; font-size: 16px; display: inline-block; border-radius: 4px; width: 220px; text-align: center;">
+                                            Pagar con PayPal (USD)
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <hr style="border: none; border-top: 1px solid #222; margin: 30px 0;">
+                            <p style="color: #666; font-size: 13px; text-align: center;">Argenterio AI | Tu defensa
+                                financiera en tiempos de caos.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

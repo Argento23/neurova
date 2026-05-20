@@ -1,0 +1,544 @@
+{
+    "name": "Agente Ventas V22 (FIX Log + Maps)",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "start-trigger",
+            "name": "Start Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                -3552,
+                1376
+            ]
+        },
+        {
+            "parameters": {
+                "values": {
+                    "string": [
+                        {
+                            "name": "search_term",
+                            "value": "Dentistas"
+                        },
+                        {
+                            "name": "location",
+                            "value": "Buenos Aires, Argentina"
+                        },
+                        {
+                            "name": "sheet_id",
+                            "value": "1b_nPYFDov3Rg2ljPQ6hRLwUhoSznfw5GmyneBqCNJWg"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "config-node",
+            "name": "CONFIGURACION",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 1,
+            "position": [
+                -3344,
+                1376
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://serpapi.com/search.json",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "queryAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "api_key",
+                            "value": "9be0d43581dc9220232e9a2819f308c303a32082a1e62f97c9c87b75dfde8d72"
+                        },
+                        {
+                            "name": "engine",
+                            "value": "google_maps"
+                        },
+                        {
+                            "name": "q",
+                            "value": "={{ $json[\"search_term\"] + \" en \" + $json[\"location\"] }}"
+                        },
+                        {
+                            "name": "type",
+                            "value": "search"
+                        },
+                        {
+                            "name": "num",
+                            "value": "10"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "serp-api",
+            "name": "SerpApi - Maps Scraper",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -3120,
+                1376
+            ]
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "local_results",
+                "options": {}
+            },
+            "id": "item-lists",
+            "name": "Separar Lista",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 3,
+            "position": [
+                -2920,
+                1376
+            ]
+        },
+        {
+            "parameters": {
+                "batchSize": 1,
+                "options": {}
+            },
+            "id": "loop-node",
+            "name": "Loop (1 por 1)",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 2,
+            "position": [
+                -2700,
+                1376
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "1b_nPYFDov3Rg2ljPQ6hRLwUhoSznfw5GmyneBqCNJWg",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "Hoja 1",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "title": "={{ $json.title }}",
+                        "status": "ANALIZANDO...",
+                        "fecha": "={{ $now.toISO() }}"
+                    },
+                    "matchingColumns": [],
+                    "schema": [],
+                    "attemptToConvertTypes": false,
+                    "convertFieldsToString": false
+                },
+                "options": {}
+            },
+            "id": "log-start",
+            "name": "Log: Start",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                -2500,
+                1376
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "zwdmBzveCXv4B3Ec",
+                    "name": "Google Sheets account"
+                }
+            },
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "url": "={{ $('Loop (1 por 1)').item.json.website }}",
+                "options": {
+                    "redirect": {
+                        "redirect": {
+                            "maxRedirects": 2
+                        }
+                    },
+                    "timeout": 5000
+                }
+            },
+            "id": "visit-website",
+            "name": "Visitar Web",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -2280,
+                1376
+            ],
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "jsCode": "const html = $input.item.json.data || '';\nconst text = html.replace(/<[^>]*>?/gm, ' ').replace(/\\s+/g, ' ');\nreturn { text_content: text.substring(0, 3000) };"
+            },
+            "id": "clean-html",
+            "name": "Limpiar HTML",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -2060,
+                1376
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile",
+                "options": {}
+            },
+            "id": "groq-model",
+            "name": "Groq Chat Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                -1850,
+                1580
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Analiza este prospecto:\n\n---\n{{ $json.text_content }}\n---\n\nDATOS WEB:\nNombre: {{ $('Loop (1 por 1)').item.json.title }}\n\nTAREA:\n1. Busca CELULAR/WHATSAPP. Si empieza con 11 o 15, agrega 549 antes. SOLO DIGITOS.\n2. Busca EMAIL.\n3. Califica (1-10).\n4. Mensaje corto venta WA.\n\nSalida JSON:\n{ \n  \"score\": 0, \n  \"whatsapp\": \"\", \n  \"email\": \"\",\n  \"wa_msg\": \"\"\n}",
+                "hasOutputParser": true
+            },
+            "id": "ai-extractor",
+            "name": "IA - Extractor",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                -1850,
+                1376
+            ],
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "jsCode": "try {\n  const aiOutput = $input.item.json;\n  return {\n      score: aiOutput.score || 0,\n      whatsapp: aiOutput.whatsapp || '',\n      email: aiOutput.email || '',\n      wa_msg: aiOutput.wa_msg || ''\n  };\n} catch (e) {\n  return { score: 0, whatsapp: '', email: '', wa_msg: '' };\n}"
+            },
+            "id": "safe-parser",
+            "name": "Safe Parser",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -1550,
+                1376
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "number": [
+                        {
+                            "value1": "={{ $json.score }}",
+                            "operation": "largerEqual",
+                            "value2": 6
+                        }
+                    ],
+                    "string": [
+                        {
+                            "value1": "={{ $json.whatsapp }}",
+                            "operation": "isNotEmpty"
+                        }
+                    ]
+                }
+            },
+            "id": "check-whatsapp",
+            "name": "Tiene WhatsApp?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                -1350,
+                1376
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "LATAM",
+                "options_message": {
+                    "number": "={{ $json.whatsapp }}",
+                    "textMessage": {
+                        "text": "={{ $json.wa_msg }}"
+                    }
+                }
+            },
+            "id": "evolution-api",
+            "name": "Enviar Texto (Evo)",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                -1100,
+                1250
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "LATAM"
+                }
+            },
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{ $json.email }}",
+                            "operation": "isNotEmpty"
+                        }
+                    ]
+                }
+            },
+            "id": "check-email",
+            "name": "Tiene Email?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                -1100,
+                1500
+            ]
+        },
+        {
+            "parameters": {
+                "senderEmail": "gustavo@neurova.ai",
+                "toEmail": "={{ $json.email }}",
+                "subject": "Propuesta Neurova AI",
+                "htmlContent": "Hola, vimos tu web y nos gustaría hablar de automatización."
+            },
+            "id": "brevo-sender",
+            "name": "Enviar Email (Brevo)",
+            "type": "n8n-nodes-base.sendInBlue",
+            "typeVersion": 2,
+            "position": [
+                -850,
+                1500
+            ],
+            "credentials": {
+                "sendInBlueApi": {
+                    "id": "dRbziQm4hHXAh3GR",
+                    "name": "Brevo account"
+                }
+            },
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "amount": 1,
+                "unit": "seconds"
+            },
+            "id": "wait-node",
+            "name": "Esperar",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                -600,
+                1376
+            ]
+        }
+    ],
+    "connections": {
+        "Start Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "CONFIGURACION",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "CONFIGURACION": {
+            "main": [
+                [
+                    {
+                        "node": "SerpApi - Maps Scraper",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "SerpApi - Maps Scraper": {
+            "main": [
+                [
+                    {
+                        "node": "Separar Lista",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Separar Lista": {
+            "main": [
+                [
+                    {
+                        "node": "Loop (1 por 1)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop (1 por 1)": {
+            "main": [
+                [
+                    {
+                        "node": "Log: Start",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Log: Start": {
+            "main": [
+                [
+                    {
+                        "node": "Visitar Web",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Visitar Web": {
+            "main": [
+                [
+                    {
+                        "node": "Limpiar HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Limpiar HTML": {
+            "main": [
+                [
+                    {
+                        "node": "IA - Extractor",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Chat Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "IA - Extractor",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IA - Extractor": {
+            "main": [
+                [
+                    {
+                        "node": "Safe Parser",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Safe Parser": {
+            "main": [
+                [
+                    {
+                        "node": "Tiene WhatsApp?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Tiene WhatsApp?": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Texto (Evo)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Tiene Email?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar Texto (Evo)": {
+            "main": [
+                [
+                    {
+                        "node": "Esperar",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Tiene Email?": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Email (Brevo)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Esperar",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar Email (Brevo)": {
+            "main": [
+                [
+                    {
+                        "node": "Esperar",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Esperar": {
+            "main": [
+                [
+                    {
+                        "node": "Loop (1 por 1)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

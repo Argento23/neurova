@@ -1,0 +1,146 @@
+{
+    "name": "Argenterio - Auditor V3 (Fixed Links)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "argenterio-audit-v1",
+                "options": {}
+            },
+            "name": "Webhook Data",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ],
+            "webhookId": "argenterio-audit-v1"
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "sheetId": "1g9q... (SELECCIONAR HOJA)",
+                "range": "A:F",
+                "options": {}
+            },
+            "name": "Guardar en Sheets",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 3,
+            "position": [
+                300,
+                150
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets Account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.groq.com/openai/v1/chat/completions",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "contentType": "json",
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "model",
+                            "value": "llama-3.3-70b-versatile"
+                        },
+                        {
+                            "name": "messages",
+                            "value": "={{ [\n  {\n    \"role\": \"system\",\n    \"content\": \"Analista ARGT-26. Tu misión: Analizar finanzas para un TEASER de venta. INPUT: Ingr:{{$json.body.ingresos}}, Gasto:{{$json.body.gastos}}, Deuda:{{$json.body.deudas}}. SALIDA: Un párrafo corto (3 líneas) muy alarmista sobre su situación, invitándolo a ver el reporte completo.\\nNO des soluciones aún. Solo diagnóstico del problema.\"\n  },\n  {\n    \"role\": \"user\",\n    \"content\": \"Dame el teaser.\"\n  }\n] }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Groq - Teaser Analyst",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                300,
+                400
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ { \"message\": \"Analisis Completado\", \"mp_link\": \"https://link.mercadopago.com.ar/TU_LINK_FIJO\", \"paypal_link\": \"https://www.paypal.com/ncp/payment/LP2ZBHDAJPLDY\", \"teaser\": $('Groq - Teaser Analyst').item.json.choices[0].message.content } }}",
+                "options": {}
+            },
+            "name": "Responder a Web (JSON)",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                600,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "senderEmail": "security@argenterio.com",
+                "toEmail": "={{ $('Webhook Data').item.json[\"body\"][\"email\"] }}",
+                "subject": "⚠️ Tu Pre-Diagnóstico de Riesgo Financiero",
+                "htmlContent": "=<!DOCTYPE html><html><head><style>body{font-family:'Courier New',monospace;background:#f4f4f4;padding:20px;color:#333}.card{background:#fff;padding:30px;border-top:5px solid #ff3333;max-width:600px;margin:0 auto}</style></head><body><div class=\"card\"><h1>ARGENTERIO_ STATUS: PENDING</h1><p>Hemos procesado tus datos.</p><div style='background:#ffe6e6; padding:15px; border-left:4px solid red'><strong>DIAGNÓSTICO PRELIMINAR:</strong><br><br>{{ $('Groq - Teaser Analyst').item.json.choices[0].message.content }}</div><p>Para desbloquear el reporte completo, completa el pago:</p><a href='https://link.mercadopago.com.ar/TU_LINK_FIJO' style='display:inline-block;padding:10px 20px;background:#009ee3;color:white;text-decoration:none;font-weight:bold;margin-right:10px'>MERCADO PAGO</a> <a href='https://www.paypal.com/ncp/payment/LP2ZBHDAJPLDY' style='display:inline-block;padding:10px 20px;background:#003087;color:white;text-decoration:none;font-weight:bold'>PAYPAL</a></div></body></html>"
+            },
+            "name": "Email - Teaser + Link",
+            "type": "n8n-nodes-base.sendInBlue",
+            "typeVersion": 2,
+            "position": [
+                600,
+                300
+            ],
+            "credentials": {
+                "sendInBlueApi": {
+                    "id": "YOUR_BREVO_CREDENTIAL_ID",
+                    "name": "Brevo/Sendinblue"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook Data": {
+            "main": [
+                [
+                    {
+                        "node": "Guardar en Sheets",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Groq - Teaser Analyst",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq - Teaser Analyst": {
+            "main": [
+                [
+                    {
+                        "node": "Responder a Web (JSON)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Email - Teaser + Link",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

@@ -1,0 +1,391 @@
+{
+    "name": "GenerArise - Video Content Generator (D-ID)",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "days",
+                            "daysInterval": 2
+                        },
+                        {
+                            "field": "hours",
+                            "triggerAtHour": 9
+                        }
+                    ]
+                }
+            },
+            "id": "cron",
+            "name": "Cron Cada 2 Días (9am)",
+            "type": "n8n-nodes-base.cron",
+            "typeVersion": 1,
+            "position": [
+                240,
+                400
+            ]
+        },
+        {
+            "parameters": {},
+            "id": "manual",
+            "name": "Manual Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                240,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "read",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "video_calendar",
+                    "mode": "list"
+                }
+            },
+            "id": "read_calendar",
+            "name": "Leer Calendario Videos",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                460,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.Estado }}",
+                            "rightValue": "Pendiente",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        },
+                        {
+                            "leftValue": "={{ new Date($json.Fecha).getTime() }}",
+                            "rightValue": "={{ $now.plus({days: 1}).toMillis() }}",
+                            "operator": {
+                                "type": "number",
+                                "operation": "lte"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "filter_next",
+            "name": "Filtrar Videos Próximos",
+            "type": "n8n-nodes-base.filter",
+            "typeVersion": 2,
+            "position": [
+                680,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "tema",
+                            "name": "tema",
+                            "value": "={{ $json.Tema }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "titulo",
+                            "name": "titulo",
+                            "value": "={{ $json.Titulo }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "duracion",
+                            "name": "duracion",
+                            "value": "={{ $json.Duracion }}",
+                            "type": "number"
+                        }
+                    ]
+                }
+            },
+            "id": "prep_data",
+            "name": "Preparar Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                900,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq",
+            "name": "Groq AI Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                1120,
+                620
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Genera un guion de video para TikTok/YouTube Shorts sobre: {{ $json.tema }}\n\nTítulo deseado: {{ $json.titulo }}\nDuración objetivo: {{ $json.duracion }} segundos\n\nESTRUCTURA:\n1. HOOK (3 seg): Frase impactante que enganche\n2. DESARROLLO ({{ $json.duracion - 8 }} seg): 3-4 puntos clave\n3. CIERRE (5 seg): CTA + siguiente paso\n\nTONO: Profesional B2B pero dinámico. Sin jerga excesiva.\n\nFormato JSON:\n{\n  \"script\": \"texto completo del guion en primera persona...\",\n  \"hashtags\": \"#Hash1 #Hash2 #Hash3 #Hash4 #Hash5\",\n  \"description\": \"descripción corta para el post (1 línea)\"\n}",
+                "hasOutputParser": true
+            },
+            "id": "ai_gen_script",
+            "name": "Generar Guion IA",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1120,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://api.d-id.com/talks",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"script\": {\n    \"type\": \"text\",\n    \"input\": \"{{ $json.script }}\",\n    \"provider\": {\n      \"type\": \"microsoft\",\n      \"voice_id\": \"es-AR-TomasNeural\"\n    }\n  },\n  \"source_url\": \"https://create-images-results.d-id.com/default-presenter-image.jpg\",\n  \"config\": {\n    \"fluent\": true,\n    \"pad_audio\": 0,\n    \"stitch\": true\n  }\n}",
+                "options": {}
+            },
+            "id": "did_create",
+            "name": "D-ID Crear Video",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1340,
+                400
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_DID_CREDENTIAL_ID",
+                    "name": "D-ID API"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "amount": 30,
+                "unit": "seconds"
+            },
+            "id": "wait",
+            "name": "Esperar Renderizado",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                1560,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "url": "=https://api.d-id.com/talks/{{ $('D-ID Crear Video').item.json.id }}",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "options": {}
+            },
+            "id": "did_status",
+            "name": "D-ID Verificar Estado",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1780,
+                400
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_DID_CREDENTIAL_ID",
+                    "name": "D-ID API"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "video_calendar",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Descripcion": "={{ $('Generar Guion IA').item.json.description }}",
+                        "Hashtags": "={{ $('Generar Guion IA').item.json.hashtags }}",
+                        "Video_URL": "={{ $json.result_url }}",
+                        "Estado": "Listo"
+                    }
+                }
+            },
+            "id": "update_calendar",
+            "name": "Actualizar Calendario",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                2000,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Cron Cada 2 Días (9am)": {
+            "main": [
+                [
+                    {
+                        "node": "Leer Calendario Videos",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Leer Calendario Videos",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Leer Calendario Videos": {
+            "main": [
+                [
+                    {
+                        "node": "Filtrar Videos Próximos",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtrar Videos Próximos": {
+            "main": [
+                [
+                    {
+                        "node": "Preparar Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Preparar Data": {
+            "main": [
+                [
+                    {
+                        "node": "Generar Guion IA",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq AI Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Generar Guion IA",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generar Guion IA": {
+            "main": [
+                [
+                    {
+                        "node": "D-ID Crear Video",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "D-ID Crear Video": {
+            "main": [
+                [
+                    {
+                        "node": "Esperar Renderizado",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Esperar Renderizado": {
+            "main": [
+                [
+                    {
+                        "node": "D-ID Verificar Estado",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "D-ID Verificar Estado": {
+            "main": [
+                [
+                    {
+                        "node": "Actualizar Calendario",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "cm-video-generator-v1"
+}

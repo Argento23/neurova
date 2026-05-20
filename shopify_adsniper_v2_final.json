@@ -1,0 +1,174 @@
+{
+    "name": "Shopify AdSniper AI - Wealth Multiplier V2 FINAL (Stable)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "shopify-adsniper",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "id": "webhook",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "={{ $json.body.product_url }}",
+                "options": {
+                    "redirect": {
+                        "redirect": true
+                    }
+                },
+                "headerParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "User-Agent",
+                            "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+                        },
+                        {
+                            "name": "Accept",
+                            "value": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+                        },
+                        {
+                            "name": "Accept-Language",
+                            "value": "es-ES,es;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
+                        }
+                    ]
+                }
+            },
+            "id": "scrape",
+            "name": "Scrape Product",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                450,
+                300
+            ],
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "jsCode": "// Robust Extraction Logic (Regex + Schema.org)\nconst item = $input.item.json;\nconst html = item.data || '';\nconst url = $('Webhook').item.json.body.product_url || '';\n\nlet title = 'Producto Desconocido';\nlet description = 'Sin descripción disponible due to scraping protection.';\nlet price = 'Consultar';\nlet image = '';\n\n// Check if scraping succeeded\nif (html && typeof html === 'string' && html.length > 100) {\n    // 1. Regex Extraction\n    const titleMatch = html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i);\n    if (titleMatch) title = titleMatch[1].replace(/\\s+/g, ' ').trim();\n    \n    // Image Extraction Priority: Schema > OG > Twitter\n    // A. Schema.org JSON-LD\n    if (!image) {\n        try {\n            const schemaMatches = html.match(/<script type=[\"']application\\/ld\\+json[\"']>([\\s\\S]*?)<\\/script>/gi);\n            if (schemaMatches) {\n                for (const script of schemaMatches) {\n                    const jsonContent = script.replace(/<[^>]+>/g, '').trim();\n                    try {\n                        const data = JSON.parse(jsonContent);\n                        if (data.image) {\n                             image = Array.isArray(data.image) ? data.image[0] : (typeof data.image === 'string' ? data.image : data.image.url);\n                             if(image) break;\n                        }\n                    } catch(e) {}\n                }\n            }\n        } catch(e) {}\n    }\n    \n    // B. Open Graph\n    if (!image) {\n        const ogMatch = html.match(/<meta[^>]*property=[\"']og:image[\"'][^>]*content=[\"']([\\s\\S]*?)[\"']/i);\n        if (ogMatch) image = ogMatch[1];\n    }\n}\n\n// Fallback Title\nif (title === 'Producto Desconocido') {\n    try {\n        const slug = url.split('/').pop().split('?')[0];\n        title = slug.replace(/-/g, ' ').replace(/\\b\\w/g, l => l.toUpperCase());\n    } catch(e) {}\n}\n\nif (image && image.startsWith('//')) image = 'https:' + image;\n\nreturn {\n  product_url: url,\n  title: title,\n  price: price,\n  description: description.substring(0, 3000),\n  main_image: image\n};"
+            },
+            "id": "normalize",
+            "name": "Extract & Normalize",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                700,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "model": "llama3-70b-8192"
+            },
+            "id": "groq_model",
+            "name": "Groq Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                950,
+                500
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=SYSTEM ROLE:\nYou are AdSniper.\nExecution language: {{ $json.body.language === 'en' ? 'ENGLISH' : 'SPANISH' }}.\n\nPRODUCT: {{ $json.title }}\nDESC: {{ $json.description }}\n\nTASK:\nGenerate 3 Ads (Logic, Emotional, Scarcity) in {{ $json.body.language === 'en' ? 'ENGLISH' : 'SPANISH' }}.\n\nJSON Output:\n[\n  { \"type\": \"Logic\", \"headline\": \"...\", \"primary_text\": \"...\", \"image_prompt\": \"...\" }\n]",
+                "hasOutputParser": true
+            },
+            "id": "ai_generator",
+            "name": "AdSniper AI Generator",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                950,
+                300
+            ],
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "jsCode": "const aiItem = $input.item.json;\nconst aiResponse = aiItem.output || aiItem.text || aiItem.response || '';\nlet ads = [];\n\n// SAFE NODE REFERENCING\nlet prevData = { main_image: '', title: '' };\ntry {\n    // Try standard selector\n    prevData = $('Extract & Normalize').first().json;\n} catch(e) {\n    try {\n        // Try $node selector (legacy)\n        if ($node['Extract & Normalize']) {\n            prevData = $node['Extract & Normalize'].json;\n        }\n    } catch(e2) {}\n}\n\nif (aiItem.error) {\n    // Handle Execution Error\n    const errDetail = aiItem.error.message || aiItem.error.description || JSON.stringify(aiItem.error);\n    ads = [{ type: 'Error', headline: 'AI Connection Failed', primary_text: 'Debug: ' + errDetail + ' (Check Model Name)', image_prompt: 'N/A' }];\n} else {\n    try {\n         if (typeof aiResponse === 'string') {\n            const cleanJson = aiResponse.replace(/```json/g, '').replace(/```/g, '').trim();\n            ads = JSON.parse(cleanJson);\n         } else {\n            ads = Array.isArray(aiResponse) ? aiResponse : [aiResponse];\n         }\n    } catch (e) {\n         ads = [{ type: 'Error', headline: 'Parse Error', primary_text: JSON.stringify(aiResponse), image_prompt: 'N/A' }];\n    }\n}\n\nreturn {\n    ads: ads,\n    product_image: prevData.main_image || '',\n    product_title: prevData.title || ''\n};"
+            },
+            "id": "format_output",
+            "name": "Format Output",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1200,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Scrape Product",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Scrape Product": {
+            "main": [
+                [
+                    {
+                        "node": "Extract & Normalize",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract & Normalize": {
+            "main": [
+                [
+                    {
+                        "node": "AdSniper AI Generator",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AdSniper AI Generator",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AdSniper AI Generator": {
+            "main": [
+                [
+                    {
+                        "node": "Format Output",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

@@ -1,0 +1,41 @@
+{
+    "name": "Alex - Neurova Consultant",
+    "transcriber": {
+        "provider": "deepgram",
+        "model": "nova-2",
+        "language": "es"
+    },
+    "model": {
+        "provider": "openai",
+        "model": "gpt-4o",
+        "messages": [
+            {
+                "role": "system",
+                "content": "Eres Alex, un Consultor Senior de Automatización e IA en Neurova Agencia AI. Tu misión es transformar empresas mediante la implementación estratégica de IA y automatización. Tu tono es profesional, innovador, directo y orientado a resultados. Comunicación clara y técnica pero accesible. Foco en retorno de inversión (ROI) y eficiencia."
+            }
+        ]
+    },
+    "voice": {
+        "provider": "elevenlabs",
+        "voiceId": "pNInz6obpg8n9iWJUI7Q",
+        "model": "eleven_multilingual_v2",
+        "stability": 0.5,
+        "similarityBoost": 0.75
+    },
+    "firstMessage": "¡Hola! Soy Alex, tu consultor de Neurova. 🚀 ¿Cómo podemos automatizar tu éxito hoy?",
+    "serverUrl": "https://manager.agentes.space/webhook/universal-leads",
+    "clientMessages": [
+        "transcript",
+        "hangup",
+        "function-call",
+        "speech-update",
+        "metadata",
+        "conversation-update"
+    ],
+    "serverMessages": [
+        "knowledge-base-response",
+        "tool-calls",
+        "transfer-destination-request"
+    ],
+    "endCallFunctionEnabled": true
+}

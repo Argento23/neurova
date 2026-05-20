@@ -1,0 +1,693 @@
+{
+    "name": "Chatbot Fábrica B2B - Sales & Quotation AI",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "whatsapp-factory",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "id": "webhook",
+            "name": "Webhook WhatsApp",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                240,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "from",
+                            "name": "from",
+                            "value": "={{ $json.body.data.key.remoteJid }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "message",
+                            "name": "message",
+                            "value": "={{ $json.body.data.message.conversation || $json.body.data.message.extendedTextMessage.text }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "phone",
+                            "name": "phone",
+                            "value": "={{ $json.from.replace('@s.whatsapp.net', '') }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "extract",
+            "name": "Extraer Mensaje",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                460,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "nombre_fabrica",
+                            "name": "nombre_fabrica",
+                            "value": "NOMBRE_FABRICA",
+                            "type": "string"
+                        },
+                        {
+                            "id": "productos",
+                            "name": "productos",
+                            "value": "Galletitas dulces, saladas, obleas, alfajores",
+                            "type": "string"
+                        },
+                        {
+                            "id": "min_order",
+                            "name": "min_order",
+                            "value": "100 cajas",
+                            "type": "string"
+                        },
+                        {
+                            "id": "pricing_tiers",
+                            "name": "pricing_tiers",
+                            "value": "100-499: $9,000/caja | 500-999: $8,500/caja | 1000+: $8,000/caja",
+                            "type": "string"
+                        },
+                        {
+                            "id": "email_comercial",
+                            "name": "email_comercial",
+                            "value": "ventas@fabrica.com.ar",
+                            "type": "string"
+                        },
+                        {
+                            "id": "sheet_skus_id",
+                            "name": "sheet_skus_id",
+                            "value": "YOUR_SKU_CATALOG_SHEET_ID",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "config",
+            "name": "CONFIG",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                680,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.message.toLowerCase() }}",
+                            "rightValue": "cotización|precio|presupuesto|pedido|quiero comprar",
+                            "operator": {
+                                "type": "string",
+                                "operation": "regex"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_quotation",
+            "name": "Es Cotización?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                680,
+                250
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "getAll",
+                "documentId": {
+                    "__rl": true,
+                    "value": "={{ $('CONFIG').item.json.sheet_skus_id }}",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "skus",
+                    "mode": "list"
+                },
+                "options": {}
+            },
+            "id": "get_skus",
+            "name": "Obtener SKUs",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                900,
+                150
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq1",
+            "name": "Groq Extract Quote",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                900,
+                370
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Catálogo disponible:\n{{ $('Obtener SKUs').all().map(item => `SKU ${item.json.SKU}: ${item.json.Producto} ${item.json.Sabor} - ${item.json.Formato}`).join('\\n') }}\n\nSolicitud cliente: {{ $('Extraer Mensaje').item.json.message }}\n\nExtrae:\n- SKU solicitado (o el más similar)\n- Cantidad aproximada en cajas\n- Empresa/Cliente (si menciona)\n\nResponde JSON:\n{\n  \"sku\": \"código SKU\",\n  \"producto\": \"nombre producto\",\n  \"cantidad\": \"número o 'no especificado'\",\n  \"empresa\": \"nombre o 'no especificado'\"\n}\n\nSolo JSON:",
+                "hasOutputParser": true
+            },
+            "id": "extract_quote",
+            "name": "Extraer Cotización",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1120,
+                150
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const quote = JSON.parse($input.item.json.output);\nconst cantidad = parseInt(quote.cantidad) || 0;\n\nlet precio_unitario = 9000;\nlet tier = '100-499 cajas';\n\nif (cantidad >= 1000) {\n  precio_unitario = 8000;\n  tier = '1000+ cajas';\n} else if (cantidad >= 500) {\n  precio_unitario = 8500;\n  tier = '500-999 cajas';\n}\n\nconst subtotal = cantidad * precio_unitario;\n\nreturn [{\n  json: {\n    ...quote,\n    cantidad_num: cantidad,\n    precio_unitario,\n    tier,\n    subtotal,\n    valido: cantidad >= 100\n  }\n}];"
+            },
+            "id": "calculate_price",
+            "name": "Calcular Precio",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1340,
+                150
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.valido }}",
+                            "rightValue": "true",
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "valid_quote",
+            "name": "Pedido Válido?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1560,
+                150
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "response",
+                            "name": "response",
+                            "value": "=📋 COTIZACIÓN\n\nProducto: {{ $json.producto }}\nSKU: {{ $json.sku }}\nCantidad: {{ $json.cantidad_num }} cajas\n\nTier: {{ $json.tier }}\nPrecio: ${{ $json.precio_unitario }}/caja\nSubtotal: ${{ $json.subtotal.toLocaleString() }}\n\n✅ Enviamos PDF formal a {{ $('CONFIG').item.json.email_comercial }}\n\n¿Confirmar pedido?",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "valid_response",
+            "name": "Respuesta Válida",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                1780,
+                50
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "response",
+                            "name": "response",
+                            "value": "=⚠️ Pedido mínimo: {{ $('CONFIG').item.json.min_order }}\n\nTe contacta nuestro equipo comercial para volúmenes menores.\n\n¿Querés info de distribuidores en tu zona?",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "invalid_response",
+            "name": "Pedido Bajo Mínimo",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                1780,
+                250
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.message.toLowerCase() }}",
+                            "rightValue": "nuevo|primera vez|kiosco|distribuidora|quiero ser cliente",
+                            "operator": {
+                                "type": "string",
+                                "operation": "regex"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_new_lead",
+            "name": "Es Nuevo Lead?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                680,
+                450
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq2",
+            "name": "Groq Lead Qualification",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                900,
+                570
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Mensaje nuevo lead: {{ $('Extraer Mensaje').item.json.message }}\n\nExtrae información de onboarding:\n- Nombre del negocio/empresa\n- Tipo (kiosco/supermercado/distribuidora)\n- Ubicación (ciudad/provincia)\n- Volumen mensual estimado en cajas\n\nResponde JSON:\n{\n  \"empresa\": \"nombre o 'no especificado'\",\n  \"tipo\": \"tipo negocio o 'no especificado'\",\n  \"ubicacion\": \"ubicación o 'no especificado'\",\n  \"volumen\": \"estimado o 'no especificado'\"\n}\n\nSolo JSON:",
+                "hasOutputParser": true
+            },
+            "id": "extract_lead",
+            "name": "Extraer Info Lead",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1120,
+                450
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "response",
+                            "name": "response",
+                            "value": "=¡Bienvenido a {{ $('CONFIG').item.json.nombre_fabrica }}! 🏭\n\nPara ayudarte mejor necesito:\n1. Nombre del negocio\n2. CUIT\n3. Ubicación (ciudad)\n4. Volumen mensual aprox (cajas)\n\nPodés enviarlo todo junto.",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "onboarding_response",
+            "name": "Respuesta Onboarding",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                1340,
+                450
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq3",
+            "name": "Groq General",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                900,
+                770
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres asistente de {{ $('CONFIG').item.json.nombre_fabrica }} (fábrica B2B).\n\nINFO:\n- Productos: {{ $('CONFIG').item.json.productos }}\n- Pedido mínimo: {{ $('CONFIG').item.json.min_order }}\n- Pricing: {{ $('CONFIG').item.json.pricing_tiers }}\n- Contacto: {{ $('CONFIG').item.json.email_comercial }}\n\nConsulta: {{ $('Extraer Mensaje').item.json.message }}\n\nResponde profesional, B2B tone (máximo 3 líneas).\nSi preguntan por cotización, pedir: producto + cantidad.\nSi preguntan técnico (ingredientes, certificaciones), ofrecer ficha técnica.\n\nRespuesta:",
+                "hasOutputParser": false
+            },
+            "id": "general_response",
+            "name": "Respuesta General B2B",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1120,
+                650
+            ]
+        },
+        {
+            "parameters": {
+                "url": "=https://evolution-api.com/message/sendText/{{$('CONFIG').item.json.instance_name}}",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"number\": \"{{ $('Extraer Mensaje').item.json.phone }}\",\n  \"text\": \"{{ $json.response || $json.output }}\"\n}",
+                "options": {}
+            },
+            "id": "send_wp",
+            "name": "Enviar WhatsApp",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                2000,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_CRM_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "leads_cotizaciones",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Fecha": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+                        "Telefono": "={{ $('Extraer Mensaje').item.json.phone }}",
+                        "Tipo": "={{ $json.is_quote ? 'Cotización' : ($json.is_lead ? 'Nuevo Lead' : 'Consulta') }}",
+                        "Empresa": "={{ $json.empresa || '' }}",
+                        "SKU": "={{ $json.sku || '' }}",
+                        "Cantidad": "={{ $json.cantidad_num || '' }}",
+                        "Subtotal": "={{ $json.subtotal || '' }}",
+                        "Estado": "={{ $json.valido ? 'Válido' : 'Follow-up' }}"
+                    }
+                }
+            },
+            "id": "log_crm",
+            "name": "Log CRM",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                2220,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\"success\": true}",
+                "options": {}
+            },
+            "id": "response",
+            "name": "Response OK",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                2440,
+                400
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Extraer Mensaje",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extraer Mensaje": {
+            "main": [
+                [
+                    {
+                        "node": "Es Cotización?",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "CONFIG",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "CONFIG": {
+            "main": [
+                [
+                    {
+                        "node": "Respuesta General B2B",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Es Cotización?": {
+            "main": [
+                [
+                    {
+                        "node": "Obtener SKUs",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Es Nuevo Lead?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Obtener SKUs": {
+            "main": [
+                [
+                    {
+                        "node": "Extraer Cotización",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Extract Quote": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Extraer Cotización",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extraer Cotización": {
+            "main": [
+                [
+                    {
+                        "node": "Calcular Precio",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Calcular Precio": {
+            "main": [
+                [
+                    {
+                        "node": "Pedido Válido?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Pedido Válido?": {
+            "main": [
+                [
+                    {
+                        "node": "Respuesta Válida",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Pedido Bajo Mínimo",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Respuesta Válida": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Pedido Bajo Mínimo": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Es Nuevo Lead?": {
+            "main": [
+                [
+                    {
+                        "node": "Extraer Info Lead",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Groq Lead Qualification": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Extraer Info Lead",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extraer Info Lead": {
+            "main": [
+                [
+                    {
+                        "node": "Respuesta Onboarding",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Respuesta Onboarding": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq General": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Respuesta General B2B",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Respuesta General B2B": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Log CRM",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Log CRM": {
+            "main": [
+                [
+                    {
+                        "node": "Response OK",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "chatbot-factory-b2b-v1"
+}

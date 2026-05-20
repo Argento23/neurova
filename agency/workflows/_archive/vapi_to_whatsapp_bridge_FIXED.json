@@ -1,0 +1,234 @@
+{
+    "name": "Vapi WhatsApp Bridge - FIXED",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "vapi-whatsapp-bridge",
+                "responseMode": "responseNode"
+            },
+            "name": "WebhookVapi",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "id": "wh-id",
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "name": "raw_phone",
+                            "value": "={{ ($json.body.message.toolCalls[0].function.arguments.phone || \"\").toString().replace(/\\D/g, '') }}",
+                            "type": "string"
+                        },
+                        {
+                            "name": "message",
+                            "value": "={{ ($json.body.message.toolCalls[0].function.arguments.message || \"\").toString().replace(/\\\\n/g, '\\n') }}",
+                            "type": "string"
+                        },
+                        {
+                            "name": "media_url",
+                            "value": "={{ ($json.body.message.toolCalls[0].function.arguments.media_url || \"\").toString().trim().replace(/[\\n\\r]/g, '') }}",
+                            "type": "string"
+                        },
+                        {
+                            "name": "toolCallId",
+                            "value": "={{ $json.body.message.toolCalls[0].id || \"no-id\" }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "name": "PrepareData",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "id": "pd-id",
+            "position": [
+                300,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "name": "phone",
+                            "value": "={{ $json.raw_phone.length === 10 ? '549' + $json.raw_phone : $json.raw_phone }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "name": "Sanitize Phone",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "id": "sp-id",
+            "position": [
+                450,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $json.toolCallId }}\",\n      \"result\": \"SUCCESS: Mensaje en camino.\"\n    }\n  ]\n}",
+                "options": {}
+            },
+            "name": "Instant Response",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "id": "ir-id",
+            "position": [
+                600,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{ $json.media_url.toLowerCase() }}",
+                            "operation": "regex",
+                            "value2": "(\\.(pdf|png|jpg|jpeg))$"
+                        }
+                    ]
+                }
+            },
+            "name": "Is Valid File?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "id": "ivf-id",
+            "position": [
+                800,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "GenerArise",
+                "options_message": {
+                    "number": "={{ $node[\"Sanitize Phone\"].json.phone }}",
+                    "textMessage": {
+                        "text": "={{ $node[\"PrepareData\"].json.message + '\\n\\n' + $node[\"PrepareData\"].json.media_url }}"
+                    }
+                }
+            },
+            "name": "Send-As-Text",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "id": "sat-id",
+            "position": [
+                1050,
+                200
+            ],
+            "onError": "continueErrorOutput",
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "operation": "send-media",
+                "instanceName": "GenerArise",
+                "options_message": {
+                    "number": "={{ $node[\"Sanitize Phone\"].json.phone }}",
+                    "mediaMessage": {
+                        "mediatype": "={{ $node[\"PrepareData\"].json.media_url.toLowerCase().endsWith('.pdf') ? 'document' : 'image' }}",
+                        "media": "={{ $node[\"PrepareData\"].json.media_url }}",
+                        "caption": "={{ $node[\"PrepareData\"].json.message }}"
+                    }
+                }
+            },
+            "name": "Send-As-Media",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "id": "sam-id",
+            "position": [
+                1050,
+                400
+            ],
+            "onError": "continueErrorOutput",
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "WebhookVapi": {
+            "main": [
+                [
+                    {
+                        "node": "PrepareData",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "PrepareData": {
+            "main": [
+                [
+                    {
+                        "node": "Sanitize Phone",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Sanitize Phone": {
+            "main": [
+                [
+                    {
+                        "node": "Instant Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Instant Response": {
+            "main": [
+                [
+                    {
+                        "node": "Is Valid File?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is Valid File?": {
+            "main": [
+                [
+                    {
+                        "node": "Send-As-Media",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send-As-Text",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

@@ -1,0 +1,119 @@
+{
+    "name": "MindHafen - Checkout (FINAL FIX)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "mindhafen-checkout",
+                "options": {
+                    "allowedOrigins": "*"
+                },
+                "responseMode": "responseNode"
+            },
+            "id": "1",
+            "name": "MH_Checkout_Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                0,
+                240
+            ],
+            "webhookId": "mindhafen-checkout"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.mercadopago.com/checkout/preferences",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer APP_USR-2662030501407901-070617-26cd9e8e4a1f61917e341886b260864c-89801872"
+                        },
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"items\": [\n    {\n      \"title\": \"MindHafen - Plan Premium\",\n      \"quantity\": 1,\n      \"currency_id\": \"ARS\",\n      \"unit_price\": 29999\n    }\n  ],\n  \"payer\": {\n    \"name\": \"{{ $json.body.name }}\",\n    \"email\": \"{{ $json.body.email }}\"\n  },\n  \"back_urls\": {\n    \"success\": \"https://mindhafen.generarise.space/success\"\n  },\n  \"auto_return\": \"approved\"\n}"
+            },
+            "id": "2",
+            "name": "MH_MercadoPago_API",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                220,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"success\": true,\n  \"checkout_url\": \"{{ $json.init_point }}\"\n}"
+            },
+            "id": "3",
+            "name": "MH_Respond_URL",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.1,
+            "position": [
+                480,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "email",
+                "toEmail": "={{ $node[\"MH_Checkout_Webhook\"].json[\"body\"][\"email\"] }}",
+                "subject": "¡Bienvenido a MindHafen Premium!",
+                "html": "<h1>¡Hola {{ $node[\"MH_Checkout_Webhook\"].json[\"body\"][\"name\"] }}!</h1><p>Tu link de pago ha sido generado con éxito.</p>"
+            },
+            "id": "4",
+            "name": "MH_Brevo_Email",
+            "type": "n8n-nodes-base.sendInBlue",
+            "typeVersion": 1,
+            "position": [
+                700,
+                240
+            ]
+        }
+    ],
+    "connections": {
+        "MH_Checkout_Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "MH_MercadoPago_API",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MH_MercadoPago_API": {
+            "main": [
+                [
+                    {
+                        "node": "MH_Respond_URL",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MH_Respond_URL": {
+            "main": [
+                [
+                    {
+                        "node": "MH_Brevo_Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Basic Tailwind-like reset to debug build */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+:root {
+    --background: #ffffff;
+    --foreground: #2C1810;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #1a1410;
+        --foreground: #F4E4C1;
+    }
+}
+
+body {
+    color: var(--foreground);
+    background: var(--background);
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+@layer utilities {
+    .text-balance {
+        text-wrap: balance;
+    }
+
+    .gradient-gold {
+        background: linear-gradient(135deg, #D4AF37 0%, #F4E4C1 100%);
+    }
+
+    .gradient-brown {
+        background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+    }
+}
+
+@layer components {
+    .btn-primary {
+        @apply bg-cilo-primary hover:bg-cilo-secondary text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1;
+    }
+
+    .btn-secondary {
+        @apply bg-white hover:bg-cilo-accent text-cilo-dark font-semibold py-3 px-8 rounded-lg transition-all duration-300 border-2 border-cilo-primary;
+    }
+
+    .card {
+        @apply bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 p-6;
+    }
+}

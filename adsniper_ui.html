@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdSniper AI - Wealth Multiplier</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --accent: #10b981;
+            /* Money Green */
+            --secondary: #3b82f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            background: linear-gradient(to right, var(--accent), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .input-group {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: white;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            color: #0f172a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            background: #475569;
+            cursor: not-allowed;
+        }
+
+        #results {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .ad-card {
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ad-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--secondary);
+        }
+
+        .ad-type {
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .ad-headline {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .ad-body {
+            white-space: pre-wrap;
+            color: #cbd5e1;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .image-prompt {
+            font-size: 0.9rem;
+            color: var(--accent);
+            background: rgba(16, 185, 129, 0.1);
+            padding: 0.75rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .loading {
+            text-align: center;
+            font-style: italic;
+            color: #94a3b8;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>AdSniper AI 🎯</h1>
+
+        <div class="input-group">
+            <label for="webhookUrl">Webhook URL (n8n)</label>
+            <input type="text" id="webhookUrl" value="http://localhost:5678/webhook-test/shopify-adsniper"
+                placeholder="Pegar URL del Webhook">
+
+            <label for="productUrl">Producto Shopify URL</label>
+            <input type="text" id="productUrl" placeholder="https://tienda.com/products/mi-producto">
+
+            <button id="generateBtn" onclick="generateAds()">Generar Anuncios Ganadores</button>
+            <div id="loading" class="loading">Analizando producto y redactando copy... (Esto toma ~10-20 seg)</div>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // TELEGRAM: Alertas manejadas por n8n. No se exponen credenciales aquí.
+        async function sendTelegramAlert(productUrl) {
+            console.log('📨 Alerta delegada a n8n (server-side)');
+        }
+
+        async function generateAds() {
+            const webhookUrl = document.getElementById('webhookUrl').value;
+            const productUrl = document.getElementById('productUrl').value;
+            const btn = document.getElementById('generateBtn');
+            const loading = document.getElementById('loading');
+            const resultsDiv = document.getElementById('results');
+
+            if (!productUrl) return alert('Ingresa una URL de producto');
+
+            btn.disabled = true;
+            loading.style.display = 'block';
+            resultsDiv.innerHTML = '';
+
+            // Enviar alerta
+            await sendTelegramAlert(productUrl);
+
+            try {
+                // Enviar al Webhook
+                // Nota: n8n debe tener CORS habilitado o usar un proxy si esto falla por CORS desde archivo local.
+                // Para pruebas locales, n8n suele permitirlo si se configura.
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_url: productUrl })
+                });
+
+                if (!response.ok) throw new Error('Error en el Webhook');
+
+                const data = await response.json();
+
+                // Asumimos que el webhook devuelve el array de anuncios directamente o dentro de una propiedad
+                // El nodo Groq devuelve un JSON array en 'output' o similar. 
+                // Ajustar según la salida real del nodo final.
+                // En el workflow v1, el último nodo devuelve el array de la IA.
+
+                renderAds(data);
+
+            } catch (err) {
+                console.error(err);
+                resultsDiv.innerHTML = `<div style="color:red; text-align:center;">Error: ${err.message}. <br>Verifica que n8n esté corriendo y el webhook activo. (Y CORS).</div>`;
+            } finally {
+                btn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+
+        function renderAds(ads) {
+            const resultsDiv = document.getElementById('results');
+
+            // Si devuelve un objeto con output, intentar parsearlo
+            let items = ads;
+            if (ads.output && Array.isArray(ads.output)) items = ads.output;
+            if (!Array.isArray(items) && ads[0]) items = ads; // n8n array format
+
+            // Normalizar (a veces n8n devuelve array de items con json property)
+            const cleanItems = items.map(i => i.json || i).flat();
+
+            // Buscar el array de anuncios real dentro de los datos
+            // La IA devuelve un array de objetos { type, headline... }
+            // Si cleanItems[0] tiene esas propiedades, usarlo.
+            let variations = cleanItems;
+
+            // Si la IA devolvió el array en un campo específico
+            if (cleanItems[0] && cleanItems[0].content) {
+                try { variations = JSON.parse(cleanItems[0].content); } catch (e) { }
+            }
+
+            resultsDiv.innerHTML = '';
+
+            variations.forEach(ad => {
+                // Fallback si no tiene estructura correcta
+                const type = ad.type || 'Anuncio';
+                const headline = ad.headline || 'Sin Título';
+                const body = ad.primary_text || JSON.stringify(ad);
+                const prompt = ad.image_prompt || 'N/A';
+
+                const html = `
+                    <div class="ad-card">
+                        <div class="ad-type">${type}</div>
+                        <div class="ad-headline">${headline}</div>
+                        <div class="ad-body">${body}</div>
+                        <div class="image-prompt">🎨 <strong>Prompt de Imagen:</strong> ${prompt}</div>
+                    </div>
+                `;
+                resultsDiv.innerHTML += html;
+            });
+
+            if (variations.length === 0) {
+                resultsDiv.innerHTML = '<div style="text-align:center;">No se encontraron anuncios en la respuesta. Revisa el Output de n8n.</div>';
+            }
+        }
+    </script>
+</body>
+
+</html>

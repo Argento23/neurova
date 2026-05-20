@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GenerArise — AI-Powered Content Automation Platform</title>
+  <meta name="description" content="GenerArise is an AI-powered content automation platform that generates, schedules, and publishes content across TikTok, Instagram, Facebook, and YouTube. Includes B2B lead discovery, AI scoring, and automated sales outreach.">
+  <link rel="icon" type="image/png" href="/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --bg: #030307;
+      --bg2: #08081a;
+      --bg3: #0f0f2a;
+      --glass: rgba(10, 10, 30, 0.65);
+      --border: rgba(255,255,255,0.06);
+      --border2: rgba(255,255,255,0.12);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --cyan: #22d3ee;
+      --emerald: #34d399;
+      --violet: #a78bfa;
+      --rose: #fb7185;
+      --amber: #fbbf24;
+      --blue: #60a5fa;
+    }
+    
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    
+    /* ── Animated BG ── */
+    .bg-glow {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 600px 400px at 20% 20%, rgba(34,211,238,0.08), transparent),
+        radial-gradient(ellipse 500px 500px at 80% 60%, rgba(167,139,250,0.08), transparent),
+        radial-gradient(ellipse 400px 300px at 50% 90%, rgba(52,211,153,0.06), transparent);
+      animation: glowShift 20s ease-in-out infinite alternate;
+    }
+    @keyframes glowShift {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(30deg); }
+    }
+    
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+    
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(3,3,7,0.7); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--cyan), var(--emerald));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 20px rgba(34,211,238,0.3);
+    }
+    .nav-name { font-size: 16px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+    .nav-links { display: flex; gap: 32px; align-items: center; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      padding: 10px 24px; border-radius: 12px; font-weight: 700; font-size: 13px;
+      background: linear-gradient(135deg, var(--cyan), var(--emerald));
+      color: #030307; border: none; cursor: pointer; text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(34,211,238,0.3); }
+    
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      padding: 120px 24px 80px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px; border-radius: 100px;
+      background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.2);
+      font-size: 12px; font-weight: 600; color: var(--cyan);
+      margin-bottom: 32px;
+      animation: fadeIn 0.8s ease-out;
+    }
+    .hero-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    
+    .hero h1 {
+      font-size: clamp(40px, 6vw, 72px); font-weight: 900; letter-spacing: -2px;
+      line-height: 1.1; margin-bottom: 24px;
+      background: linear-gradient(135deg, var(--text) 0%, var(--cyan) 50%, var(--emerald) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      animation: fadeIn 1s ease-out 0.2s both;
+    }
+    .hero p {
+      font-size: 18px; color: var(--muted); max-width: 600px; margin-bottom: 48px;
+      animation: fadeIn 1s ease-out 0.4s both;
+    }
+    .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; animation: fadeIn 1s ease-out 0.6s both; }
+    .btn-hero {
+      padding: 16px 36px; border-radius: 16px; font-size: 15px; font-weight: 700;
+      cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--cyan), var(--emerald));
+      color: #030307; border: none;
+      box-shadow: 0 8px 32px rgba(34,211,238,0.25);
+    }
+    .btn-primary:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 12px 40px rgba(34,211,238,0.35); }
+    .btn-outline {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border2);
+    }
+    .btn-outline:hover { border-color: var(--cyan); background: rgba(34,211,238,0.05); }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    /* ── STATS BAR ── */
+    .stats-bar {
+      display: flex; justify-content: center; gap: 48px; padding: 40px 0;
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      margin-bottom: 80px;
+    }
+    .stat { text-align: center; }
+    .stat-value { font-size: 32px; font-weight: 800; color: var(--cyan); }
+    .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+    
+    /* ── SECTION ── */
+    section { padding: 100px 0; }
+    .section-label {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+      color: var(--cyan); margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: clamp(28px, 4vw, 44px); font-weight: 800; letter-spacing: -1px;
+      margin-bottom: 16px; line-height: 1.2;
+    }
+    .section-sub { font-size: 16px; color: var(--muted); max-width: 600px; margin-bottom: 48px; }
+    
+    /* ── PRODUCT CARDS ── */
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+    
+    .product-card {
+      background: var(--glass); border: 1px solid var(--border2);
+      border-radius: 28px; padding: 40px 32px;
+      backdrop-filter: blur(16px);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative; overflow: hidden;
+    }
+    .product-card:hover { transform: translateY(-8px); border-color: rgba(34,211,238,0.3); }
+    .product-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      border-radius: 28px 28px 0 0;
+    }
+    .product-card:nth-child(1)::before { background: linear-gradient(90deg, var(--cyan), var(--blue)); }
+    .product-card:nth-child(2)::before { background: linear-gradient(90deg, var(--violet), var(--rose)); }
+    .product-card:nth-child(3)::before { background: linear-gradient(90deg, var(--emerald), var(--amber)); }
+    .product-card:nth-child(4)::before { background: linear-gradient(90deg, var(--rose), var(--amber)); }
+    
+    .product-icon {
+      width: 56px; height: 56px; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; margin-bottom: 20px;
+    }
+    .product-card:nth-child(1) .product-icon { background: rgba(34,211,238,0.1); }
+    .product-card:nth-child(2) .product-icon { background: rgba(167,139,250,0.1); }
+    .product-card:nth-child(3) .product-icon { background: rgba(52,211,153,0.1); }
+    .product-card:nth-child(4) .product-icon { background: rgba(251,113,133,0.1); }
+    
+    .product-name { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .product-desc { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.7; }
+    
+    .product-features { list-style: none; margin-bottom: 28px; }
+    .product-features li {
+      font-size: 13px; color: var(--muted); padding: 6px 0;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .product-features li::before { content: '✓'; color: var(--emerald); font-weight: 700; font-size: 14px; }
+    
+    .product-price { margin-bottom: 20px; }
+    .price-value { font-size: 36px; font-weight: 800; }
+    .price-period { font-size: 14px; color: var(--muted); }
+    .price-note { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    
+    .product-card:nth-child(1) .price-value { color: var(--cyan); }
+    .product-card:nth-child(2) .price-value { color: var(--violet); }
+    .product-card:nth-child(3) .price-value { color: var(--emerald); }
+    .product-card:nth-child(4) .price-value { color: var(--rose); }
+    
+    .btn-product {
+      width: 100%; padding: 14px; border-radius: 14px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      border: 1px solid var(--border2); background: var(--bg3); color: var(--text);
+      transition: all 0.2s;
+    }
+    .btn-product:hover { background: rgba(34,211,238,0.1); border-color: var(--cyan); color: var(--cyan); }
+    
+    .product-popular {
+      border-color: rgba(167,139,250,0.3) !important;
+      box-shadow: 0 0 60px rgba(167,139,250,0.1);
+    }
+    .popular-tag {
+      position: absolute; top: 16px; right: 16px;
+      padding: 4px 12px; border-radius: 100px;
+      background: var(--violet); color: white;
+      font-size: 11px; font-weight: 700;
+    }
+    
+    /* ── HOW IT WORKS ── */
+    .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 32px; }
+    .step {
+      text-align: center; padding: 32px 24px;
+      background: var(--glass); border: 1px solid var(--border);
+      border-radius: 24px; backdrop-filter: blur(12px);
+    }
+    .step-number {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan), var(--emerald));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800; color: #030307;
+      margin: 0 auto 16px;
+    }
+    .step-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .step-desc { font-size: 13px; color: var(--muted); }
+    
+    /* ── CTA SECTION ── */
+    .cta-section {
+      text-align: center; padding: 120px 24px;
+      background: linear-gradient(180deg, transparent 0%, rgba(34,211,238,0.03) 50%, transparent 100%);
+    }
+    .cta-section h2 { font-size: clamp(28px, 4vw, 48px); font-weight: 800; margin-bottom: 16px; letter-spacing: -1px; }
+    .cta-section p { font-size: 16px; color: var(--muted); margin-bottom: 40px; max-width: 500px; margin-inline: auto; }
+    
+    /* ── FOOTER ── */
+    footer {
+      padding: 40px; text-align: center; font-size: 13px; color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--cyan); text-decoration: none; }
+    
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 12px 20px; }
+      .nav-links { display: none; }
+      .stats-bar { flex-wrap: wrap; gap: 24px; }
+      .hero { padding: 100px 20px 60px; }
+      .products-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+  
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-brand">
+      <div class="nav-logo" style="background: transparent; box-shadow: none; width: 40px; height: 40px;">
+        <img src="/logo.png" alt="GenerArise" style="width: 100%; height: 100%; object-fit: contain;">
+      </div>
+      <span class="nav-name">GenerArise</span>
+    </a>
+    <div class="nav-links">
+      <a href="#how">Cómo Funciona</a>
+      <a href="/auth.html">Panel</a>
+      <a href="/auth.html" class="nav-cta">Empezar Gratis</a>
+    </div>
+  </nav>
+  
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">Plataforma Activa · Más de 14,000 leads procesados</div>
+    <h1>Tu Negocio en Piloto Automático con IA</h1>
+    <p>Generá contenido para todas tus redes, descubrí clientes potenciales y cerrá ventas 24/7. Todo sin mover un dedo.</p>
+    <div class="hero-actions">
+      <a href="/auth.html" class="btn-hero btn-primary">Empezar Gratis →</a>
+      <a href="#how" class="btn-hero btn-outline">¿Cómo funciona?</a>
+    </div>
+  </section>
+  
+  <!-- STATS -->
+  <div class="container">
+    <div class="stats-bar" id="stats-bar">
+      <div class="stat"><div class="stat-value" id="stat-leads">14,200+</div><div class="stat-label">Leads Descubiertos</div></div>
+      <div class="stat"><div class="stat-value">4</div><div class="stat-label">Plataformas Conectadas</div></div>
+      <div class="stat"><div class="stat-value">24/7</div><div class="stat-label">Automatización Activa</div></div>
+      <div class="stat"><div class="stat-value">30s</div><div class="stat-label">Tiempo por Post</div></div>
+    </div>
+  </div>
+  
+  <!-- PRODUCTS -->
+  <section id="products">
+    <div class="container">
+      <div class="section-label">☁️ Productos</div>
+      <h2 class="section-title">Elegí el motor que necesitás</h2>
+      <p class="section-sub">Cada producto funciona de forma independiente o combinado. Pagás solo por lo que usás.</p>
+      
+      <div class="products-grid">
+        <!-- Product 1: Content Factory -->
+        <div class="product-card">
+          <div class="product-icon">🎬</div>
+          <h3 class="product-name">Content Factory SaaS</h3>
+          <p class="product-desc">Plataforma SaaS multi-inquilino donde empresas de terceros conectan sus propias cuentas de redes sociales para gestionar y automatizar su contenido.</p>
+          <ul class="product-features">
+            <li>Herramienta SaaS para creadores independientes</li>
+            <li>Posts en Instagram, Facebook, TikTok y YouTube</li>
+            <li>Videos cortos con voz IA y overlays</li>
+            <li>Calendario de contenido inteligente</li>
+            <li>Reportes diarios por Telegram</li>
+          </ul>
+          <div class="product-price">
+            <span class="price-value">$49</span>
+            <span class="price-period">USD/mes</span>
+            <div class="price-note">Hasta 90 posts/mes · 4 plataformas</div>
+          </div>
+          <button class="btn-product" onclick="startCheckout('starter')">Activar Content Factory →</button>
+        </div>
+        
+        <!-- Product 2: Lead Marketplace (POPULAR) -->
+        <div class="product-card product-popular">
+          <span class="popular-tag">🔥 Popular</span>
+          <div class="product-icon">🎯</div>
+          <h3 class="product-name">Lead Marketplace</h3>
+          <p class="product-desc">Comprá leads B2B verificados y calificados por IA. Contactos reales con teléfono, email y score de calidad. Listos para vender.</p>
+          <ul class="product-features">
+            <li>Leads verificados con datos reales</li>
+            <li>Score de calidad por IA (60-100)</li>
+            <li>Filtros por industria, ciudad y país</li>
+            <li>Datos desbloqueados al instante del pago</li>
+          </ul>
+          <div class="product-price">
+            <span class="price-value">$25-75</span>
+            <span class="price-period">USD/lead</span>
+            <div class="price-note">Precio según score de calidad · Sin suscripción</div>
+          </div>
+          <button class="btn-product" onclick="window.location.href='/marketplace.html'">Explorar Leads →</button>
+        </div>
+        
+        <!-- Product 3: SDR Automático -->
+        <div class="product-card">
+          <div class="product-icon">🤖</div>
+          <h3 class="product-name">SDR + Community Manager IA</h3>
+          <p class="product-desc">Un equipo de ventas y marketing 100% automático. Descubre leads, los contacta por WhatsApp y publica en tus redes. Todo en uno.</p>
+          <ul class="product-features">
+            <li>Todo lo de Content Factory incluido</li>
+            <li>Prospección automática en Google Maps</li>
+            <li>Contacto por WhatsApp personalizado por IA</li>
+            <li>Pipeline de ventas con seguimiento</li>
+            <li>Soporte prioritario y setup dedicado</li>
+          </ul>
+          <div class="product-price">
+            <span class="price-value">A convenir</span>
+            <span class="price-period"></span>
+            <div class="price-note">Reemplaza un vendedor + community manager</div>
+          </div>
+          <button class="btn-product" onclick="window.open('https://cal.com/gustavo-a.-dornhofer-nqjqos/sdr-community-manager-ia','_blank')">Agendar Demo →</button>
+        </div>
+        
+        <!-- Product 4: Tienda para Emprendedores -->
+        <div class="product-card">
+          <div class="product-icon">🛍️</div>
+          <h3 class="product-name">Tienda Digital</h3>
+          <p class="product-desc">Tu propia tienda online con catálogo, pagos integrados (MercadoPago) y publicación automática de productos en redes sociales.</p>
+          <ul class="product-features">
+            <li>Storefront profesional personalizable</li>
+            <li>Catálogo de productos con imágenes IA</li>
+            <li>Pagos con MercadoPago y transferencia</li>
+            <li>Publicación automática de productos en redes</li>
+          </ul>
+          <div class="product-price">
+            <span class="price-value">$29</span>
+            <span class="price-period">USD/mes</span>
+            <div class="price-note">Tienda completa · Sin comisiones</div>
+          </div>
+          <button class="btn-product" onclick="startCheckout('store')">Crear Mi Tienda →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="container">
+      <div class="section-label">⚡ Cómo Funciona</div>
+      <h2 class="section-title">De cero a automático en 3 pasos</h2>
+      <p class="section-sub">No necesitás saber de tecnología. Nosotros configuramos todo por vos.</p>
+      
+      <div class="steps-grid">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3 class="step-title">Elegí tu plan</h3>
+          <p class="step-desc">Seleccioná el producto que necesitás: contenido automático, leads calientes, o el combo completo.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3 class="step-title">Conectá tus redes</h3>
+          <p class="step-desc">Vinculá tu Instagram, Facebook, TikTok o YouTube en un click. La IA se encarga del resto.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3 class="step-title">Mirá los resultados</h3>
+          <p class="step-desc">Tu contenido se publica solo, tus leads llegan calientes, y vos solo cerrás las ventas.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <section class="cta-section" id="cta">
+    <h2>¿Listo para escalar?</h2>
+    <p>Empezá hoy y dejá que la IA trabaje por vos mientras dormís.</p>
+    <a href="/auth.html" class="btn-hero btn-primary">Empezar Gratis →</a>
+  </section>
+  
+  <!-- FOOTER -->
+  <footer style="padding:48px 40px;">
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;">
+      <img src="/logo.png" alt="GenerArise" style="width:28px;height:28px;border-radius:8px;object-fit:contain;">
+      <span style="font-weight:700;font-size:15px;color:var(--text);">GenerArise</span>
+    </div>
+    <p style="max-width:600px;margin:0 auto 20px;font-size:13px;color:var(--muted);line-height:1.6;">GenerArise is a multi-tenant SaaS platform where independent businesses and creators connect their own accounts to generate, schedule, and publish their own content across TikTok, Instagram, Facebook, and YouTube. Not for internal company operations or personal use.</p>
+    <p style="margin-bottom:12px;">
+      <a href="/privacy.html" style="font-weight:600;">Privacy Policy</a>
+      &nbsp;·&nbsp;
+      <a href="/terms.html" style="font-weight:600;">Terms of Service</a>
+      &nbsp;·&nbsp;
+      <a href="mailto:soporte@generarise.space">Contact Us</a>
+    </p>
+    <p style="font-size:12px;">© 2026 GenerArise — All rights reserved.</p>
+  </footer>
+  
+  <script>
+    // PayPal checkout placeholder
+    // Redirect to auth before checkout
+    function startCheckout(plan) {
+      window.location.href = '/auth.html?plan=' + plan;
+    }
+    
+    // Animate stats on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.animation = 'fadeIn 0.8s ease-out forwards';
+        }
+      });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.product-card, .step').forEach(el => {
+      el.style.opacity = '0';
+      observer.observe(el);
+    });
+    
+    // Fetch live stats from API
+    async function loadLiveStats() {
+      try {
+        const res = await fetch('/api/admin/stats');
+        if (res.ok) {
+          const data = await res.json();
+          const leadsEl = document.getElementById('stat-leads');
+          if (data.sales?.totalLeads) {
+            leadsEl.textContent = data.sales.totalLeads.toLocaleString() + '+';
+          }
+        }
+      } catch (e) { /* silently fail for static hosting */ }
+    }
+    loadLiveStats();
+  </script>
+</body>
+</html>

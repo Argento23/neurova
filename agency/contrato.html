@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrato de Servicios - GenerArise</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Grotesk:wght@300;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --primary: #6366f1;
+            --accent: #ec4899;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+
+            .contract-container {
+                box-shadow: none;
+                border: none;
+            }
+
+            .no-print {
+                display: none;
+            }
+
+            h1,
+            h2,
+            h3 {
+                color: black;
+            }
+
+            p,
+            li {
+                color: #333;
+            }
+
+            .logo-text {
+                color: black !important;
+            }
+
+            .text-accent {
+                color: #6366f1 !important;
+                -webkit-background-clip: unset !important;
+                -webkit-text-fill-color: initial !important;
+                background: none !important;
+            }
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .contract-container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 3rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .text-accent {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-top: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            color: white;
+        }
+
+        p,
+        li {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        .highlight-box {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .signature-section {
+            margin-top: 4rem;
+            display: flex;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .signature-box {
+            flex: 1;
+            border-top: 1px solid var(--text-muted);
+            padding-top: 1rem;
+            text-align: center;
+        }
+
+        .print-btn {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+        }
+    </style>
+</head>
+
+<body>
+
+    <button class="print-btn no-print" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+
+    <div class="contract-container">
+        <div class="header">
+            <div class="logo">
+                <!-- SVG Logo from Index -->
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="logo-gradient" x1="0" y1="0" x2="40" y2="40">
+                            <stop offset="0%" stop-color="#6366f1" />
+                            <stop offset="100%" stop-color="#ec4899" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M20 4L36 12V28L20 36L4 28V12L20 4Z" stroke="url(#logo-gradient)" stroke-width="2"
+                        fill="rgba(99, 102, 241, 0.1)" />
+                    <path d="M20 12L28 16V24L20 28L12 24V16L20 12Z" stroke="url(#logo-gradient)" stroke-width="2" />
+                    <circle cx="20" cy="20" r="3" fill="#fff" />
+                </svg>
+                <span class="logo-text">Gener<span class="text-accent">Arise</span></span>
+            </div>
+            <div style="text-align: right; color: var(--text-muted); font-size: 0.9rem;">
+                Ref: SERVICIOS-TECH-2026<br>
+                GenerArise Labs Division
+            </div>
+        </div>
+
+        <h1>Contrato de Automatización IA</h1>
+        <p><strong>Fecha de emisión:</strong> <span id="currentDate"></span></p>
+        <p>
+            <strong>Proveedor:</strong> GenerArise (GenerArise Labs)<br>
+            <strong>Cliente:</strong> [NOMBRE DEL CLIENTE / EMPRESA]
+        </p>
+
+        <h2>1. Objeto del Contrato</h2>
+        <p>El presente acuerdo establece los términos bajo los cuales <strong>GenerArise</strong> implementará,
+            desplegará y mantendrá soluciones de <strong>Automatización basada en Inteligencia Artificial</strong> para
+            <strong>El Cliente</strong>.
+        </p>
+        <p>El objetivo es la optimización de procesos comerciales, cualificación de leads y automatización de revenue
+            mediante Modelos de Lenguaje Grande (LLMs).</p>
+
+        <h2>2. Infraestructura Google Cloud</h2>
+        <p>GenerArise garantiza que la infraestructura subyacente corre sobre estándares de nivel empresarial
+            (Enterprise Grade) para máxima seguridad.</p>
+
+        <div class="highlight-box">
+            <h3 style="margin-top: 0; color: var(--primary);">Stack Tecnológico Certificado</h3>
+            <ul>
+                <li><strong>Motor de Inteligencia:</strong> Google Cloud Vertex AI / OpenAI API (Modelos GPT-4o / Gemini
+                    1.5 Pro).</li>
+                <li><strong>Servidores:</strong> Google Cloud Run (Serverless) con uptime garantizado del 99.9%.</li>
+                <li><strong>Seguridad:</strong> Encriptación SSL (TLS 1.2+) en tránsito y AES-256 en reposo.</li>
+            </ul>
+        </div>
+
+        <h2>3. Alcance y Niveles de Servicio (SLA)</h2>
+        <h3>3.1 Responsabilidades</h3>
+        <ul>
+            <li>Diseño y programación de los flujos de automatización (Workflows).</li>
+            <li>Integración con CRM y plataformas de mensajería (WhatsApp Business API).</li>
+            <li>Mantenimiento correctivo de APIs.</li>
+            <li><strong>Soporte:</strong> Respuesta máxima en 24h hábiles para incidencias críticas.</li>
+        </ul>
+
+        <h3>3.2 Inteligencia Artificial Generativa</h3>
+        <p>El Cliente reconoce que la tecnología de IA es probabilística. Aunque implementamos filtros de seguridad
+            ("Guardrails"), existe una posibilidad técnica de respuestas inexactas. GenerArise no se hace responsable
+            por daños derivados de la interpretación errónea de textos generados, sugiriendo supervisión humana inicial.
+        </p>
+
+        <h2>4. Confidencialidad y Propiedad</h2>
+        <p><strong>Datos del Cliente:</strong> Todos los leads y métricas pertenecen exclusivamente al Cliente. No
+            usamos sus datos para entrenar modelos públicos.</p>
+        <p><strong>Propiedad Intelectual:</strong> Los códigos fuente de los agentes y la arquitectura de los workflows
+            siguen siendo propiedad de GenerArise, otorgándose una licencia de uso perpetua al Cliente.</p>
+
+        <h2>5. Términos Económicos</h2>
+        <p>Según propuesta comercial adjunta:</p>
+        <ul>
+            <li><strong>Setup Fee (Implementación):</strong> $ ____________ USD</li>
+            <li><strong>Fee Mensual (Mantenimiento):</strong> $ ____________ USD</li>
+        </ul>
+
+        <div class="signature-section">
+            <div class="signature-box">
+                <p><strong>POR GENERARISE</strong></p>
+                <div style="height: 50px;"></div> <!-- Espacio para firma -->
+                <p style="font-size: 0.8rem;">CEO / Director de Tecnología</p>
+            </div>
+            <div class="signature-box">
+                <p><strong>POR EL CLIENTE</strong></p>
+                <div style="height: 50px;"></div> <!-- Espacio para firma -->
+                <p style="font-size: 0.8rem;">Firma y Aclaración</p>
+            </div>
+        </div>
+
+        <p style="margin-top: 4rem; text-align: center; font-size: 0.8rem; opacity: 0.5;">
+            Este documento digital tiene validez legal al ser firmado por ambas partes. Generado por GenerArise Systems.
+        </p>
+    </div>
+
+    <script>
+        // Set current date
+        const date = new Date();
+        document.getElementById('currentDate').innerText = date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+    </script>
+</body>
+
+</html>

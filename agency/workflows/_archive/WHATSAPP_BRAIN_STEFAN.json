@@ -1,0 +1,118 @@
+{
+    "name": "CEREBRO_WHATSAPP_STEFAN_V1",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "whatsapp-stefan",
+                "options": {}
+            },
+            "id": "node-webhook",
+            "name": "Webhook Stefan",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile",
+                "options": {
+                    "temperature": 0.7
+                }
+            },
+            "id": "node-groq",
+            "name": "Groq Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                300,
+                500
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres Stefan, Senior Sales Hunter para \"Turismo 4.0\" en Argenterio (Österreich).\n\nIDENTIDAD: Elegante, experto en hotelería, autoritario. Sabes todo sobre Mews, Protel y SIHOT.\n\nCONTEXTO MENSAJE:\nUsuario: {{ $json.body.data.message.conversation || $json.body.data.message.extendedTextMessage.text }}\nTeléfono: {{ $json.body.data.key.remoteJid }}\n\nINSTRUCCIONES:\n1. Habla sobre la ineficiencia de los hoteles sin IA.\n2. Tu objetivo es que agenden la auditoría de 15 min.\n3. Envía el link de Cal.com si hay interés: https://cal.com/gustavo-a.-dornhofer-nqjqos/argenterio\n4. RESPUESTA SOLO TEXTO. Habla en español si el usuario habla español, pero mantén el estilo austríaco profesional.",
+                "hasOutputParser": true
+            },
+            "id": "node-ai-agent",
+            "name": "AI Agent Stefan",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                300,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "Austria",
+                "options_message": {
+                    "number": "={{ $node[\"Webhook Stefan\"].json.body.data.key.remoteJid }}",
+                    "textMessage": {
+                        "text": "={{ $json.text }}"
+                    }
+                }
+            },
+            "id": "node-evo",
+            "name": "Enviar WhatsApp (Stefan)",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                550,
+                300
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "Austria"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook Stefan": {
+            "main": [
+                [
+                    {
+                        "node": "AI Agent Stefan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Agent Stefan",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Agent Stefan": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp (Stefan)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

@@ -1,0 +1,624 @@
+{
+    "name": "Autonomous Sales Agent v17 (WhatsApp + Evolution API)",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "start-trigger",
+            "name": "Start Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                -9440,
+                336
+            ]
+        },
+        {
+            "parameters": {
+                "values": {
+                    "string": [
+                        {
+                            "name": "search_term",
+                            "value": "Inmobiliarias"
+                        },
+                        {
+                            "name": "location",
+                            "value": "Buenos Aires, Argentina"
+                        },
+                        {
+                            "name": "target_audience",
+                            "value": "Empresas que necesiten automatización con IA"
+                        },
+                        {
+                            "name": "sender_email",
+                            "value": "no-reply@generarise.space"
+                        },
+                        {
+                            "name": "sheet_id",
+                            "value": "1b_nPYFDov3Rg2ljPQ6hRLwUhoSznfw5GmyneBqCNJWg"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "config-node",
+            "name": "CONFIGURACION",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 1,
+            "position": [
+                -9280,
+                336
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://serpapi.com/search.json",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "queryAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "api_key",
+                            "value": "9be0d43581dc9220232e9a2819f308c303a32082a1e62f97c9c87b75dfde8d72"
+                        },
+                        {
+                            "name": "engine",
+                            "value": "google_maps"
+                        },
+                        {
+                            "name": "q",
+                            "value": "={{ $json[\"search_term\"] + \" en \" + $json[\"location\"] }}"
+                        },
+                        {
+                            "name": "type",
+                            "value": "search"
+                        },
+                        {
+                            "name": "num",
+                            "value": "10"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "serp-api",
+            "name": "SerpApi - Maps Scraper",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -9088,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "documentId": {
+                    "__rl": true,
+                    "value": "1b_nPYFDov3Rg2ljPQ6hRLwUhoSznfw5GmyneBqCNJWg",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "gid=0",
+                    "mode": "list",
+                    "cachedResultName": "Hoja 1",
+                    "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1b_nPYFDov3Rg2ljPQ6hRLwUhoSznfw5GmyneBqCNJWg/edit#gid=0"
+                },
+                "options": {}
+            },
+            "id": "memory-loader",
+            "name": "Cargar Memoria (Sheets)",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                -9088,
+                496
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "zwdmBzveCXv4B3Ec",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "local_results",
+                "options": {}
+            },
+            "id": "split-results",
+            "name": "Separar Resultados",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 1,
+            "position": [
+                -8864,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "mode": "removeKeyMatches",
+                "propertyInput1": "title",
+                "propertyInput2": "title"
+            },
+            "id": "merge-filter",
+            "name": "Filtro Anti-Repetidos",
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 3,
+            "position": [
+                -8640,
+                336
+            ],
+            "notes": "Elimina duplicados comparando el nombre (title) contra Sheets."
+        },
+        {
+            "parameters": {
+                "batchSize": 1,
+                "options": {}
+            },
+            "id": "loop-node",
+            "name": "Loop (1 por 1)",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 2,
+            "position": [
+                -8416,
+                336
+            ]
+        },
+        {
+            "parameters": {
+                "url": "={{ $json.website }}",
+                "options": {
+                    "redirect": {
+                        "redirect": {
+                            "maxRedirects": 3
+                        }
+                    },
+                    "timeout": 5000
+                }
+            },
+            "id": "visit-website",
+            "name": "Visitar Pagina Web",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -8208,
+                336
+            ],
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "jsCode": "const html = $input.item.json.data || '';\\nconst text = html.replace(/<[^>]*>?/gm, ' ');\\nreturn { text_content: text.substring(0, 8000) };"
+            },
+            "id": "clean-html",
+            "name": "Limpiar HTML",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -7984,
+                336
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile",
+                "options": {}
+            },
+            "id": "groq-model",
+            "name": "Groq Chat Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                -7760,
+                560
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Analiza el texto de esta web de un potencial cliente:\\n\\n---\\n{{ $json.text_content }}\\n---\\n\\nDATOS:\\nNombre Negocio: {{ $('Loop (1 por 1)').item.json.title }}\\n\\nTAREA PRINCIPAL:\\n1. Busca un NÚMERO DE TELÉFONO O WHATSAPP. Prioriza celulares y busca en secciones de contacto o pie de página.\\n2. Busca un EMAIL de contacto.\\n3. Califica (1-10) el lead.\\n4. Escribe un mensaje de ventas CORTO y CASUAL para WhatsApp.\\n\\nFORMATO JSON OBLIGATORIO:\\n{ \\n  \"score\": 8, \\n  \"phone_number\": \"54911...\", \\n  \"email_address\": \"...\",\\n  \"whatsapp_message\": \"Hola! Vi su web...\",\\n  \"reason\": \"...\"\\n}",
+                "hasOutputParser": true
+            },
+            "id": "ai-extractor",
+            "name": "IA - Extractor Datos",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                -7760,
+                336
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "try {\\n  let content = $input.item.json.text || '';\\n  content = content.replace(/```json/g, '').replace(/```/g, '').trim();\\n  const parsed = JSON.parse(content);\\n  \\n  if(parsed.phone_number) {\\n     parsed.phone_number = parsed.phone_number.replace(/[^0-9]/g, '');\\n     if(parsed.phone_number.startsWith('11') && parsed.phone_number.length === 10) {\\n         parsed.phone_number = '549' + parsed.phone_number;\\n     }\\n  }\\n  \\n  return parsed;\\n} catch (error) {\\n  return {\\n    score: 0,\\n    phone_number: \"\",\\n    email_address: \"\",\\n    reason: \"Error IA o Sin Datos\"\\n  };\\n}"
+            },
+            "id": "json-parser",
+            "name": "JSON Parser",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -7460,
+                336
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "number": [
+                        {
+                            "value1": "={{ $json.score }}",
+                            "operation": "largerEqual",
+                            "value2": 6
+                        }
+                    ],
+                    "string": [
+                        {
+                            "value1": "={{ $json.phone_number }}",
+                            "operation": "isNotEmpty"
+                        }
+                    ]
+                }
+            },
+            "id": "check-whatsapp",
+            "name": "Tiene WhatsApp?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                -7240,
+                336
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://TU-URL-EVOLUTION/message/sendText/TU-INSTANCIA",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "number",
+                            "value": "={{ $json.phone_number }}"
+                        },
+                        {
+                            "name": "textMessage.text",
+                            "value": "={{ $json.whatsapp_message }}"
+                        },
+                        {
+                            "name": "options.delay",
+                            "value": "1200"
+                        },
+                        {
+                            "name": "options.presence",
+                            "value": "composing"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "whatsapp-sender",
+            "name": "Enviar WhatsApp (Evolution)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -6960,
+                240
+            ],
+            "notes": "CONFIGURA AQUI TU URL Y APIKEY"
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "1b_nPYFDov3Rg2ljPQ6hRLwUhoSznfw5GmyneBqCNJWg",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "Hoja 1",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "title": "={{ $('Loop (1 por 1)').item.json.title }}",
+                        "phone": "={{ $json.phone_number }}",
+                        "status": "WhatsApp Enviado",
+                        "score": "={{ $json.score }}"
+                    },
+                    "matchingColumns": [],
+                    "schema": [],
+                    "attemptToConvertTypes": false,
+                    "convertFieldsToString": false
+                },
+                "options": {}
+            },
+            "id": "log-success",
+            "name": "Log: EXITO",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                -6700,
+                240
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "zwdmBzveCXv4B3Ec",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "1TIiVtgoI736-7suBh09oP73PjOqEftL79RtCOr4EeaE",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "Hoja 1",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "title": "={{ $('Loop (1 por 1)').item.json.title }}",
+                        "reason": "={{ $json.reason || 'Sin WhatsApp o Score bajo' }}"
+                    },
+                    "matchingColumns": [],
+                    "schema": [],
+                    "attemptToConvertTypes": false,
+                    "convertFieldsToString": false
+                },
+                "options": {}
+            },
+            "id": "log-discard",
+            "name": "Log: DESCARTE",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                -6960,
+                460
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "zwdmBzveCXv4B3Ec",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "amount": 2,
+                "unit": "seconds"
+            },
+            "id": "wait-node",
+            "name": "Esperar",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                -6460,
+                340
+            ]
+        }
+    ],
+    "connections": {
+        "Start Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "CONFIGURACION",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "CONFIGURACION": {
+            "main": [
+                [
+                    {
+                        "node": "SerpApi - Maps Scraper",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Cargar Memoria (Sheets)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "SerpApi - Maps Scraper": {
+            "main": [
+                [
+                    {
+                        "node": "Separar Resultados",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Cargar Memoria (Sheets)": {
+            "main": [
+                [
+                    {
+                        "node": "Filtro Anti-Repetidos",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "Separar Resultados": {
+            "main": [
+                [
+                    {
+                        "node": "Filtro Anti-Repetidos",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtro Anti-Repetidos": {
+            "main": [
+                [
+                    {
+                        "node": "Loop (1 por 1)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop (1 por 1)": {
+            "main": [
+                [
+                    {
+                        "node": "Visitar Pagina Web",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Visitar Pagina Web": {
+            "main": [
+                [
+                    {
+                        "node": "Limpiar HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Limpiar HTML": {
+            "main": [
+                [
+                    {
+                        "node": "IA - Extractor Datos",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "groq-model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "IA - Extractor Datos",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IA - Extractor Datos": {
+            "main": [
+                [
+                    {
+                        "node": "JSON Parser",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "JSON Parser": {
+            "main": [
+                [
+                    {
+                        "node": "Tiene WhatsApp?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Tiene WhatsApp?": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp (Evolution)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Log: DESCARTE",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar WhatsApp (Evolution)": {
+            "main": [
+                [
+                    {
+                        "node": "Log: EXITO",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Log: EXITO": {
+            "main": [
+                [
+                    {
+                        "node": "Esperar",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Log: DESCARTE": {
+            "main": [
+                [
+                    {
+                        "node": "Esperar",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Esperar": {
+            "main": [
+                [
+                    {
+                        "node": "Loop (1 por 1)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": false,
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "versionId": "v17-whatsapp-fix-2",
+    "id": "workflow-v17-2",
+    "tags": []
+}

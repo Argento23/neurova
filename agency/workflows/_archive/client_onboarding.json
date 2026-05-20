@@ -1,0 +1,230 @@
+{
+    "name": "GenerArise - Client Onboarding Automation",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "new-client",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "id": "webhook",
+            "name": "Webhook - Cliente Nuevo",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                240,
+                400
+            ],
+            "webhookId": "new-client-trigger"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "client_name",
+                            "name": "client_name",
+                            "value": "={{ $json.body.nombre }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "client_email",
+                            "name": "client_email",
+                            "value": "={{ $json.body.email }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "client_phone",
+                            "name": "client_phone",
+                            "value": "={{ $json.body.telefono }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "client_industry",
+                            "name": "client_industry",
+                            "value": "={{ $json.body.industria }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "plan",
+                            "name": "plan",
+                            "value": "={{ $json.body.plan }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "prep_data",
+            "name": "Preparar Info Cliente",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                460,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_CLIENTS_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "clients",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Fecha_Alta": "={{ $now.format('yyyy-MM-dd') }}",
+                        "Nombre": "={{ $json.client_name }}",
+                        "Email": "={{ $json.client_email }}",
+                        "Telefono": "={{ $json.client_phone }}",
+                        "Industria": "={{ $json.client_industry }}",
+                        "Plan": "={{ $json.plan }}",
+                        "Estado": "Onboarding",
+                        "Dia_Setup": "1"
+                    }
+                }
+            },
+            "id": "add_to_sheet",
+            "name": "Agregar a Clients DB",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                680,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "fromEmail": "agentes.space@gmail.com",
+                "toEmail": "={{ $('Preparar Info Cliente').item.json.client_email }}",
+                "subject": "Bienvenido a GenerArise - Próximos Pasos 🚀",
+                "emailType": "html",
+                "message": "=<html>\n<body style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;\">\n  <h2>Hola {{ $('Preparar Info Cliente').item.json.client_name }}! 👋</h2>\n  \n  <p>Gracias por confiar en GenerArise para automatizar tus consultas.</p>\n  \n  <h3>📋 Próximos pasos (7 días):</h3>\n  <ul>\n    <li><strong>Día 1-2:</strong> Recolección de información (FAQs, accesos)</li>\n    <li><strong>Día 3-5:</strong> Configuramos tu chatbot personalizado</li>\n    <li><strong>Día 6-7:</strong> Testing conjunto</li>\n    <li><strong>Día 8:</strong> ¡Go Live! 🚀</li>\n  </ul>\n  \n  <h3>🔑 Necesitamos de tu parte:</h3>\n  <ol>\n    <li>Acceso WhatsApp Business API (te enviamos guía)</li>\n    <li>Lista de 10-15 FAQs principales</li>\n    <li>Ejemplos de conversaciones típicas</li>\n  </ol>\n  \n  <p><strong>Agendar Kick-off Call (30 min):</strong><br>\n  <a href=\"https://calendly.com/generarise/kickoff\" style=\"background: #0066cc; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px 0;\">Elegir Horario</a></p>\n  \n  <h3>📞 Mantenemos contacto:</h3>\n  <ul>\n    <li>Updates diarios por WhatsApp</li>\n    <li>Call de revisión Día 6</li>\n    <li>Soporte 24/7: agentes.space@gmail.com</li>\n  </ul>\n  \n  <p>¿Dudas? Respondeme este email.</p>\n  \n  <p>Abrazo,<br>\n  <strong>Gustavo</strong><br>\n  GenerArise<br>\n  📱 +54 9 11 7358 5449</p>\n</body>\n</html>",
+                "options": {}
+            },
+            "id": "send_welcome",
+            "name": "Enviar Welcome Email",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2.1,
+            "position": [
+                900,
+                300
+            ],
+            "credentials": {
+                "gmailOAuth2": {
+                    "id": "YOUR_GMAIL_CREDENTIAL_ID",
+                    "name": "Gmail account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "url": "https://api.whatsapp.com/send",
+                "method": "POST",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"phone\": \"+5491173585449\",\n  \"message\": \"🎉 Nuevo cliente: {{ $('Preparar Info Cliente').item.json.client_name }}\\n\\nIndustria: {{ $('Preparar Info Cliente').item.json.client_industry }}\\nPlan: {{ $('Preparar Info Cliente').item.json.plan }}\\n\\nAcciones:\\n1. Welcome email enviado ✅\\n2. Agregado a Clients DB ✅\\n3. Kickoff pendiente agendamiento\\n\\nEmail: {{ $('Preparar Info Cliente').item.json.client_email }}\"\n}",
+                "options": {}
+            },
+            "id": "notify_me",
+            "name": "Notificarme WhatsApp",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                900,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"success\": true,\n  \"message\": \"Cliente {{ $('Preparar Info Cliente').item.json.client_name }} registrado. Welcome email enviado.\",\n  \"next_steps\": \"Agendar kick-off call\"\n}",
+                "options": {}
+            },
+            "id": "response",
+            "name": "Response Success",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                1120,
+                400
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook - Cliente Nuevo": {
+            "main": [
+                [
+                    {
+                        "node": "Preparar Info Cliente",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Preparar Info Cliente": {
+            "main": [
+                [
+                    {
+                        "node": "Agregar a Clients DB",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Agregar a Clients DB": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Welcome Email",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Notificarme WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar Welcome Email": {
+            "main": [
+                [
+                    {
+                        "node": "Response Success",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Notificarme WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Response Success",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "client-onboarding-v1"
+}

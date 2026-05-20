@@ -1,0 +1,442 @@
+{
+    "name": "Chatbot Inmobiliaria - WhatsApp AI",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "whatsapp-inmobiliaria",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "id": "webhook",
+            "name": "Webhook WhatsApp",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                240,
+                400
+            ],
+            "webhookId": "whatsapp-inmobiliaria"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "from",
+                            "name": "from",
+                            "value": "={{ $json.body.data.key.remoteJid }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "message",
+                            "name": "message",
+                            "value": "={{ $json.body.data.message.conversation || $json.body.data.message.extendedTextMessage.text }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "phone",
+                            "name": "phone",
+                            "value": "={{ $json.from.replace('@s.whatsapp.net', '') }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "extract_data",
+            "name": "Extraer Mensaje",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                460,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.message.toLowerCase() }}",
+                            "rightValue": "hablar con agente|contacto|asesor|urgente",
+                            "operator": {
+                                "type": "string",
+                                "operation": "regex"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "check_human",
+            "name": "Pide Agente Humano?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                680,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "response",
+                            "name": "response",
+                            "value": "Te contacto con un asesor ahora mismo. Un momento por favor! 👤",
+                            "type": "string"
+                        },
+                        {
+                            "id": "escalate",
+                            "name": "escalate",
+                            "value": "true",
+                            "type": "boolean"
+                        }
+                    ]
+                }
+            },
+            "id": "escalate_response",
+            "name": "Derivar a Humano",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                900,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq_model",
+            "name": "Groq AI Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                900,
+                620
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres el asistente virtual de {{$('CONFIG').item.json.nombre_inmobiliaria}}.\n\nCONTEXTO:\n- Horario atención humana: {{$('CONFIG').item.json.horario}}\n- Ubicación: {{$('CONFIG').item.json.ubicacion}}\n\nCONSULTA DEL CLIENTE:\n{{ $('Extraer Mensaje').item.json.message }}\n\nINSTRUCCIONES:\n1. Responde la consulta de forma profesional pero amigable\n2. Si preguntan por propiedades específicas, recomendá contactar al asesor\n3. Si consultan fuera de horario, avisá que te contactan mañana\n4. Máximo 3 líneas de respuesta\n5. Incluí 1 emoji relevante\n6. Si es consulta general (horarios, ubicación, servicios), respondé directamente\n7. Si piden tasación/visita, pedí: nombre, tipo propiedad, zona\n\nFAQs PRINCIPALES:\n{{$('CONFIG').item.json.faqs}}\n\nRespuesta:",
+                "hasOutputParser": false
+            },
+            "id": "ai_agent",
+            "name": "AI Responder",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                900,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "nombre_inmobiliaria",
+                            "name": "nombre_inmobiliaria",
+                            "value": "NOMBRE_INMOBILIARIA_AQUI",
+                            "type": "string"
+                        },
+                        {
+                            "id": "horario",
+                            "name": "horario",
+                            "value": "Lunes a Viernes 9-18hs, Sábados 9-13hs",
+                            "type": "string"
+                        },
+                        {
+                            "id": "ubicacion",
+                            "name": "ubicacion",
+                            "value": "Av. Corrientes 1234, CABA",
+                            "type": "string"
+                        },
+                        {
+                            "id": "faqs",
+                            "name": "faqs",
+                            "value": "- Trabajamos venta, alquiler y tasaciones\n- Cobertura: CABA, Zona Norte, Zona Oeste\n- Aceptamos reservas con seña\n- Comisión venta: 3% + IVA\n- Comisión alquiler: 1 mes + IVA",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "config",
+            "name": "CONFIG",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                680,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "url": "=https://evolution-api.com/message/sendText/{{$('CONFIG').item.json.instance_name}}",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"number\": \"{{ $('Extraer Mensaje').item.json.phone }}\",\n  \"text\": \"{{ $json.response || $json.output }}\"\n}",
+                "options": {}
+            },
+            "id": "send_whatsapp",
+            "name": "Enviar WhatsApp",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1120,
+                400
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_EVOLUTION_API_KEY",
+                    "name": "Evolution API"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "conversaciones",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Fecha": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+                        "Telefono": "={{ $('Extraer Mensaje').item.json.phone }}",
+                        "Mensaje_Cliente": "={{ $('Extraer Mensaje').item.json.message }}",
+                        "Respuesta_Bot": "={{ $('Enviar WhatsApp').item.json.text }}",
+                        "Escalado": "={{ $json.escalate || 'false' }}"
+                    }
+                }
+            },
+            "id": "log_conversation",
+            "name": "Log Conversación",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                1340,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.escalate }}",
+                            "rightValue": "true",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "check_escalate",
+            "name": "Necesita Escalado?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1560,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://api.whatsapp.com/send",
+                "method": "POST",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"phone\": \"{{$('CONFIG').item.json.numero_asesor}}\",\n  \"message\": \"🚨 NUEVO LEAD CALIENTE\\n\\nTeléfono: {{ $('Extraer Mensaje').item.json.phone }}\\nConsulta: {{ $('Extraer Mensaje').item.json.message }}\\n\\nPidió hablar con agente. Contactar AHORA!\"\n}",
+                "options": {}
+            },
+            "id": "notify_agent",
+            "name": "Notificar Asesor",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1780,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\"success\": true, \"processed\": true}",
+                "options": {}
+            },
+            "id": "response",
+            "name": "Response OK",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                2000,
+                400
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Extraer Mensaje",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extraer Mensaje": {
+            "main": [
+                [
+                    {
+                        "node": "Pide Agente Humano?",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "CONFIG",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Pide Agente Humano?": {
+            "main": [
+                [
+                    {
+                        "node": "Derivar a Humano",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Derivar a Humano": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq AI Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Responder",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Responder": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "CONFIG": {
+            "main": [
+                [
+                    {
+                        "node": "AI Responder",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Log Conversación",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Log Conversación": {
+            "main": [
+                [
+                    {
+                        "node": "Necesita Escalado?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Necesita Escalado?": {
+            "main": [
+                [
+                    {
+                        "node": "Notificar Asesor",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Response OK",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Notificar Asesor": {
+            "main": [
+                [
+                    {
+                        "node": "Response OK",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "chatbot-inmobiliaria-v1"
+}

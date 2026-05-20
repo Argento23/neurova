@@ -1,0 +1,450 @@
+{
+    "name": "Argenterio - Autonomous Lead Generation (HTML Premium)",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "hours",
+                            "triggerAtHour": 10
+                        }
+                    ]
+                }
+            },
+            "id": "schedule",
+            "name": "Cron Diario (10am)",
+            "type": "n8n-nodes-base.cron",
+            "typeVersion": 1,
+            "position": [
+                240,
+                400
+            ]
+        },
+        {
+            "parameters": {},
+            "id": "start",
+            "name": "Manual Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                240,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "values": {
+                    "string": [
+                        {
+                            "name": "search_term",
+                            "value": "Contadores"
+                        },
+                        {
+                            "name": "location",
+                            "value": "Buenos Aires, Argentina"
+                        },
+                        {
+                            "name": "banner_url",
+                            "value": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=800&auto=format&fit=crop"
+                        }
+                    ]
+                }
+            },
+            "id": "config",
+            "name": "CONFIG",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 1,
+            "position": [
+                460,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://serpapi.com/search.json",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "queryAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "api_key",
+                            "value": "9be0d43581dc9220232e9a2819f308c303a32082a1e62f97c9c87b75dfde8d72"
+                        },
+                        {
+                            "name": "engine",
+                            "value": "google_maps"
+                        },
+                        {
+                            "name": "q",
+                            "value": "={{ $json.search_term + ' en ' + $json.location }}"
+                        },
+                        {
+                            "name": "num",
+                            "value": "10"
+                        }
+                    ]
+                }
+            },
+            "id": "serp",
+            "name": "Google Maps",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                680,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "local_results"
+            },
+            "id": "split",
+            "name": "Dividir",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 3,
+            "position": [
+                900,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "batchSize": 1
+            },
+            "id": "loop",
+            "name": "Loop",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 2,
+            "position": [
+                1120,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "url": "={{ $json.website }}",
+                "options": {
+                    "timeout": 5000
+                }
+            },
+            "id": "web",
+            "name": "Visitar Web",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1340,
+                400
+            ],
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "jsCode": "const html = $input.item.json.data || '';\nconst text = html.replace(/<[^>]*>/g, ' ').replace(/\\s+/g, ' ');\nconst title = $('Loop').item.json.title || 'Sin nombre';\nconst phone = $('Loop').item.json.phone || '';\n\nreturn {\n  text: text.substring(0, 2500),\n  title: title,\n  phone_from_maps: phone\n};"
+            },
+            "id": "clean",
+            "name": "Limpiar HTML",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1560,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq",
+            "name": "Groq Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                1780,
+                620
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=CONTEXTO:\nEres el Equipo de **Argenterio**, sistema de eficiencia financiera contra la inflación argentina.\n\nNEGOCIO:\nWeb: {{ $json.text }}\nNombre: {{ $json.title }}\nTel Maps: {{ $json.phone_from_maps }}\n\nTAREA:\n1. EXTRAE datos (tel/wa con 549, email)\n2. IDENTIFICA si es contador, asesor financiero, o consultor\n3. GENERA WA TEXTO (Directo, urgente, tono técnico, máximo 2 líneas).\n4. GENERA EMAIL BODY (SOLO EL TEXTO CENTRAL, sin <html> ni <head>, usa <p> y <ul>):\n   - Saludo: 'Hola [Nombre]' o 'Hola equipo de [Nombre]'\n   - Párrafo 1: Reconocer el desafío de proteger el negocio de clientes en contexto argentino\n   - Párrafo 2: Presentar Argenterio como herramienta de diagnóstico financiero con IA\n   - Lista: 3 Beneficios clave (diagnóstico automatizado, recomendaciones de eficiencia, reportes profesionales)\n   - CTA: '¿Querés ver cómo puede potenciar tu consultora?'\n\nJSON:\n{\n  \"phone\": \"549...\",\n  \"email\": \"...\",\n  \"score\": 8,\n  \"wa_msg\": \"Hola [Nombre], Argenterio...\",\n  \"email_body\": \"<p>...</p>\"\n}",
+                "hasOutputParser": true
+            },
+            "id": "ai",
+            "name": "IA Extractor PRO",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1780,
+                400
+            ],
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "jsCode": "const data = $input.item.json;\nconst title = $('Loop').item.json.title || 'Sin nombre';\nconst phone_maps = $('Loop').item.json.phone || '';\nconst banner = $('CONFIG').item.json.banner_url;\n\n// Datos con fallback\nconst phone = data.phone || phone_maps || '5491112345678';\nconst email = data.email || 'contacto@ejemplo.com';\nconst score = data.score || 5;\n\n// Contenido del email (viene de IA o fallback)\nconst emailBody = data.email_body || '<p>Hola <strong>' + title + '</strong>,</p><p>Argenterio es un sistema de diagnóstico financiero automatizado para proteger negocios contra la inflación.</p>';\n\n// Template HTML (sin nested template literals)\nconst email_html_argenterio = '<!DOCTYPE html>' +\n'<html lang=\"es\">' +\n'<head>' +\n'    <meta charset=\"UTF-8\">' +\n'    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">' +\n'    <title>Argenterio - Eficiencia Financiera</title>' +\n'</head>' +\n'<body style=\"margin: 0; padding: 0; background-color: #050505; font-family: \\'Segoe UI\\', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;\">' +\n'    <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color: #000000; padding: 40px 10px; background-image: radial-gradient(#1a1a1a 1px, transparent 1px); background-size: 20px 20px;\">' +\n'        <tr>' +\n'            <td align=\"center\">' +\n'                <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color: #0a0a0a; border: 1px solid #222; max-width: 600px; width: 100%; border-radius: 8px; overflow: hidden; box-shadow: 0 0 40px rgba(0, 255, 65, 0.05);\">' +\n'                    <tr>' +\n'                        <td style=\"background-image: url(\\'' + banner + '\\'); background-size: cover; background-position: center; height: 160px; position: relative;\">' +\n'                            <div style=\"position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.85) 100%);\"></div>' +\n'                            <div style=\"position: absolute; bottom: 20px; left: 30px; color: #ffffff; font-size: 26px; font-weight: 800; text-shadow: 0 2px 6px rgba(0,0,0,0.5); letter-spacing: 1.5px;\">' +\n'                                ARGENTERIO<span style=\"color:#00ff41;\">_</span>' +\n'                            </div>' +\n'                        </td>' +\n'                    </tr>' +\n'                    <tr>' +\n'                        <td style=\"padding: 40px 30px; color: #e0e0e0; line-height: 1.6; font-size: 16px;\">' +\n                            emailBody +\n'                            <div style=\"text-align: center; margin-top: 30px;\">' +\n'                                <a href=\"https://argenterio.com\" style=\"display: inline-block; background: linear-gradient(90deg, #00C853 0%, #00ff41 100%); color: #000000; text-decoration: none; padding: 16px 40px; font-weight: 800; font-size: 16px; border-radius: 4px; box-shadow: 0 0 20px rgba(0, 255, 65, 0.4); text-transform: uppercase; letter-spacing: 1px;\">' +\n'                                    [ VER DEMO ]' +\n'                                </a>' +\n'                            </div>' +\n'                        </td>' +\n'                    </tr>' +\n'                    <tr>' +\n'                        <td style=\"background-color: #080808; padding: 25px; text-align: center; border-top: 1px solid #222; font-size: 11px; color: #444;\">' +\n'                            <p style=\"margin: 5px 0; color: #888;\"><strong>ARGENTERIO FINANCIAL STRATEGY AI</strong></p>' +\n'                            <p style=\"margin: 0;\">© 2026 NEUROVA • <a href=\"https://argenterio.com\" style=\"color:#00ff41; text-decoration:none;\">argenterio.com</a></p>' +\n'                        </td>' +\n'                    </tr>' +\n'                </table>' +\n'            </td>' +\n'        </tr>' +\n'    </table>' +\n'</body>' +\n'</html>';\n\nreturn {\n  text: title,\n  score: score,\n  email_address: email,\n  phone: phone,\n  wa_msg: data.wa_msg || 'Hola ' + title + ', Argenterio: Diagnóstico financiero automatizado anti-inflación. ¿Querés verlo en acción?',\n  email_html: email_html_argenterio,\n  search_term: $('CONFIG').item.json.search_term,\n  location: $('CONFIG').item.json.location,\n  raw_ai: JSON.stringify(data)\n};"
+            },
+            "id": "parse",
+            "name": "Diseñador Email Premium",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                2000,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "senderEmail": "contacto@generarise.space",
+                "toEmail": "={{ $json.email_address }}",
+                "subject": "Propuesta de Automatización - GenerArise",
+                "htmlContent": "={{ $json.email_html }}"
+            },
+            "id": "brevo",
+            "name": "Enviar Email",
+            "type": "n8n-nodes-base.sendInBlue",
+            "typeVersion": 2,
+            "position": [
+                2440,
+                400
+            ],
+            "credentials": {
+                "sendInBlueApi": {
+                    "id": "dRbziQm4hHXAh3GR",
+                    "name": "Brevo account"
+                }
+            },
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "1HSNrK1Zmk2WqU14QZgxpFmvShdPSRWA41GxRPQ956Eo",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "Hoja 1",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "text": "={{ $json.text }}",
+                        "score": "={{ $json.score }}",
+                        "email_address": "={{ $json.email_address }}",
+                        "search_term": "={{ $json.search_term }}",
+                        "location": "={{ $json.location }}",
+                        "raw": "={{ $json.raw_ai }}"
+                    }
+                }
+            },
+            "id": "sheet",
+            "name": "Guardar en Sheet",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                2660,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "zwdmBzveCXv4B3Ec",
+                    "name": "Google Sheets account"
+                }
+            },
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "amount": 120,
+                "unit": "seconds"
+            },
+            "id": "wait",
+            "name": "Esperar (2 min)",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                2880,
+                400
+            ]
+        }
+    ],
+    "connections": {
+        "Cron Diario (10am)": {
+            "main": [
+                [
+                    {
+                        "node": "CONFIG",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "CONFIG",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "CONFIG": {
+            "main": [
+                [
+                    {
+                        "node": "Google Maps",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Maps": {
+            "main": [
+                [
+                    {
+                        "node": "Dividir",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Dividir": {
+            "main": [
+                [
+                    {
+                        "node": "Loop",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop": {
+            "main": [
+                [
+                    {
+                        "node": "Visitar Web",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Visitar Web": {
+            "main": [
+                [
+                    {
+                        "node": "Limpiar HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Limpiar HTML": {
+            "main": [
+                [
+                    {
+                        "node": "IA Extractor PRO",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "IA Extractor PRO",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IA Extractor PRO": {
+            "main": [
+                [
+                    {
+                        "node": "Diseñador Email Premium",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Diseñador Email Premium": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar WhatsApp (Texto)": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar Email": {
+            "main": [
+                [
+                    {
+                        "node": "Guardar en Sheet",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Guardar en Sheet": {
+            "main": [
+                [
+                    {
+                        "node": "Esperar (2 min)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Esperar (2 min)": {
+            "main": [
+                [
+                    {
+                        "node": "Loop",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "argenterio-autonomous-v1"
+}

@@ -1,0 +1,614 @@
+{
+    "name": "Chatbot Restaurante - Reservas & Delivery AI",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "whatsapp-restaurant",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "id": "webhook",
+            "name": "Webhook WhatsApp",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                240,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "from",
+                            "name": "from",
+                            "value": "={{ $json.body.data.key.remoteJid }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "message",
+                            "name": "message",
+                            "value": "={{ $json.body.data.message.conversation || $json.body.data.message.extendedTextMessage.text }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "phone",
+                            "name": "phone",
+                            "value": "={{ $json.from.replace('@s.whatsapp.net', '') }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "extract",
+            "name": "Extraer Mensaje",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                460,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "nombre_restaurant",
+                            "name": "nombre_restaurant",
+                            "value": "NOMBRE_RESTAURANTE",
+                            "type": "string"
+                        },
+                        {
+                            "id": "tipo_cocina",
+                            "name": "tipo_cocina",
+                            "value": "Parrilla Argentina",
+                            "type": "string"
+                        },
+                        {
+                            "id": "horario",
+                            "name": "horario",
+                            "value": "12-16hs y 20-00hs",
+                            "type": "string"
+                        },
+                        {
+                            "id": "ubicacion",
+                            "name": "ubicacion",
+                            "value": "Palermo, CABA",
+                            "type": "string"
+                        },
+                        {
+                            "id": "delivery",
+                            "name": "delivery",
+                            "value": "Sí, Pedidos Ya y Rappi",
+                            "type": "string"
+                        },
+                        {
+                            "id": "precio_promedio",
+                            "name": "precio_promedio",
+                            "value": "$8,000-12,000 por persona",
+                            "type": "string"
+                        },
+                        {
+                            "id": "reservas_min",
+                            "name": "reservas_min",
+                            "value": "2 personas",
+                            "type": "string"
+                        },
+                        {
+                            "id": "menu_destacados",
+                            "name": "menu_destacados",
+                            "value": "Bife de Chorizo ($12,000), Provoleta ($4,500), Entraña ($10,000), Vino casa ($8,000)",
+                            "type": "string"
+                        },
+                        {
+                            "id": "faqs",
+                            "name": "faqs",
+                            "value": "- Aceptamos todas las tarjetas y efectivo\n- Menú celíaco disponible\n- No admitimos mascotas (solo terraza)\n- Reservas hasta 8 personas (más consultar)\n- Estacionamiento: sí, valet parking\n- Ambiente: casual elegante\n- Cancelar reserva: hasta 2hs antes",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "config",
+            "name": "CONFIG",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                680,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.message.toLowerCase() }}",
+                            "rightValue": "reserva|mesa|agendar|hoy|noche|mañana",
+                            "operator": {
+                                "type": "string",
+                                "operation": "regex"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_booking",
+            "name": "Quiere Reservar?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                680,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Cliente quiere reservar en {{ $('CONFIG').item.json.nombre_restaurant }}.\n\nMensaje: {{ $('Extraer Mensaje').item.json.message }}\n\nExtrae la siguiente información si está en el mensaje:\n- Número de personas\n- Día (hoy/mañana/viernes/etc)\n- Hora aproximada\n- Nombre del cliente\n\nResponde en formato JSON:\n{\n  \"personas\": \"número o 'no especificado'\",\n  \"dia\": \"texto o 'no especificado'\",\n  \"hora\": \"texto o 'no especificado'\",\n  \"nombre\": \"texto o 'no especificado'\"\n}\n\nSolo JSON, nada más.",
+                "hasOutputParser": true,
+                "options": {
+                    "systemMessage": "Eres un extractor de información. Solo respondes JSON válido."
+                }
+            },
+            "id": "extract_booking",
+            "name": "Extraer Info Reserva",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                900,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq1",
+            "name": "Groq Extract",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                900,
+                420
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq2",
+            "name": "Groq Respond",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                900,
+                620
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const booking = JSON.parse($input.item.json.output);\nconst faltantes = [];\n\nif (booking.personas === 'no especificado') faltantes.push('cantidad de personas');\nif (booking.dia === 'no especificado') faltantes.push('día');\nif (booking.hora === 'no especificado') faltantes.push('hora');\nif (booking.nombre === 'no especificado') faltantes.push('nombre');\n\nreturn [{\n  json: {\n    ...booking,\n    completa: faltantes.length === 0,\n    faltantes: faltantes.join(', ')\n  }\n}];"
+            },
+            "id": "check_complete",
+            "name": "Revisar Info Completa",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1120,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.completa }}",
+                            "rightValue": "true",
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_complete",
+            "name": "Info Completa?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1340,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "response",
+                            "name": "response",
+                            "value": "=¡Perfecto! Anotada tu reserva:\n\n👥 {{ $json.personas }} personas\n📅 {{ $json.dia }}\n🕐 {{ $json.hora }}\n📝 A nombre de {{ $json.nombre }}\n\nTe confirmamos en minutos vía WhatsApp.\n\n{{ $('CONFIG').item.json.nombre_restaurant }} - {{ $('CONFIG').item.json.ubicacion }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "confirm_booking",
+            "name": "Confirmar Reserva",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                1560,
+                100
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "response",
+                            "name": "response",
+                            "value": "=Para confirmar tu reserva necesito:\n\n{{ $json.faltantes }}\n\n¿Me pasás esos datos? 😊",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "request_missing",
+            "name": "Pedir Faltantes",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                1560,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres el asistente de {{ $('CONFIG').item.json.nombre_restaurant }}.\n\nCONTEXTO:\n- Tipo: {{ $('CONFIG').item.json.tipo_cocina }}\n- Horario: {{ $('CONFIG').item.json.horario }}\n- Ubicación: {{ $('CONFIG').item.json.ubicacion }}\n- Delivery: {{ $('CONFIG').item.json.delivery }}\n- Precio promedio: {{ $('CONFIG').item.json.precio_promedio }}\n- Platos destacados: {{ $('CONFIG').item.json.menu_destacados }}\n\nFAQs:\n{{ $('CONFIG').item.json.faqs }}\n\nCONSULTA:\n{{ $('Extraer Mensaje').item.json.message }}\n\nINSTRUCCIONES:\n1. Responde cálido y entusiasta (sos un restaurant!)\n2. Para consultas menú: mencionar 2-3 platos destacados\n3. Para delivery: confirmar apps disponibles\n4. Para precios: dar rango + \"depende del plato\"\n5. Si preguntan por reserva: decir que escriban \"quiero reservar\"\n6. Máximo 3 líneas\n7. Usar emojis food: 🍖🍷🥗🍰\n\nRespuesta:",
+                "hasOutputParser": false
+            },
+            "id": "ai_general",
+            "name": "AI General Response",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                900,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "url": "=https://evolution-api.com/message/sendText/{{$('CONFIG').item.json.instance_name}}",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"number\": \"{{ $('Extraer Mensaje').item.json.phone }}\",\n  \"text\": \"{{ $json.response || $json.output }}\"\n}",
+                "options": {}
+            },
+            "id": "send_wp",
+            "name": "Enviar WhatsApp",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1780,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "consultas",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Fecha": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+                        "Telefono": "={{ $('Extraer Mensaje').item.json.phone }}",
+                        "Mensaje": "={{ $('Extraer Mensaje').item.json.message }}",
+                        "Respuesta": "={{ $('Enviar WhatsApp').item.json.text }}",
+                        "Es_Reserva": "={{ $json.is_booking || 'false' }}",
+                        "Nombre": "={{ $json.nombre || '' }}",
+                        "Personas": "={{ $json.personas || '' }}",
+                        "Dia": "={{ $json.dia || '' }}",
+                        "Hora": "={{ $json.hora || '' }}"
+                    }
+                }
+            },
+            "id": "log",
+            "name": "Log",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                2000,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.completa }}",
+                            "rightValue": "true",
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "notify_check",
+            "name": "Notificar Staff?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                2220,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "fromEmail": "agentes.space@gmail.com",
+                "toEmail": "restaurant@ejemplo.com",
+                "subject": "Nueva Reserva - {{ $('Revisar Info Completa').item.json.dia }} {{ $('Revisar Info Completa').item.json.hora }}",
+                "emailType": "text",
+                "message": "=NUEVA RESERVA\n\nNombre: {{ $('Revisar Info Completa').item.json.nombre }}\nPersonas: {{ $('Revisar Info Completa').item.json.personas }}\nDía: {{ $('Revisar Info Completa').item.json.dia }}\nHora: {{ $('Revisar Info Completa').item.json.hora }}\nTeléfono: {{ $('Extraer Mensaje').item.json.phone }}\n\nCONFIRMAR con cliente vía WhatsApp",
+                "options": {}
+            },
+            "id": "email_staff",
+            "name": "Email a Staff",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2.1,
+            "position": [
+                2440,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\"success\": true}",
+                "options": {}
+            },
+            "id": "response",
+            "name": "Response OK",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                2660,
+                400
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Extraer Mensaje",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extraer Mensaje": {
+            "main": [
+                [
+                    {
+                        "node": "Quiere Reservar?",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "CONFIG",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "CONFIG": {
+            "main": [
+                [
+                    {
+                        "node": "AI General Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Quiere Reservar?": {
+            "main": [
+                [
+                    {
+                        "node": "Extraer Info Reserva",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Extraer Info Reserva": {
+            "main": [
+                [
+                    {
+                        "node": "Revisar Info Completa",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Extract": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Extraer Info Reserva",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Respond": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI General Response",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Revisar Info Completa": {
+            "main": [
+                [
+                    {
+                        "node": "Info Completa?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Info Completa?": {
+            "main": [
+                [
+                    {
+                        "node": "Confirmar Reserva",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Pedir Faltantes",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Confirmar Reserva": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Pedir Faltantes": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI General Response": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Log",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Log": {
+            "main": [
+                [
+                    {
+                        "node": "Notificar Staff?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Notificar Staff?": {
+            "main": [
+                [
+                    {
+                        "node": "Email a Staff",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Response OK",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Email a Staff": {
+            "main": [
+                [
+                    {
+                        "node": "Response OK",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "chatbot-restaurant-v1"
+}

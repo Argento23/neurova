@@ -1,0 +1,236 @@
+{
+    "name": "ALEX_V7_ULTIMATE",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "vapi-alex-v7",
+                "options": {},
+                "responseMode": "responseNode"
+            },
+            "id": "ax-vapi-in-v7",
+            "name": "Webhook VAPI",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $json.body.message.toolCalls[0].id }}\",\n      \"result\": \"Message sent to WhatsApp!\"\n    }\n  ]\n}",
+                "options": {}
+            },
+            "id": "ax-vapi-out-v7",
+            "name": "Respond to VAPI",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                240,
+                -100
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "GenerArise",
+                "options_message": {
+                    "number": "={{ $json.body.message.toolCalls[0].function.arguments.phone.replace(/[^0-9]/g, '') }}",
+                    "textMessage": {
+                        "text": "={{ $json.body.message.toolCalls[0].function.arguments.message }}"
+                    }
+                }
+            },
+            "id": "ax-evo-vapi-v7",
+            "name": "Evolution VAPI",
+            "type": "n8n-nodes-base.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                480,
+                0
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "chat-alex-v7",
+                "options": {},
+                "responseMode": "responseNode"
+            },
+            "id": "ax-wa-in-v7",
+            "name": "Webhook WA",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                360
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "{\"status\":\"success\"}",
+                "options": {}
+            },
+            "id": "ax-wa-out-v7",
+            "name": "Respond to WA",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                240,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const payload = $input.item.json.body || {};\nconst data = payload.data || payload;\nlet text = 'Me gustaría saber más';\nif (data.message) {\n  text = data.message.conversation || data.message.extendedTextMessage?.text || data.message.buttonsResponseMessage?.selectedDisplayText || data.message.listResponseMessage?.title || text;\n}\nlet rawPhone = data.key?.remoteJid || '';\nlet phone = rawPhone.split('@')[0].replace(/[^0-9]/g, '');\nreturn { phone, text };"
+            },
+            "id": "ax-wa-code-v7",
+            "name": "Code WA Extractor",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                240,
+                440
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile",
+                "options": {
+                    "temperature": 0.7
+                }
+            },
+            "id": "ax-groq-wa-v7",
+            "name": "Groq LLM WA",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                540,
+                580
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres Alex, SDR de GenerArise AI.\n\nMENSAJE DEL USUARIO: {{ $json.text }}\n\nINSTRUCCIONES CRÍTICAS:\n1. HABLA COMO UN HUMANO EXPERTO COMERCIAL.\n2. No pases el link del calendario en el primer mensaje. Saluda, preséntate, y genera expectativa sobre nuestro agente de llamadas.\n3. Si el usuario acepta una reunión o tiene interés, pásale: https://cal.com/gustavo-a.-dornhofer-nqjqos/argenterio\n4. Escribe sólo TEXTO plano. No pongas comillas de más.",
+                "hasOutputParser": true
+            },
+            "id": "ax-ai-wa-v7",
+            "name": "AI Chain WA",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                540,
+                440
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "GenerArise",
+                "options_message": {
+                    "number": "={{ $json.phone }}",
+                    "textMessage": {
+                        "text": "={{ $node[\"AI Chain WA\"].json.text }}"
+                    }
+                }
+            },
+            "id": "ax-evo-wa-v7",
+            "name": "Evolution WA",
+            "type": "n8n-nodes-base.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                860,
+                440
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook VAPI": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to VAPI",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Evolution VAPI",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook WA": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to WA",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Code WA Extractor",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code WA Extractor": {
+            "main": [
+                [
+                    {
+                        "node": "AI Chain WA",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq LLM WA": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Chain WA",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Chain WA": {
+            "main": [
+                [
+                    {
+                        "node": "Evolution WA",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

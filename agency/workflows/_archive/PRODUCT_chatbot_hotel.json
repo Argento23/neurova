@@ -1,0 +1,479 @@
+{
+    "name": "Hotel Chatbot - Multilingual AI Receptionist",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "whatsapp-hotel",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "id": "webhook",
+            "name": "Webhook WhatsApp",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                240,
+                400
+            ],
+            "webhookId": "whatsapp-hotel"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "from",
+                            "name": "from",
+                            "value": "={{ $json.body.data.key.remoteJid }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "message",
+                            "name": "message",
+                            "value": "={{ $json.body.data.message.conversation || $json.body.data.message.extendedTextMessage.text }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "phone",
+                            "name": "phone",
+                            "value": "={{ $json.from.replace('@s.whatsapp.net', '') }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "extract_data",
+            "name": "Extraer Mensaje",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                460,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq_detect",
+            "name": "Groq Language Detector",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                680,
+                620
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Detect the language of this message and respond with ONLY the 2-letter code:\n\nMessage: {{ $('Extraer Mensaje').item.json.message }}\n\nRespond ONLY with: DE (German), EN (English), ES (Spanish), or IT (Italian)\n\nLanguage code:",
+                "hasOutputParser": false
+            },
+            "id": "detect_lang",
+            "name": "Detectar Idioma",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                680,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "language",
+                            "name": "language",
+                            "value": "={{ $json.output.trim().toUpperCase() }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "set_lang",
+            "name": "Set Language",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                900,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "hotel_name",
+                            "name": "hotel_name",
+                            "value": "HOTEL_NAME_HERE",
+                            "type": "string"
+                        },
+                        {
+                            "id": "check_in",
+                            "name": "check_in",
+                            "value": "15:00",
+                            "type": "string"
+                        },
+                        {
+                            "id": "check_out",
+                            "name": "check_out",
+                            "value": "11:00",
+                            "type": "string"
+                        },
+                        {
+                            "id": "address",
+                            "name": "address",
+                            "value": "Herrengasse 10, 1010 Wien",
+                            "type": "string"
+                        },
+                        {
+                            "id": "amenities",
+                            "name": "amenities",
+                            "value": "Free WiFi, Breakfast included, Gym, Spa, Parking (€15/day)",
+                            "type": "string"
+                        },
+                        {
+                            "id": "policies",
+                            "name": "policies",
+                            "value": "Pets allowed (€20/night), Cancellation free up to 48h before, Min age 18",
+                            "type": "string"
+                        },
+                        {
+                            "id": "booking_email",
+                            "name": "booking_email",
+                            "value": "reservations@hotel.at",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "hotel_config",
+            "name": "Hotel Config",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                900,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq_respond",
+            "name": "Groq AI Responder",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                1340,
+                620
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=You are the AI receptionist for {{ $('Hotel Config').item.json.hotel_name }}.\n\nHOTEL INFO:\n- Check-in: {{ $('Hotel Config').item.json.check_in }}\n- Check-out: {{ $('Hotel Config').item.json.check_out }}\n- Address: {{ $('Hotel Config').item.json.address }}\n- Amenities: {{ $('Hotel Config').item.json.amenities }}\n- Policies: {{ $('Hotel Config').item.json.policies }}\n- Booking email: {{ $('Hotel Config').item.json.booking_email }}\n\nGUEST MESSAGE ({{ $('Set Language').item.json.language }}):\n{{ $('Extraer Mensaje').item.json.message }}\n\nINSTRUCTIONS:\n1. Respond in {{ $('Set Language').item.json.language }} language\n2. Be hospitable and efficient\n3. For booking requests: collect dates, room type, guests number, then provide booking email\n4. For info questions: answer directly from HOTEL INFO\n5. Keep responses under 4 lines\n6. Use 1 relevant emoji\n7. If asking about availability, say \"Please email {{ $('Hotel Config').item.json.booking_email }} with your dates\"\n\nResponse in {{ $('Set Language').item.json.language }}:",
+                "hasOutputParser": false
+            },
+            "id": "ai_respond",
+            "name": "AI Respond Multilingual",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1120,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.output.toLowerCase() }}",
+                            "rightValue": "book|reserve|reser|buchen|prenotare",
+                            "operator": {
+                                "type": "string",
+                                "operation": "regex"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_booking",
+            "name": "Es Reserva?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1340,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "fromEmail": "agentes.space@gmail.com",
+                "toEmail": "={{ $('Hotel Config').item.json.booking_email }}",
+                "subject": "Nueva Consulta Reserva - {{ $('Set Language').item.json.language }}",
+                "emailType": "text",
+                "message": "=NUEVA CONSULTA DE RESERVA\n\nIdioma: {{ $('Set Language').item.json.language }}\nTeléfono: {{ $('Extraer Mensaje').item.json.phone }}\n\nMensaje Original:\n{{ $('Extraer Mensaje').item.json.message }}\n\nRespuesta Bot:\n{{ $('AI Respond Multilingual').item.json.output }}\n\n---\nContactar vía WhatsApp: {{ $('Extraer Mensaje').item.json.phone }}",
+                "options": {}
+            },
+            "id": "email_staff",
+            "name": "Email a Staff",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2.1,
+            "position": [
+                1560,
+                200
+            ],
+            "credentials": {
+                "gmailOAuth2": {
+                    "id": "YOUR_GMAIL_CREDENTIAL_ID",
+                    "name": "Gmail account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "url": "=https://evolution-api.com/message/sendText/{{$('Hotel Config').item.json.instance_name}}",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"number\": \"{{ $('Extraer Mensaje').item.json.phone }}\",\n  \"text\": \"{{ $('AI Respond Multilingual').item.json.output }}\"\n}",
+                "options": {}
+            },
+            "id": "send_whatsapp",
+            "name": "Enviar WhatsApp",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1560,
+                400
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_EVOLUTION_API_KEY",
+                    "name": "Evolution API"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "guest_interactions",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Fecha": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+                        "Telefono": "={{ $('Extraer Mensaje').item.json.phone }}",
+                        "Idioma": "={{ $('Set Language').item.json.language }}",
+                        "Mensaje": "={{ $('Extraer Mensaje').item.json.message }}",
+                        "Respuesta": "={{ $('AI Respond Multilingual').item.json.output }}",
+                        "Es_Reserva": "={{ $json.is_booking || 'false' }}"
+                    }
+                }
+            },
+            "id": "log_interaction",
+            "name": "Log Interacción",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                1780,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\"success\": true, \"language\": \"{{ $('Set Language').item.json.language }}\", \"processed\": true}",
+                "options": {}
+            },
+            "id": "response",
+            "name": "Response OK",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                2000,
+                400
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Extraer Mensaje",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extraer Mensaje": {
+            "main": [
+                [
+                    {
+                        "node": "Detectar Idioma",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Language Detector": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Detectar Idioma",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Detectar Idioma": {
+            "main": [
+                [
+                    {
+                        "node": "Set Language",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Set Language": {
+            "main": [
+                [
+                    {
+                        "node": "AI Respond Multilingual",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Hotel Config",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Hotel Config": {
+            "main": [
+                [
+                    {
+                        "node": "AI Respond Multilingual",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq AI Responder": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Respond Multilingual",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Respond Multilingual": {
+            "main": [
+                [
+                    {
+                        "node": "Es Reserva?",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Es Reserva?": {
+            "main": [
+                [
+                    {
+                        "node": "Email a Staff",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Email a Staff": {
+            "main": [
+                [
+                    {
+                        "node": "Log Interacción",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Log Interacción",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Log Interacción": {
+            "main": [
+                [
+                    {
+                        "node": "Response OK",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "chatbot-hotel-multilingual-v1"
+}

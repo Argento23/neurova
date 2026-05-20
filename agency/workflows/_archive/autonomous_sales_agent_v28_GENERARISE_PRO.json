@@ -1,0 +1,441 @@
+{
+    "name": "Agente V28 - GENERARISE PROFESIONAL",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "start",
+            "name": "Start",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                240,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "values": {
+                    "string": [
+                        {
+                            "name": "search_term",
+                            "value": "Dentistas"
+                        },
+                        {
+                            "name": "location",
+                            "value": "Buenos Aires, Argentina"
+                        }
+                    ]
+                }
+            },
+            "id": "config",
+            "name": "CONFIG",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 1,
+            "position": [
+                460,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://serpapi.com/search.json",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "queryAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "api_key",
+                            "value": "9be0d43581dc9220232e9a2819f308c303a32082a1e62f97c9c87b75dfde8d72"
+                        },
+                        {
+                            "name": "engine",
+                            "value": "google_maps"
+                        },
+                        {
+                            "name": "q",
+                            "value": "={{ $json.search_term + ' en ' + $json.location }}"
+                        },
+                        {
+                            "name": "num",
+                            "value": "5"
+                        }
+                    ]
+                }
+            },
+            "id": "serp",
+            "name": "Google Maps",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                680,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "local_results"
+            },
+            "id": "split",
+            "name": "Dividir",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 3,
+            "position": [
+                900,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "batchSize": 1
+            },
+            "id": "loop",
+            "name": "Loop",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 2,
+            "position": [
+                1120,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "url": "={{ $json.website }}",
+                "options": {
+                    "timeout": 5000
+                }
+            },
+            "id": "web",
+            "name": "Visitar Web",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1340,
+                400
+            ],
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "jsCode": "const html = $input.item.json.data || '';\nconst text = html.replace(/<[^>]*>/g, ' ').replace(/\\s+/g, ' ');\nconst title = $('Loop').item.json.title || 'Sin nombre';\nconst phone = $('Loop').item.json.phone || '';\n\nreturn {\n  text: text.substring(0, 2500),\n  title: title,\n  phone_from_maps: phone\n};"
+            },
+            "id": "clean",
+            "name": "Limpiar HTML",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1560,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq",
+            "name": "Groq Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                1780,
+                620
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=CONTEXTO:\nEres el analista de leads senior de **GenerArise**, una agencia boutique de automatización inteligente que ayuda a empresas latinoamericanas a escalar mediante IA conversacional, agentes autónomos y workflows sin código.\n\nPROPUESTA DE VALOR GENERARISE:\n- Agentes de IA que atienden clientes 24/7 (WhatsApp, web, Instagram)\n- Automatización de procesos repetitivos (agendas, seguimientos, calificación de leads)\n- Integración con sistemas existentes (CRM, Google Calendar, email)\n- ROI comprobado: 40% menos tiempo operativo, 3x más conversiones\n\nNEGOCIO A ANALIZAR:\nTexto web: {{ $json.text }}\nNombre: {{ $json.title }}\nTeléfono Maps: {{ $json.phone_from_maps }}\n\nTAREA:\n1. EXTRAE teléfono/WhatsApp (si empieza con 11→54911, si 15→54915, si ya 549→déjalo)\n2. EXTRAE email válido\n3. CALIFICA 1-10 (nivel de digitalización)\n4. IDENTIFICA industria (ej: Odontología, Real Estate, Retail, Salud, etc)\n\n5. GENERA mensaje WhatsApp (máx 170 chars):\n   - Saludo con nombre del negocio\n   - Menciona GenerArise\n   - Propuesta ESPECÍFICA para su industria:\n     * Dentistas/Clínicas: \"automatizar agendas y recordatorios de turnos\"\n     * Inmobiliarias: \"calificar leads y tours virtuales 24/7\"\n     * Retail: \"chatbot de ventas que atiende consultas al instante\"\n     * Servicios profesionales: \"agendar reuniones automáticamente\"\n   - CTA suave (\"¿te interesa una demo?\", \"¿charlamos 15min?\") + emoji\n   - Tono: Profesional pero cercano, como un colega\n\n6. GENERA email HTML ultra profesional:\n   - Asunto personalizado\n   - Diseño limpio con espaciado\n   - Párrafo 1: \"Hola equipo de [Nombre], soy Gustavo de GenerArise...\" + mención específica de su industria\n   - Párrafo 2: Propuesta concreta (3 beneficios con bullets)\n   - Párrafo 3: Caso de éxito breve o dato impactante\n   - Párrafo 4: CTA claro (\"¿Agendamos 15min esta semana?\")\n   - Firma profesional:\n     ```\n     Gustavo Dornhofer\n     Founder & AI Solutions Architect\n     GenerArise | Automatización Inteligente\n     📧 gustavo@neurova.ai\n     🌐 generarise.space\n     ```\n   - Usa: <p>, <br>, <strong>, <ul>, <li>\n   - IMPORTANTE: Email en HTML bien formateado, profesional, sin errores\n\nJSON EXACTO (sin comentarios):\n{\n  \"phone\": \"549...\",\n  \"email\": \"contacto@...\",\n  \"score\": 8,\n  \"wa_msg\": \"Hola equipo de [Nombre]! Gustavo de GenerArise. Ayudamos a [industria] con [beneficio concreto]. ¿Te copa una demo de 15min? 🚀\",\n  \"email_html\": \"<p>Hola equipo de <strong>[Nombre]</strong>,</p><p>Soy Gustavo Dornhofer, Founder de GenerArise...</p>...\"\n}",
+                "hasOutputParser": true
+            },
+            "id": "ai",
+            "name": "IA Extractor PRO",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1780,
+                400
+            ],
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "jsCode": "const data = $input.item.json;\nconst title = $('Loop').item.json.title || 'Sin nombre';\nconst phone_maps = $('Loop').item.json.phone || '';\n\n// Usar teléfono de la IA, o el de Maps, o uno de prueba\nconst phone = data.phone || phone_maps || '5491112345678';\nconst email = data.email || 'test@ejemplo.com';\n\nreturn {\n  text: title,\n  score: data.score || 5,\n  email_address: email,\n  phone: phone,\n  wa_msg: data.wa_msg || `Hola equipo de ${title}! Gustavo de GenerArise. Automatizamos procesos con IA. ¿Charlamos 15min? 🚀`,\n  email_html: data.email_html || `<p>Hola equipo de <strong>${title}</strong>,</p><p>Soy Gustavo Dornhofer, Founder de GenerArise, una agencia que ayuda a empresas como la suya a escalar mediante automatización inteligente.</p><p>Vimos su presencia digital y creemos que podríamos ayudarlos a:</p><ul><li>Automatizar tareas repetitivas (agendas, seguimientos)</li><li>Atender clientes 24/7 con agentes de IA</li><li>Multiplicar conversiones sin aumentar personal</li></ul><p>¿Le interesa una reunión rápida de 15min para explorar oportunidades?</p><p>Saludos cordiales,<br><br><strong>Gustavo Dornhofer</strong><br>Founder & AI Solutions Architect<br>GenerArise | Automatización Inteligente<br>📧 gustavo@neurova.ai<br>🌐 generarise.space</p>`,\n  search_term: $('CONFIG').item.json.search_term,\n  location: $('CONFIG').item.json.location,\n  raw_ai: JSON.stringify(data)\n};"
+            },
+            "id": "parse",
+            "name": "Preparar Datos",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                2000,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "LATAM",
+                "options_message": {
+                    "number": "={{ $json.phone }}",
+                    "textMessage": {
+                        "text": "={{ $json.wa_msg }}"
+                    }
+                }
+            },
+            "id": "evo",
+            "name": "Enviar WhatsApp",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                2220,
+                400
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "LATAM"
+                }
+            },
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "senderEmail": "gustavo@neurova.ai",
+                "toEmail": "={{ $json.email_address }}",
+                "subject": "Propuesta de Automatización - GenerArise",
+                "htmlContent": "={{ $json.email_html }}"
+            },
+            "id": "brevo",
+            "name": "Enviar Email",
+            "type": "n8n-nodes-base.sendInBlue",
+            "typeVersion": 2,
+            "position": [
+                2440,
+                400
+            ],
+            "credentials": {
+                "sendInBlueApi": {
+                    "id": "dRbziQm4hHXAh3GR",
+                    "name": "Brevo account"
+                }
+            },
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "1HSNrK1Zmk2WqU14QZgxpFmvShdPSRWA41GxRPQ956Eo",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "Hoja 1",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "text": "={{ $json.text }}",
+                        "score": "={{ $json.score }}",
+                        "email_address": "={{ $json.email_address }}",
+                        "search_term": "={{ $json.search_term }}",
+                        "location": "={{ $json.location }}",
+                        "raw": "={{ $json.raw_ai }}"
+                    }
+                }
+            },
+            "id": "sheet",
+            "name": "Guardar en Sheet",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                2660,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "zwdmBzveCXv4B3Ec",
+                    "name": "Google Sheets account"
+                }
+            },
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "amount": 3,
+                "unit": "seconds"
+            },
+            "id": "wait",
+            "name": "Esperar",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                2880,
+                400
+            ]
+        }
+    ],
+    "connections": {
+        "Start": {
+            "main": [
+                [
+                    {
+                        "node": "CONFIG",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "CONFIG": {
+            "main": [
+                [
+                    {
+                        "node": "Google Maps",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Maps": {
+            "main": [
+                [
+                    {
+                        "node": "Dividir",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Dividir": {
+            "main": [
+                [
+                    {
+                        "node": "Loop",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop": {
+            "main": [
+                [
+                    {
+                        "node": "Visitar Web",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Visitar Web": {
+            "main": [
+                [
+                    {
+                        "node": "Limpiar HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Limpiar HTML": {
+            "main": [
+                [
+                    {
+                        "node": "IA Extractor PRO",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "IA Extractor PRO",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IA Extractor PRO": {
+            "main": [
+                [
+                    {
+                        "node": "Preparar Datos",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Preparar Datos": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar Email": {
+            "main": [
+                [
+                    {
+                        "node": "Guardar en Sheet",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Guardar en Sheet": {
+            "main": [
+                [
+                    {
+                        "node": "Esperar",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Esperar": {
+            "main": [
+                [
+                    {
+                        "node": "Loop",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

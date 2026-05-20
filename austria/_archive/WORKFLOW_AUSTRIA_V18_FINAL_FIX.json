@@ -1,0 +1,208 @@
+{
+    "name": "Austria Voice Assistant V18 (ULTRA ROBUSTO)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "austria-leads-v18",
+                "options": {}
+            },
+            "id": "webhook-trigger",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "content": "🚀 V18 FINAL FIX - ULTRA ROBUSTO\n\nCAMBIOS:\n1. Filtro V7 incorporado (evita errores de parseo).\n2. Detección de idioma nativa mejorada.\n3. TTS 100% dinámico.\n\n⚠️ IMPORTANTE:\n- Conecta tu credencial de Google Gemini en el nodo 'Gemini Brain'.\n- Conecta tu credencial de Google TTS en el nodo 'Generar Audio'.\n- Conecta tu Evolution API en los nodos de 'Enviar'.",
+                "height": 400,
+                "width": 400
+            },
+            "id": "instrucciones",
+            "name": "Instrucciones de Setup",
+            "type": "n8n-nodes-base.stickyNote",
+            "typeVersion": 1,
+            "position": [
+                1400,
+                250
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// NORMALIZADOR INPUT V18\nlet body = $input.item.json.body || {};\nlet data = body.data || {};\nlet msg = data.message || {};\n\nlet userMessage = \"\";\nif (msg.extendedTextMessage && msg.extendedTextMessage.text) {\n    userMessage = msg.extendedTextMessage.text;\n}\nelse if (msg.conversation) {\n    userMessage = msg.conversation;\n}\nelse if (msg.conversationMessage && msg.conversationMessage.message) {\n    userMessage = msg.conversationMessage.message;\n}\nelse if (body.message) {\n    userMessage = body.message;\n}\n\nif (!userMessage) userMessage = \"Hola\";\n\nreturn {\n  json: {\n    ...$input.item.json,\n    user_message: userMessage\n  }\n};"
+            },
+            "id": "normalizer",
+            "name": "Normalizar Input",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "modelName": "models/gemini-1.5-flash",
+                "options": {
+                    "temperature": 0.3
+                }
+            },
+            "id": "gemini_model",
+            "name": "Google Gemini 1.5 Flash",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+            "typeVersion": 1,
+            "position": [
+                500,
+                500
+            ],
+            "credentials": {
+                "googlePalmApi": {
+                    "id": "REPLACE_WITH_YOUR_GEMINI_ID",
+                    "name": "Google Gemini(PaLM) Api account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.user_message }}",
+                "hasOutputParser": true,
+                "options": {
+                    "systemMessage": "=# 🇦🇹 PROMPT STEFAN AI - TURISMO 4.0\n\nResponde SIEMPRE en el idioma del usuario.\n\nJSON EXIT:\n{\n  \"respuesta_voz\": \"Texto breve...\",\n  \"accion_requerida\": \"agendar | contacto | info\",\n  \"idioma\": \"de | en | es | it\"\n}"
+                }
+            },
+            "id": "gemini_brain",
+            "name": "Gemini Brain",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// FILTRO V7 ULTRA ROBUSTO\nlet inputData = $input.item.json.response || $input.item.json.text || \"\";\nlet rawRemoteJid = \"\";\ntry {\n    if ($('Webhook').item.json.body.data && $('Webhook').item.json.body.data.key) {\n        rawRemoteJid = $('Webhook').item.json.body.data.key.remoteJid;\n    }\n    else if ($('Webhook').item.json.body.key) {\n        rawRemoteJid = $('Webhook').item.json.body.key.remoteJid;\n    }\n} catch (e) {}\n\nlet textoVoz = \"\";\nlet accionFinal = \"info\";\nlet mensajeTexto = \"\";\n\nif (typeof inputData === 'string') {\n    let clean = inputData.replace(/```json/g, \"\").replace(/```/g, \"\").trim();\n    try {\n        let parsed = JSON.parse(clean);\n        textoVoz = parsed.respuesta_voz || clean;\n        accionFinal = parsed.accion_requerida || \"info\";\n    } catch(e) { textoVoz = clean; }\n} else { \n    textoVoz = inputData.respuesta_voz || \"\";\n    accionFinal = inputData.accion_requerida || \"info\";\n}\n\n// Detección Idioma\nfunction detectLang(t) {\n    if (t.includes(\"der\") || t.includes(\"die\")) return \"de\";\n    if (t.includes(\"the\") || t.includes(\"have\")) return \"en\";\n    if (t.includes(\"il\") || t.includes(\"ciao\")) return \"it\";\n    return \"es\";\n}\nlet lang = detectLang(textoVoz);\nconst voices = {\n    de: { lc: \"de-DE\", name: \"de-DE-Neural2-F\", g: \"FEMALE\" },\n    en: { lc: \"en-US\", name: \"en-US-Neural2-F\", g: \"FEMALE\" },\n    es: { lc: \"es-US\", name: \"es-US-Neural2-B\", g: \"MALE\" },\n    it: { lc: \"it-IT\", name: \"it-IT-Neural2-A\", g: \"FEMALE\" }\n};\nconst v = voices[lang] || voices.es;\n\nif (accionFinal === \"agendar\") mensajeTexto = \"🔗 Agenda aquí: https://cal.com/example\";\n\nreturn {\n    json: {\n        clean_voice: textoVoz.replace(/[^\\w\\s.,!?áéíóú]/g, \" \"),\n        accion: accionFinal,\n        mensaje_texto: mensajeTexto,\n        remote_jid: rawRemoteJid,\n        tts_language_code: v.lc,\n        tts_voice_name: v.name,\n        tts_gender: v.g\n    }\n};"
+            },
+            "id": "logic_filter",
+            "name": "Stefan Logic Filter",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                750,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "text": "={{ $json.clean_voice }}",
+                "languageCode": "={{ $json.tts_language_code }}",
+                "voiceName": "={{ $json.tts_voice_name }}",
+                "voiceGender": "={{ $json.tts_gender }}"
+            },
+            "id": "tts_node",
+            "name": "Generar Audio",
+            "type": "n8n-nodes-google-cloud-tts.googleCloudTts",
+            "typeVersion": 1,
+            "position": [
+                1000,
+                450
+            ],
+            "credentials": {
+                "googleCloudTtsApi": {
+                    "id": "REPLACE_WITH_YOUR_TTS_ID",
+                    "name": "Google Cloud Text-to-Speech account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "operation": "send-audio",
+                "instanceName": "USA",
+                "remoteJid": "={{ $json.remote_jid }}",
+                "media": "={{ $json.audioData }}"
+            },
+            "id": "send_audio",
+            "name": "Enviar Audio",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                1250,
+                450
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "REPLACE_WITH_YOUR_EVOLUTION_ID",
+                    "name": "Evolution API account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Normalizar Input",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Normalizar Input": {
+            "main": [
+                [
+                    {
+                        "node": "Gemini Brain",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Gemini 1.5 Flash": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Gemini Brain",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Gemini Brain": {
+            "main": [
+                [
+                    {
+                        "node": "Stefan Logic Filter",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Stefan Logic Filter": {
+            "main": [
+                [
+                    {
+                        "node": "Generar Audio",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generar Audio": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Audio",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

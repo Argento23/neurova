@@ -1,0 +1,205 @@
+{
+    "name": "Austria Voice Assistant V4 (AUTO-TEXT)",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "webhook-trigger",
+            "name": "Webhook (WhatsApp)",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                200,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "content": "⚠️ CAMPO IMPORTANTE\n\nEn tu nodo Evolution, mapea:\n\nMessage / Text = {{ $json.mensaje_texto }}\n\nEsto tomará automáticamente el texto correcto (Link, Contacto, etc.)",
+                "height": 218,
+                "width": 328
+            },
+            "id": "nota-mapping",
+            "name": "Nota: Mapping Texto",
+            "type": "n8n-nodes-base.stickyNote",
+            "typeVersion": 1,
+            "position": [
+                1320,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// ═══════════════════════════════════════════════════════════════\n// FILTRO V4 - GENERADOR DE TEXTO AUTOMÁTICO\n// Genera el texto aquí para que no tengas que escribirlo en Evolution\n// ═══════════════════════════════════════════════════════════════\n\n// 1. OBTENER INPUT\nlet inputData = $input.item.json.original_voice \n             || $input.item.json.text \n             || $input.item.json.output \n             || $input.item.json.response\n             || \"\";\n\n// 2. OBTENER NÚMERO (Intentar arreglar formato Argentina)\nlet rawRemoteJid = \"\";\ntry {\n  // Intenta leer del nodo Webhook anterior\n  rawRemoteJid = $('Webhook (WhatsApp)').item.json.body.key.remoteJid || \"\";\n} catch(e) {}\n\n// Variables por defecto\nlet textoVoz = \"\";\nlet accionFinal = \"info\";\nlet mensajeTexto = \"\"; // El mensaje que irá a WhatsApp\n\n// 3. PARSEO DE RESPUESTA AI\nif (typeof inputData === 'object' && inputData !== null) {\n  textoVoz = inputData.respuesta_voz || \"\";\n  accionFinal = inputData.accion_requerida || \"info\";\n} else if (typeof inputData === 'string') {\n  let cleanString = inputData.replace(/```json\\s*/g, \"\").replace(/```\\s*/g, \"\").trim();\n  try {\n    const parsed = JSON.parse(cleanString);\n    textoVoz = parsed.respuesta_voz || \"\";\n    accionFinal = parsed.accion_requerida || \"info\";\n  } catch (e) {\n    textoVoz = cleanString;\n    accionFinal = \"info\";\n  }\n}\n\n// 4. LIMPIEZA PARA TTS\nfunction cleanForTTS(text) {\n  if (!text || typeof text !== 'string') return \"\";\n  return text\n    .replace(/[\\u{1F600}-\\u{1F64F}\\u{1F300}-\\u{1F5FF}]/gu, \"\")\n    .replace(/(https?:\\/\\/[^\\s]+)/g, \"\")\n    .replace(/[\"*{}\\[\\]_`]/g, \"\")\n    .replace(/\\s+/g, \" \").trim();\n}\n\n// 5. GENERAR EL MENSAJE DE TEXTO SEGÚN LA ACCIÓN\n// Así no tienes que configurar nada en el nodo Evolution, solo mapear una variable.\n\nif (accionFinal === \"agendar\") {\n  mensajeTexto = \"🔗 Agendá tu auditoría aquí:\\n\\nhttps://cal.com/gustavo-a.-dornhofer-nqjqos/auditoria-ia-gratuita-free-ai-audit-kostenloses-ki-audit\\n\\nElegí día y horario. Duración: 30 min ⏱️\";\n}\nelse if (accionFinal === \"contacto\") {\n  mensajeTexto = \"📞 Contacto directo:\\n\\n• WhatsApp: +54 9 11 7371-9972\\n• Email: agentes.space@gmail.com\\n\\n¿En qué más puedo ayudarte?\";\n}\nelse if (accionFinal === \"derivar\") {\n  mensajeTexto = \"He notificado a un especialista humano sobre tu caso. Te contactarán a la brevedad.\";\n}\n\nreturn {\n  json: {\n    clean_voice: cleanForTTS(textoVoz),              \n    accion: accionFinal.toLowerCase().trim(),\n    mensaje_texto: mensajeTexto, // <--- USA ESTA VARIABLE EN EVOLUTION API\n    remote_jid: rawRemoteJid     // <--- USA ESTA VARIABLE EN EVOLUTION API (Opcional)\n  }\n};"
+            },
+            "id": "filtro-js-v4",
+            "name": "Filtro V4 (Genera Textos)",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "dataType": "string",
+                "value1": "={{ $json.accion }}",
+                "rules": {
+                    "rules": [
+                        {
+                            "value2": "info"
+                        },
+                        {
+                            "value2": "agendar"
+                        },
+                        {
+                            "value2": "contacto"
+                        },
+                        {
+                            "value2": "derivar"
+                        }
+                    ]
+                }
+            },
+            "id": "switch-accion",
+            "name": "Switch Acción",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 1,
+            "position": [
+                800,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "amount": 2,
+                "unit": "seconds"
+            },
+            "id": "wait-node",
+            "name": "Esperar 2s",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                1100,
+                450
+            ]
+        },
+        {
+            "parameters": {},
+            "id": "evolution-placeholder",
+            "name": "👇 CONECTAR EVOLUTION AQUÍ",
+            "type": "n8n-nodes-base.noOp",
+            "typeVersion": 1,
+            "position": [
+                1300,
+                450
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://api.elevenlabs.io/v1/text-to-speech/voice_id",
+                "method": "POST",
+                "authentication": "headerAuth",
+                "options": {},
+                "bodyParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "text",
+                            "value": "={{ $json.clean_voice }}"
+                        }
+                    ]
+                }
+            },
+            "id": "tts-node",
+            "name": "Generar Audio (TTS)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                1100,
+                200
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook (WhatsApp)": {
+            "main": [
+                [
+                    {
+                        "node": "Filtro V4 (Genera Textos)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtro V4 (Genera Textos)": {
+            "main": [
+                [
+                    {
+                        "node": "Switch Acción",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Switch Acción": {
+            "main": [
+                [
+                    {
+                        "node": "Generar Audio (TTS)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Generar Audio (TTS)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Esperar 2s",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Generar Audio (TTS)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Esperar 2s",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Generar Audio (TTS)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Esperar 2s",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Esperar 2s": {
+            "main": [
+                [
+                    {
+                        "node": "👇 CONECTAR EVOLUTION AQUÍ",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

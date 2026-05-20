@@ -1,0 +1,236 @@
+{
+    "name": "Vapi WhatsApp Bridge - MULTIMEDIA SAFE",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "vapi-multimedia-bridge",
+                "options": {},
+                "responseMode": "responseNode"
+            },
+            "id": "webhook-id-safe",
+            "name": "WebhookVapi",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "values": {
+                    "string": [
+                        {
+                            "name": "phone",
+                            "value": "={{ $json.body?.message?.toolCalls?.[0]?.function?.arguments?.phone || $json.body?.phone || \"5491112345678\" }}"
+                        },
+                        {
+                            "name": "message",
+                            "value": "={{ $json.body?.message?.toolCalls?.[0]?.function?.arguments?.message || $json.body?.message || \"Hola! Te envío el material solicitado.\" }}"
+                        },
+                        {
+                            "name": "media_url",
+                            "value": "={{ $json.body?.message?.toolCalls?.[0]?.function?.arguments?.media_url }}"
+                        },
+                        {
+                            "name": "media_type",
+                            "value": "={{ $json.body?.message?.toolCalls?.[0]?.function?.arguments?.media_type || \"document\" }}"
+                        },
+                        {
+                            "name": "toolCallId",
+                            "value": "={{ $json.body?.message?.toolCalls?.[0]?.id || \"test-id\" }}"
+                        },
+                        {
+                            "name": "instanceName",
+                            "value": "={{ $json.body?.message?.toolCalls?.[0]?.function?.name.includes('stefan') ? 'Argenterio' : 'GenerArise' }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-node-id-safe",
+            "name": "PrepareData",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 2,
+            "position": [
+                350,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "rules": {
+                    "values": [
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeFilter": "string"
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "cond-1",
+                                        "leftValue": "={{ $json.media_url }}",
+                                        "rightValue": "",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "notEmpty"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameNextTarget": "Media"
+                        }
+                    ],
+                    "fallbackResult": "Text"
+                }
+            },
+            "id": "switch-id-safe",
+            "name": "Check Media",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 1,
+            "position": [
+                550,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "={{ $json.instanceName }}",
+                "options_message": {
+                    "number": "={{ $json.phone }}",
+                    "textMessage": {
+                        "text": "={{ $json.message }}"
+                    }
+                }
+            },
+            "id": "evo-text-id-safe",
+            "name": "Evolution Text",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                800,
+                400
+            ],
+            "continueOnFail": true,
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "operation": "sendMedia",
+                "instanceName": "={{ $json.instanceName }}",
+                "options_message": {
+                    "number": "={{ $json.phone }}",
+                    "mediaMessage": {
+                        "media": "={{ $json.media_url }}",
+                        "mediaType": "={{ $json.media_type }}",
+                        "caption": "={{ $json.message }}"
+                    }
+                }
+            },
+            "id": "evo-media-id-safe",
+            "name": "Evolution Media",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                800,
+                200
+            ],
+            "continueOnFail": true,
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $('PrepareData').item.json.toolCallId }}\",\n      \"result\": \"Material enviado correctamente.\"\n    }\n  ]\n}"
+            },
+            "id": "respond-id-safe",
+            "name": "Respond to Vapi",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                1100,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "WebhookVapi": {
+            "main": [
+                [
+                    {
+                        "node": "PrepareData",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "PrepareData": {
+            "main": [
+                [
+                    {
+                        "node": "Check Media",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check Media": {
+            "main": [
+                [
+                    {
+                        "node": "Evolution Media",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Evolution Text",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Evolution Text": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Vapi",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Evolution Media": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Vapi",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

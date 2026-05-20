@@ -1,0 +1,207 @@
+{
+    "name": "Vapi WhatsApp Bridge - FINAL ATOMIC",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "vapi-whatsapp-bridge",
+                "responseMode": "responseNode"
+            },
+            "name": "WebhookVapi",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "name": "phone",
+                            "value": "={{ ($json.body.message.toolCalls[0].function.arguments.phone || \"\").toString().replace(/\\D/g, '') }}",
+                            "type": "string"
+                        },
+                        {
+                            "name": "message",
+                            "value": "={{ $json.body.message.toolCalls[0].function.arguments.message || \"\" }}",
+                            "type": "string"
+                        },
+                        {
+                            "name": "media_url",
+                            "value": "={{ $json.body.message.toolCalls[0].function.arguments.media_url || \"\" }}",
+                            "type": "string"
+                        },
+                        {
+                            "name": "toolCallId",
+                            "value": "={{ $json.body.message.toolCalls[0].id || \"no-id\" }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "name": "PrepareData",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                300,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{ $json.media_url.toLowerCase() }}",
+                            "operation": "regex",
+                            "value2": "(\\.(pdf|png|jpg|jpeg))$"
+                        }
+                    ]
+                }
+            },
+            "name": "Is Hard File?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                550,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "GenerArise",
+                "options_message": {
+                    "number": "={{ $node.PrepareData.json.phone }}",
+                    "textMessage": {
+                        "text": "={{ $node.PrepareData.json.message + ($node.PrepareData.json.media_url ? '\\n\\n🔗 ' + $node.PrepareData.json.media_url : '') }}"
+                    }
+                }
+            },
+            "name": "Send as TEXT",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                800,
+                200
+            ],
+            "onError": "continueErrorOutput",
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "operation": "send-media",
+                "instanceName": "GenerArise",
+                "options_message": {
+                    "number": "={{ $node.PrepareData.json.phone }}",
+                    "mediaMessage": {
+                        "mediatype": "={{ $node.PrepareData.json.media_url.endsWith('.pdf') ? 'document' : 'image' }}",
+                        "media": "={{ $node.PrepareData.json.media_url }}",
+                        "caption": "={{ $node.PrepareData.json.message }}"
+                    }
+                }
+            },
+            "name": "Send as MEDIA",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                800,
+                400
+            ],
+            "onError": "continueErrorOutput",
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $node.PrepareData.json.toolCallId }}\",\n      \"result\": \"Mensaje enviado correctamente.\"\n    }\n  ]\n}",
+                "options": {}
+            },
+            "name": "Final Response",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                1050,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "WebhookVapi": {
+            "main": [
+                [
+                    {
+                        "node": "PrepareData",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "PrepareData": {
+            "main": [
+                [
+                    {
+                        "node": "Is Hard File?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is Hard File?": {
+            "main": [
+                [
+                    {
+                        "node": "Send as MEDIA",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send as TEXT",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send as TEXT": {
+            "main": [
+                [
+                    {
+                        "node": "Final Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send as MEDIA": {
+            "main": [
+                [
+                    {
+                        "node": "Final Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

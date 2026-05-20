@@ -1,0 +1,196 @@
+{
+    "name": "Vapi WhatsApp Bridge - INSTANT",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "vapi-whatsapp-bridge",
+                "responseMode": "responseNode"
+            },
+            "name": "WebhookVapi",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "name": "phone",
+                            "value": "={{ ($json.body.message.toolCalls[0].function.arguments.phone || \"\").toString().replace(/\\D/g, '') }}",
+                            "type": "string"
+                        },
+                        {
+                            "name": "message",
+                            "value": "={{ ($json.body.message.toolCalls[0].function.arguments.message || \"\").toString().replace(/\\\\n/g, '\\n') }}",
+                            "type": "string"
+                        },
+                        {
+                            "name": "media_url",
+                            "value": "={{ ($json.body.message.toolCalls[0].function.arguments.media_url || \"\").toString().trim().replace(/[\\n\\r]/g, '') }}",
+                            "type": "string"
+                        },
+                        {
+                            "name": "toolCallId",
+                            "value": "={{ $json.body.message.toolCalls[0].id || \"no-id\" }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "name": "PrepareData",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                300,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $json.toolCallId }}\",\n      \"result\": \"Status: Success. Enviando WhatsApp en segundo plano.\"\n    }\n  ]\n}",
+                "options": {}
+            },
+            "name": "Instant Response",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{ $json.media_url.toLowerCase() }}",
+                            "operation": "regex",
+                            "value2": "(\\.(pdf|png|jpg|jpeg))$"
+                        }
+                    ]
+                }
+            },
+            "name": "Is Valid File?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                700,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "GenerArise",
+                "options_message": {
+                    "number": "={{ $node.PrepareData.json.phone }}",
+                    "textMessage": {
+                        "text": "={{ $node.PrepareData.json.message + '\\n\\n' + $node.PrepareData.json.media_url }}"
+                    }
+                }
+            },
+            "name": "Send-As-Text",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                950,
+                200
+            ],
+            "onError": "continueErrorOutput",
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "operation": "send-media",
+                "instanceName": "GenerArise",
+                "options_message": {
+                    "number": "={{ $node.PrepareData.json.phone }}",
+                    "mediaMessage": {
+                        "mediatype": "={{ $node.PrepareData.json.media_url.toLowerCase().endsWith('.pdf') ? 'document' : 'image' }}",
+                        "media": "={{ $node.PrepareData.json.media_url }}",
+                        "caption": "={{ $node.PrepareData.json.message }}"
+                    }
+                }
+            },
+            "name": "Send-As-Media",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                950,
+                400
+            ],
+            "onError": "continueErrorOutput",
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "WebhookVapi": {
+            "main": [
+                [
+                    {
+                        "node": "PrepareData",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "PrepareData": {
+            "main": [
+                [
+                    {
+                        "node": "Instant Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Instant Response": {
+            "main": [
+                [
+                    {
+                        "node": "Is Valid File?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is Valid File?": {
+            "main": [
+                [
+                    {
+                        "node": "Send-As-Media",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send-As-Text",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

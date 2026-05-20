@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp - Verticali Real Estate</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0b141a;
+            height: 100vh;
+            overflow: hidden;
+            cursor: default;
+            user-select: none;
+        }
+        .wa-container { display: flex; height: 100vh; max-width: 100%; }
+        .sidebar {
+            width: 340px;
+            background: #111b21;
+            border-right: 1px solid #222d34;
+            flex-shrink: 0;
+        }
+        .sidebar-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1f2c34;
+        }
+        .sidebar-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: linear-gradient(135deg, #00a884, #25d366);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: bold; font-size: 18px;
+        }
+        .sidebar-icons { display: flex; gap: 20px; color: #aebac1; font-size: 20px; }
+        .search-bar { padding: 8px 12px; background: #111b21; }
+        .search-bar input {
+            width: 100%; padding: 8px 32px; border-radius: 8px; border: none;
+            background: #202c33; color: #e9edef; font-size: 14px; outline: none;
+        }
+        .chat-list-item {
+            display: flex; align-items: center; padding: 12px 16px;
+            cursor: pointer; border-bottom: 1px solid #222d34;
+        }
+        .chat-list-item:first-child { background: #2a3942; }
+        .chat-list-item .avatar {
+            width: 49px; height: 49px; border-radius: 50%; margin-right: 14px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: bold; font-size: 20px; flex-shrink: 0;
+        }
+        .chat-list-item .chat-info { flex: 1; min-width: 0; }
+        .chat-list-item .chat-name { color: #e9edef; font-size: 16px; }
+        .chat-list-item .chat-preview {
+            color: #8696a0; font-size: 13px; white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis;
+        }
+        .chat-list-item .chat-time { color: #00a884; font-size: 12px; align-self: flex-start; margin-top: 4px; }
+        .main-chat { flex: 1; display: flex; flex-direction: column; background: #0b141a; }
+        .chat-header {
+            padding: 10px 16px; background: #1f2c34;
+            display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #222d34;
+        }
+        .chat-header .avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: linear-gradient(135deg, #6a4c93, #b185db);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: bold; font-size: 16px;
+        }
+        .chat-header-info { flex: 1; }
+        .chat-header-info .name { color: #e9edef; font-size: 16px; font-weight: 500; }
+        .chat-header-info .status { color: #8696a0; font-size: 13px; }
+        .chat-header-icons { display: flex; gap: 24px; color: #aebac1; font-size: 20px; }
+        .messages-area {
+            flex: 1; padding: 20px 60px; overflow-y: auto;
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='p' width='40' height='40' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='20' cy='20' r='1' fill='%23ffffff08'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='200' height='200' fill='url(%23p)'/%3E%3C/svg%3E");
+        }
+        .message {
+            max-width: 65%; padding: 8px 12px; margin-bottom: 4px; border-radius: 8px;
+            font-size: 14.5px; line-height: 1.45; position: relative;
+            opacity: 0; transform: translateY(10px);
+        }
+        .message.visible { opacity: 1; transform: translateY(0); animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .message.sent { background: #005c4b; color: #e9edef; margin-left: auto; border-top-right-radius: 2px; }
+        .message.received { background: #202c33; color: #e9edef; margin-right: auto; border-top-left-radius: 2px; }
+        .message .time { font-size: 11px; color: rgba(255,255,255,0.5); float: right; margin-left: 10px; margin-top: 4px; }
+        .message .check { color: #53bdeb; margin-left: 2px; }
+        .typing-indicator {
+            display: none; align-items: center; gap: 4px;
+            background: #202c33; padding: 12px 16px; border-radius: 8px;
+            max-width: 80px; margin-bottom: 4px;
+        }
+        .typing-indicator.visible { display: flex; }
+        .typing-dot { width: 7px; height: 7px; border-radius: 50%; background: #8696a0; animation: typing 1.4s infinite; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-5px); opacity: 1; } }
+        .input-bar {
+            padding: 10px 16px; background: #1f2c34;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .input-bar .emoji { font-size: 26px; color: #8696a0; }
+        .input-bar input {
+            flex: 1; padding: 10px 14px; border-radius: 8px; border: none;
+            background: #2a3942; color: #e9edef; font-size: 15px; outline: none;
+        }
+        .input-bar .mic { font-size: 24px; color: #8696a0; }
+        .date-divider { text-align: center; margin: 12px 0; }
+        .date-divider span { background: #182229; color: #8696a0; padding: 5px 12px; border-radius: 8px; font-size: 12px; }
+        .click-hint {
+            position: fixed; bottom: 80px; right: 40px;
+            background: rgba(0,168,132,0.9); color: white;
+            padding: 12px 24px; border-radius: 24px; font-size: 15px;
+            z-index: 100; animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.03); } }
+        .click-hint.hidden { display: none; }
+        .messages-area::-webkit-scrollbar { width: 6px; }
+        .messages-area::-webkit-scrollbar-thumb { background: #374045; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="wa-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-avatar">G</div>
+                <div class="sidebar-icons"><span>⊕</span><span>⋮</span></div>
+            </div>
+            <div class="search-bar"><input type="text" placeholder="Buscar o empezar un chat nuevo"></div>
+            <div class="chat-list-item">
+                <div class="avatar" style="background: linear-gradient(135deg, #6a4c93, #b185db);">🏢</div>
+                <div class="chat-info">
+                    <div class="chat-name">Verticali Real Estate</div>
+                    <div class="chat-preview">Escribiendo...</div>
+                </div>
+                <div class="chat-time">ahora</div>
+            </div>
+            <div class="chat-list-item">
+                <div class="avatar" style="background: linear-gradient(135deg, #1a3a5c, #2d6da8);">⚖️</div>
+                <div class="chat-info">
+                    <div class="chat-name">Arriola Abogados</div>
+                    <div class="chat-preview">Me interesa...</div>
+                </div>
+                <div class="chat-time">10:15</div>
+            </div>
+            <div class="chat-list-item">
+                <div class="avatar" style="background: linear-gradient(135deg, #2d6a4f, #52b788);">🏠</div>
+                <div class="chat-info">
+                    <div class="chat-name">Lic. Moisés Campos</div>
+                    <div class="chat-preview">Buenos días...</div>
+                </div>
+                <div class="chat-time">8:47</div>
+            </div>
+            <div class="chat-list-item">
+                <div class="avatar" style="background: linear-gradient(135deg, #e07a5f, #f4845f);">🦷</div>
+                <div class="chat-info">
+                    <div class="chat-name">Clínica DentaLux</div>
+                    <div class="chat-preview">¿Cuánto cuesta el servicio?</div>
+                </div>
+                <div class="chat-time">ayer</div>
+            </div>
+            <div class="chat-list-item">
+                <div class="avatar" style="background: linear-gradient(135deg, #bc6c25, #dda15e);">🍽️</div>
+                <div class="chat-info">
+                    <div class="chat-name">Restaurante El Cielo</div>
+                    <div class="chat-preview">Me interesa la propuesta</div>
+                </div>
+                <div class="chat-time">ayer</div>
+            </div>
+        </div>
+
+        <div class="main-chat">
+            <div class="chat-header">
+                <div class="avatar">🏢</div>
+                <div class="chat-header-info">
+                    <div class="name">Verticali Real Estate Monterrey</div>
+                    <div class="status" id="headerStatus">en línea</div>
+                </div>
+                <div class="chat-header-icons"><span>🔍</span><span>📎</span><span>⋮</span></div>
+            </div>
+            <div class="messages-area" id="messagesArea">
+                <div class="date-divider"><span>HOY</span></div>
+            </div>
+            <div class="input-bar">
+                <span class="emoji">😊</span>
+                <span class="emoji">📎</span>
+                <input type="text" placeholder="Escribe un mensaje" id="inputField" readonly>
+                <span class="mic">🎤</span>
+            </div>
+        </div>
+    </div>
+    <div class="click-hint" id="clickHint">👆 Haz clic en cualquier lugar para avanzar</div>
+
+    <script>
+        const messages = [
+            { type: 'sent', text: 'Hola buenas tardes, estoy buscando opciones de inversión inmobiliaria en la zona de San Pedro Garza García', time: '12:41' },
+            { type: 'typing', duration: 1800 },
+            { type: 'received', text: '¡Buenas tardes! 🏢 Bienvenido a Verticali Real Estate. Soy Sofía, su Asistente Virtual Inteligente. Es un placer atenderle. ¿Me podría compartir su nombre completo, por favor?', time: '12:41' },
+            { type: 'sent', text: 'María Elena Fuentes, soy directora de un grupo de inversión privado', time: '12:42' },
+            { type: 'typing', duration: 2000 },
+            { type: 'received', text: 'Mucho gusto, Sra. Fuentes. 📍 Para mostrarle las opciones más alineadas a su perfil, ¿me podría indicar qué tipo de propiedad le interesa?\n\n• Departamento de lujo\n• Casa residencial\n• Terreno para desarrollo\n• Local comercial u oficinas', time: '12:42' },
+            { type: 'sent', text: 'Me interesan departamentos de lujo y también algún local comercial en zona premium', time: '12:43' },
+            { type: 'typing', duration: 2200 },
+            { type: 'received', text: 'Excelente selección, Sra. Fuentes. Tenemos propiedades destacadas en ambas categorías en San Pedro. 🏠\n\nPara filtrar las mejores opciones para usted, ¿me podría compartir su rango de inversión aproximado? (esto nos permite mostrarle únicamente propiedades que se ajusten a su perfil)', time: '12:43' },
+            { type: 'sent', text: 'Estamos manejando un presupuesto de entre 200 y 400 mil dólares para esta primera inversión', time: '12:44' },
+            { type: 'typing', duration: 2500 },
+            { type: 'received', text: 'Perfecto, Sra. Fuentes. Con ese rango de inversión tenemos varias opciones exclusivas que se ajustan ideal a su perfil. ✅\n\nHe reservado un espacio prioritario con nuestro Director Comercial para una videollamada personalizada donde le presentará las propiedades pre-seleccionadas con análisis de plusvalía.\n\n📅 Seleccione el horario que mejor le acomode:\nhttps://cal.com/verticali/asesoria-vip\n\n¿Le agendo la cita?', time: '12:44' },
+            { type: 'sent', text: 'Me parece perfecto, voy a revisar la agenda y confirmo. Muchas gracias Sofía 👏', time: '12:45' },
+            { type: 'typing', duration: 1500 },
+            { type: 'received', text: '¡Con todo gusto, Sra. Fuentes! 🏢✨ Le enviaré un recordatorio automático 24 horas antes de su cita. Si tiene cualquier duda adicional, estoy disponible aquí las 24 horas. ¡Excelente tarde!', time: '12:45' },
+        ];
+
+        let currentStep = 0;
+        let isTyping = false;
+        const messagesArea = document.getElementById('messagesArea');
+        const inputField = document.getElementById('inputField');
+        const clickHint = document.getElementById('clickHint');
+        const headerStatus = document.getElementById('headerStatus');
+
+        function scrollToBottom() { messagesArea.scrollTop = messagesArea.scrollHeight; }
+
+        function showTypingIndicator() {
+            const typing = document.createElement('div');
+            typing.className = 'typing-indicator visible';
+            typing.id = 'typingBubble';
+            typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+            messagesArea.appendChild(typing);
+            headerStatus.textContent = 'escribiendo...';
+            scrollToBottom();
+        }
+
+        function removeTypingIndicator() {
+            const typing = document.getElementById('typingBubble');
+            if (typing) typing.remove();
+            headerStatus.textContent = 'en línea';
+        }
+
+        function addMessage(msg) {
+            const div = document.createElement('div');
+            div.className = `message ${msg.type}`;
+            let checkMark = msg.type === 'sent' ? '<span class="check">✓✓</span>' : '';
+            div.innerHTML = `${msg.text.replace(/\n/g, '<br>')}<span class="time">${msg.time} ${checkMark}</span>`;
+            messagesArea.appendChild(div);
+            requestAnimationFrame(() => { div.classList.add('visible'); });
+            scrollToBottom();
+        }
+
+        function simulateTypingInInput(text) {
+            inputField.value = '';
+            let i = 0;
+            return new Promise(resolve => {
+                const interval = setInterval(() => {
+                    inputField.value = text.substring(0, i + 1);
+                    i++;
+                    if (i >= text.length) {
+                        clearInterval(interval);
+                        setTimeout(() => { inputField.value = ''; resolve(); }, 300);
+                    }
+                }, 35);
+            });
+        }
+
+        async function processStep() {
+            if (currentStep >= messages.length || isTyping) return;
+            const msg = messages[currentStep];
+            currentStep++;
+            if (msg.type === 'typing') {
+                isTyping = true;
+                showTypingIndicator();
+                setTimeout(() => { removeTypingIndicator(); isTyping = false; processStep(); }, msg.duration);
+            } else if (msg.type === 'sent') {
+                isTyping = true;
+                await simulateTypingInInput(msg.text);
+                addMessage(msg);
+                isTyping = false;
+            } else if (msg.type === 'received') {
+                addMessage(msg);
+            }
+            if (currentStep >= messages.length) clickHint.classList.add('hidden');
+        }
+
+        document.addEventListener('click', async (e) => { if (!isTyping) processStep(); });
+        inputField.addEventListener('click', (e) => { e.stopPropagation(); });
+    </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+{
+    "name": "SUPER_MINIMAL_DEBUGGER",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "test-debug-webhook",
+                "options": {}
+            },
+            "id": "debug-wh",
+            "name": "Debugger Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "debug-set-1",
+                            "name": "received_at",
+                            "value": "={{ $now }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "debug-set-2",
+                            "name": "raw_body",
+                            "value": "={{ $json.body }}",
+                            "type": "object"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "debug-set",
+            "name": "Log Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                300,
+                200
+            ]
+        }
+    ],
+    "connections": {
+        "Debugger Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Log Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

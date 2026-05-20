@@ -1,0 +1,97 @@
+{
+    "name": "AdSniper Backend (Simple)",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "adsniper",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "id": "e2f6d0a7-19ee-47b1-9b16-724f115cf720",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                380,
+                240
+            ],
+            "webhookId": "e2f6d0a7-19ee-47b1-9b16-724f115cf720"
+        },
+        {
+            "parameters": {
+                "prompt": "user",
+                "text": "=Eres un Director Creativo.\nCrea 3 anuncios para Meta y 2 guiones de TikTok.\n\nINPUT:\n- Producto: {{ $json.product_title }}\n- Descripción: {{ $json.product_description }}\n- Marca: {{ $json.brand.name }}\n\nFORMATO JSON OBLIGATORIO:\n{\n  \"ads\": [\n    {\n      \"type\": \"Gancho Visual\",\n      \"headline\": \"Titular\",\n      \"primary_text\": \"Texto\",\n      \"image_prompt\": \"Fotografía realista de [Producto] en [Escenario], iluminación cinematográfica, 8k\" \n    }\n  ],\n  \"scripts\": [...]\n}\n\nRESPOND ONLY WITH RAW JSON. NO MARKDOWN.",
+                "options": {}
+            },
+            "id": "2db4ee4c-7c08-41ec-b8f4-6f02787e35b7",
+            "name": "AI Agent",
+            "type": "@n8n/n8n-nodes-langchain.agent",
+            "typeVersion": 1,
+            "position": [
+                600,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "model": "gpt-4o",
+                "options": {
+                    "responseFormat": "json_object"
+                }
+            },
+            "id": "9a3e20e8-7822-4a00-9be0-449e917d4766",
+            "name": "OpenAI Chat Model (PON TU API AQUI)",
+            "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+            "typeVersion": 1,
+            "position": [
+                640,
+                460
+            ],
+            "credentials": {
+                "openAiApi": {
+                    "id": "YOUR_CREDENTIAL_ID_HERE",
+                    "name": "OpenAI account"
+                }
+            }
+        },
+        {
+            "parameters": {},
+            "id": "dc2b1f0f-6111-4777-9097-4c17242c75a9",
+            "name": "Image Generation (DALL-E)",
+            "type": "@n8n/n8n-nodes-langchain.toolDalle",
+            "typeVersion": 1,
+            "position": [
+                820,
+                460
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "OpenAI Chat Model (PON TU API AQUI)": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "versionId": "6df0be0a-d8da-4395-8857-e6c8dc5eb56e"
+}

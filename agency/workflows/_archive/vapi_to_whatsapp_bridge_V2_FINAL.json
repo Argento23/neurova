@@ -1,0 +1,393 @@
+{
+    "name": "Vapi WhatsApp Bridge - MULTI-MEDIA V2",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "vapi-multimedia-bridge-v2",
+                "responseMode": "responseNode"
+            },
+            "id": "webhook-v2",
+            "name": "WebhookVapi",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "keepOnlySet": true,
+                "values": {
+                    "string": [
+                        {
+                            "name": "phone",
+                            "value": "={{ ($json[\"body\"]?.message?.toolCalls?.[0]?.function?.arguments?.phone || $json[\"body\"]?.phone || \"\").toString().replace(/\\+/g, \"\").replace(/\\s/g, \"\") }}"
+                        },
+                        {
+                            "name": "message",
+                            "value": "={{ $json[\"body\"][\"message\"][\"toolCalls\"][0][\"function\"][\"arguments\"][\"message\"] || $json[\"body\"][\"message\"] }}"
+                        },
+                        {
+                            "name": "media_url",
+                            "value": "={{ $json[\"body\"][\"message\"][\"toolCalls\"][0][\"function\"][\"arguments\"][\"media_url\"] }}"
+                        },
+                        {
+                            "name": "media_type",
+                            "value": "={{ $json[\"body\"][\"message\"][\"toolCalls\"][0][\"function\"][\"arguments\"][\"media_type\"] || \"text\" }}"
+                        },
+                        {
+                            "name": "toolCallId",
+                            "value": "={{ $json[\"body\"][\"message\"][\"toolCalls\"][0][\"id\"] }}"
+                        },
+                        {
+                            "name": "instanceName",
+                            "value": "={{ $json[\"body\"][\"message\"][\"toolCalls\"][0][\"function\"][\"name\"].indexOf('stefan') > -1 ? 'Argen-Austria' : 'GenerArise' }}"
+                        }
+                    ]
+                }
+            },
+            "id": "set-v2",
+            "name": "PrepareData",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "rules": {
+                    "values": [
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeFilter": "string"
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "cond-text",
+                                        "leftValue": "={{ $json[\"media_type\"] }}",
+                                        "rightValue": "text",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "equals"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameNextTarget": "Text"
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeFilter": "string"
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "cond-img",
+                                        "leftValue": "={{ $json[\"media_type\"] }}",
+                                        "rightValue": "image",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "equals"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameNextTarget": "Image"
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeFilter": "string"
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "cond-doc",
+                                        "leftValue": "={{ $json[\"media_type\"] }}",
+                                        "rightValue": "document",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "equals"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameNextTarget": "Document"
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeFilter": "string"
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "cond-vid",
+                                        "leftValue": "={{ $json[\"media_type\"] }}",
+                                        "rightValue": "video",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "equals"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameNextTarget": "Video"
+                        }
+                    ],
+                    "fallbackResult": "Text"
+                }
+            },
+            "id": "switch-v2",
+            "name": "RouteByMediaType",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 1,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "={{ $json[\"instanceName\"] }}",
+                "options_message": {
+                    "number": "={{ $json[\"phone\"] }}",
+                    "textMessage": {
+                        "text": "={{ $json[\"message\"] }}"
+                    }
+                }
+            },
+            "id": "evo-text-v2",
+            "name": "Send Text",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                750,
+                150
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "operation": "sendMedia",
+                "instanceName": "={{ $json[\"instanceName\"] }}",
+                "options_message": {
+                    "number": "={{ $json[\"phone\"] }}",
+                    "mediaMessage": {
+                        "media": "={{ $json[\"media_url\"] }}",
+                        "mediaType": "image",
+                        "caption": "={{ $json[\"message\"] }}"
+                    }
+                }
+            },
+            "id": "evo-img-v2",
+            "name": "Send Image",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                750,
+                300
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "operation": "sendMedia",
+                "instanceName": "={{ $json[\"instanceName\"] }}",
+                "options_message": {
+                    "number": "={{ $json[\"phone\"] }}",
+                    "mediaMessage": {
+                        "media": "={{ $json[\"media_url\"] }}",
+                        "mediaType": "document",
+                        "caption": "={{ $json[\"message\"] }}"
+                    }
+                }
+            },
+            "id": "evo-doc-v2",
+            "name": "Send Document",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                750,
+                450
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "operation": "sendMedia",
+                "instanceName": "={{ $json[\"instanceName\"] }}",
+                "options_message": {
+                    "number": "={{ $json[\"phone\"] }}",
+                    "mediaMessage": {
+                        "media": "={{ $json[\"media_url\"] }}",
+                        "mediaType": "video",
+                        "caption": "={{ $json[\"message\"] }}"
+                    }
+                }
+            },
+            "id": "evo-vid-v2",
+            "name": "Send Video",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                750,
+                600
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $node[\"PrepareData\"].json[\"toolCallId\"] }}\",\n      \"result\": \"Mensaje enviado correctamente vía Evolution API.\"\n    }\n  ]\n}"
+            },
+            "id": "respond-v2",
+            "name": "Respond to Vapi",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                1000,
+                350
+            ]
+        }
+    ],
+    "connections": {
+        "WebhookVapi": {
+            "main": [
+                [
+                    {
+                        "node": "PrepareData",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "PrepareData": {
+            "main": [
+                [
+                    {
+                        "node": "RouteByMediaType",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "RouteByMediaType": {
+            "main": [
+                [
+                    {
+                        "node": "Send Text",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send Image",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send Document",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send Video",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Text": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Vapi",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Image": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Vapi",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Document": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Vapi",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Video": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Vapi",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

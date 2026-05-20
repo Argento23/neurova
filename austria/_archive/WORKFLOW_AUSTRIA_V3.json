@@ -1,0 +1,229 @@
+{
+    "name": "Austria Voice Assistant V3 (FIXED)",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "webhook-trigger",
+            "name": "Webhook (WhatsApp)",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                200,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "content": "⚠️ IMPORTANTE: FORMATO DE NÚMERO\n\nEn tu nodo de Evolution API, asegúrate de mapear el campo 'Number' o 'RemoteJid' con el ID completo que viene del Webhook.\n\nEjemplo: {{ $('Webhook').item.json.body.key.remoteJid }}\n\nDebe verse como: 5491133334444@s.whatsapp.net",
+                "height": 260,
+                "width": 300
+            },
+            "id": "nota-numero",
+            "name": "Nota: Formato Número",
+            "type": "n8n-nodes-base.stickyNote",
+            "typeVersion": 1,
+            "position": [
+                1000,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// ═══════════════════════════════════════════════════════════════\n// FILTRO SEPARADOR VOZ + ACCIÓN - ARGENTERÍO AUSTRIA (Simple)\n// El AI solo genera voz, el flujo maneja los textos automáticamente\n// ═══════════════════════════════════════════════════════════════\n\n// A. OBTENER INPUT\nlet inputData = $input.item.json.original_voice \n             || $input.item.json.text \n             || $input.item.json.output \n             || $input.item.json.response\n             || \"\";\n\n// Variables por defecto\nlet textoVoz = \"\";\nlet accionFinal = \"info\";\n\n// B. PARSEO DE RESPUESTA AI\nif (typeof inputData === 'object' && inputData !== null) {\n  // CASO 1: Ya es objeto JSON parseado\n  textoVoz = inputData.respuesta_voz || \"\";\n  accionFinal = inputData.accion_requerida || \"info\";\n\n} else if (typeof inputData === 'string') {\n  // CASO 2: Es string, intentar parsear JSON\n  \n  let cleanString = inputData\n    .replace(/```json\\s*/g, \"\")\n    .replace(/```\\s*/g, \"\")\n    .trim();\n\n  try {\n    const parsed = JSON.parse(cleanString);\n    textoVoz = parsed.respuesta_voz || \"\";\n    accionFinal = parsed.accion_requerida || \"info\";\n  } catch (e) {\n    // Fallback: Si no es JSON válido, usar como texto de voz directo\n    textoVoz = cleanString;\n    accionFinal = \"info\";\n  }\n}\n\n// C. LIMPIEZA PARA TTS\nfunction cleanForTTS(text) {\n  if (!text || typeof text !== 'string') return \"\";\n  return text\n    .replace(/[\\u{1F600}-\\u{1F64F}\\u{1F300}-\\u{1F5FF}]/gu, \"\") // Emojis simples\n    .replace(/(https?:\\/\\/[^\\s]+)/g, \"\") // URLs\n    .replace(/[\"*{}\\[\\]_`]/g, \"\") // Símbolos\n    .replace(/\\s+/g, \" \")\n    .trim();\n}\n\nreturn {\n  json: {\n    clean_voice: cleanForTTS(textoVoz),              \n    accion: accionFinal.toLowerCase().trim()\n  }\n};"
+            },
+            "id": "filtro-js",
+            "name": "Filtro JS (Voz+Acción)",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "dataType": "string",
+                "value1": "={{ $json.accion }}",
+                "rules": {
+                    "rules": [
+                        {
+                            "value2": "info"
+                        },
+                        {
+                            "value2": "agendar"
+                        },
+                        {
+                            "value2": "contacto"
+                        },
+                        {
+                            "value2": "derivar"
+                        }
+                    ]
+                }
+            },
+            "id": "switch-accion",
+            "name": "Switch Acción",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 1,
+            "position": [
+                700,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "amount": 2,
+                "unit": "seconds"
+            },
+            "id": "wait-agendar",
+            "name": "Esperar 2s",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                1000,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "amount": 2,
+                "unit": "seconds"
+            },
+            "id": "wait-contacto",
+            "name": "Esperar 2s",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                1000,
+                600
+            ]
+        },
+        {
+            "parameters": {},
+            "id": "evolution-agendar",
+            "name": "👇 CONECTAR EVOLUTION AQUÍ (Link Cal.com)",
+            "type": "n8n-nodes-base.noOp",
+            "typeVersion": 1,
+            "position": [
+                1200,
+                400
+            ]
+        },
+        {
+            "parameters": {},
+            "id": "evolution-contacto",
+            "name": "👇 CONECTAR EVOLUTION AQUÍ (Datos Contacto)",
+            "type": "n8n-nodes-base.noOp",
+            "typeVersion": 1,
+            "position": [
+                1200,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://api.elevenlabs.io/v1/text-to-speech/voice_id",
+                "method": "POST",
+                "authentication": "headerAuth",
+                "options": {},
+                "bodyParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "text",
+                            "value": "={{ $json.clean_voice }}"
+                        }
+                    ]
+                }
+            },
+            "id": "tts-node",
+            "name": "Generar Audio (TTS)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                1000,
+                200
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook (WhatsApp)": {
+            "main": [
+                [
+                    {
+                        "node": "Filtro JS (Voz+Acción)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtro JS (Voz+Acción)": {
+            "main": [
+                [
+                    {
+                        "node": "Switch Acción",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Switch Acción": {
+            "main": [
+                [
+                    {
+                        "node": "Generar Audio (TTS)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Generar Audio (TTS)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Esperar 2s",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Generar Audio (TTS)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Esperar 2s",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Esperar 2s": {
+            "main": [
+                [
+                    {
+                        "node": "👇 CONECTAR EVOLUTION AQUÍ (Link Cal.com)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Esperar 2s 1": {
+            "main": [
+                [
+                    {
+                        "node": "👇 CONECTAR EVOLUTION AQUÍ (Datos Contacto)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Panel — Content Factory</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #030307; --bg-card: #0a0a0f; --bg-card-hover: #12121a;
+      --border: rgba(255,255,255,0.1); --border-focus: rgba(34,211,238,0.5);
+      --text: #f8fafc; --muted: #94a3b8;
+      --cyan: #22d3ee; --emerald: #34d399; --violet: #a78bfa; --rose: #fb7185;
+      --warning: #fbbf24;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
+    
+    .navbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 32px; border-bottom: 1px solid var(--border);
+      background: rgba(3,3,7,0.8); backdrop-filter: blur(10px);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .brand { font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+    .brand span { background: linear-gradient(135deg, var(--cyan), var(--emerald)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    .nav-actions { display: flex; gap: 16px; align-items: center; }
+    .user-email { font-size: 13px; color: var(--muted); }
+    .btn-logout { background: transparent; color: var(--rose); border: 1px solid rgba(251,113,133,0.3); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
+    .btn-logout:hover { background: rgba(251,113,133,0.1); }
+    
+    .container { max-width: 1000px; margin: 40px auto; padding: 0 24px; display: grid; grid-template-columns: 300px 1fr; gap: 32px; }
+    @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+    
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+    .card h2 { font-size: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+    input, textarea {
+      width: 100%; padding: 10px 14px; border-radius: 8px;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      color: white; font-family: inherit; font-size: 13px;
+    }
+    input:focus, textarea:focus { outline: none; border-color: var(--cyan); }
+    
+    .btn {
+      width: 100%; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 13px;
+      cursor: pointer; border: none; transition: transform 0.2s;
+    }
+    .btn-primary { background: linear-gradient(135deg, var(--cyan), var(--emerald)); color: #000; }
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .platforms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .platform-checkbox {
+      display: flex; align-items: center; gap: 8px; padding: 10px;
+      border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
+      font-size: 13px; font-weight: 500; transition: border-color 0.2s;
+    }
+    .platform-checkbox:hover { border-color: var(--cyan); }
+    .platform-checkbox input { width: auto; margin: 0; }
+    
+    /* Calendar Feed */
+    .feed-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .feed-header h2 { margin: 0; }
+    
+    .post-item {
+      padding: 16px; border-bottom: 1px solid var(--border);
+      display: flex; gap: 16px; align-items: flex-start;
+    }
+    .post-item:last-child { border-bottom: none; }
+    
+    .post-time { font-size: 12px; color: var(--muted); min-width: 60px; font-weight: 600; }
+    .post-content { flex: 1; }
+    .post-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+    .post-caption { font-size: 13px; color: var(--muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    
+    .post-media {
+      width: 80px; height: 80px; border-radius: 8px; background: rgba(255,255,255,0.05);
+      object-fit: cover; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 24px;
+    }
+    
+    .status-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;
+      background: rgba(255,255,255,0.1); color: var(--muted); margin-top: 8px;
+    }
+    .status-published { background: rgba(52,211,153,0.15); color: var(--emerald); }
+    .status-generating { background: rgba(251,191,36,0.15); color: var(--warning); }
+    .status-ready { background: rgba(34,211,238,0.15); color: var(--cyan); }
+    .status-error { background: rgba(251,113,133,0.15); color: var(--rose); }
+    
+    .toast {
+      position: fixed; bottom: 20px; right: 20px; padding: 12px 24px; border-radius: 8px;
+      background: var(--emerald); color: #000; font-weight: 600; font-size: 13px;
+      transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 1000;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.error { background: var(--rose); color: white; }
+  </style>
+</head>
+<body>
+  
+  <nav class="navbar">
+    <div class="brand"><img src="/logo.png" alt="Logo" style="width: 24px; height: 24px; border-radius: 4px; object-fit: contain;"> <span>GenerArise</span></div>
+    <div class="nav-actions">
+      <span class="user-email" id="userEmail">Cargando...</span>
+      <button class="btn-logout" onclick="logout()">Salir</button>
+    </div>
+  </nav>
+  
+  <div class="container" style="display:none;" id="mainContainer">
+    <!-- View: Content Factory -->
+    <div id="contentFactoryView" style="display:contents;">
+      <!-- Sidebar: Config -->
+      <div class="sidebar">
+        <div class="card">
+          <h2>⚙️ Configuración del Robot</h2>
+          <form id="configForm" onsubmit="saveConfig(event)">
+            <div class="form-group">
+              <label>Nombre de tu Marca</label>
+              <input type="text" id="brandName" required placeholder="Ej: Clínica Dental Madrid">
+            </div>
+            <div class="form-group">
+              <label>Nicho / De qué trata tu negocio</label>
+              <textarea id="niche" rows="3" required placeholder="Odontología estética, implantes y diseño de sonrisa en Madrid centro."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Idioma</label>
+              <input type="text" id="language" value="es" required>
+            </div>
+            
+            <label>Redes donde publicar</label>
+            <div class="platforms-grid">
+              <label class="platform-checkbox"><input type="checkbox" id="plat_instagram" value="instagram"> Instagram</label>
+              <label class="platform-checkbox"><input type="checkbox" id="plat_facebook" value="facebook"> Facebook</label>
+              <label class="platform-checkbox"><input type="checkbox" id="plat_tiktok" value="tiktok"> TikTok</label>
+              <label class="platform-checkbox"><input type="checkbox" id="plat_youtube" value="youtube"> YouTube</label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" id="btnSaveConfig">Guardar Cambios</button>
+          </form>
+        </div>
+        
+        <div class="card">
+          <h2>🔑 Conectar Redes</h2>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Conectá tu cuenta de TikTok para permitir que GenerArise publique en tu nombre.</p>
+          <button class="btn" style="background:#000;color:white;border:1px solid #22d3ee;margin-bottom:12px;" onclick="connectTikTok()">🎵 Conectar TikTok</button>
+          
+          <p style="font-size:12px;color:var(--muted);margin-bottom:16px;border-top:1px solid rgba(255,255,255,0.1);padding-top:12px;">Para Instagram y Facebook, la conexión se realiza mediante nuestro equipo de onboarding. Contactá a soporte para vincular estas redes.</p>
+          <button class="btn" style="background:rgba(255,255,255,0.1);color:white" onclick="window.open('https://wa.me/5491178287901?text=Hola,%20acabo%20de%20pagar%20mi%20plan%20en%20GenerArise%20y%20necesito%20conectar%20mis%20redes.','_blank')">Contactar Soporte</button>
+        </div>
+      </div>
+      
+      <!-- Main: Feed & Avatar -->
+      <div class="main-content">
+        <!-- NEW: AI Avatar Config moved to top right to avoid scrolling -->
+        <div class="card" style="background: linear-gradient(to right, rgba(255,255,255,0.02), rgba(34,211,238,0.05)); border-color: rgba(34,211,238,0.2);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h2 style="margin:0;">🎭 Identidad del Avatar IA</h2>
+            <label class="platform-checkbox" style="margin:0; background:rgba(34,211,238,0.1); color:var(--cyan); border:none;">
+              <input type="checkbox" id="enableAvatar" value="true"> Activar Videos Avatar
+            </label>
+          </div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Elegí tu presentador virtual para crear Reels y TikToks virales en piloto automático.</p>
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div class="form-group" style="margin:0;">
+              <label>Voz del Avatar</label>
+              <select id="avatarVoice" style="width: 100%; padding: 10px 14px; border-radius: 8px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white; font-family: inherit; font-size: 13px;">
+                <option value="es-AR-male">Argentino (Masculino)</option>
+                <option value="es-AR-female">Argentino (Femenino)</option>
+                <option value="es-ES-male">Español (Masculino)</option>
+                <option value="es-MX-female">Neutro / México (Femenino)</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label>Imagen / Estilo Visual</label>
+              <select id="avatarImage" style="width: 100%; padding: 10px 14px; border-radius: 8px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white; font-family: inherit; font-size: 13px;">
+                <option value="ai-businessman">Hombre de Negocios</option>
+                <option value="ai-businesswoman">Mujer de Negocios</option>
+                <option value="ai-casual-male">Casual Joven</option>
+                <option value="ai-casual-female">Casual Joven Femenina</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="background: rgba(34,211,238,0.1); color: var(--cyan); border: 1px solid rgba(34,211,238,0.3);" onclick="saveAvatar()">Guardar Identidad IA</button>
+        </div>        
+        <div class="card" style="min-height: 400px;">
+          <div class="feed-header">
+            <h2>📅 Tus Posts Generados</h2>
+            <button class="btn-logout" style="border-color:var(--cyan);color:var(--cyan)" onclick="loadPosts()">🔄 Actualizar</button>
+          </div>
+          
+          <div id="postsContainer">
+            <p style="text-align:center;color:var(--muted);padding:40px 0;">Cargando posts...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- View: Tienda Digital -->
+    <div id="storeView" style="display:none; grid-column: 1 / -1;">
+      <div class="card" style="padding: 40px; text-align: center; border-color: var(--cyan); box-shadow: 0 0 40px rgba(34,211,238,0.05);">
+        <h2 style="font-size: 24px; justify-content: center; margin-bottom: 8px;">🛍️ Configuración de Tienda Digital</h2>
+        <p style="color: var(--muted); margin-bottom: 32px;">Tu e-commerce está en proceso de despliegue automático. Integración con MercadoPago y publicación automatizada.</p>
+        
+        <form id="storeForm" onsubmit="saveStoreConfig(event)">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; text-align: left; margin-bottom: 32px;">
+            
+            <div style="background: rgba(255,255,255,0.03); padding: 24px; border-radius: 16px; border: 1px solid var(--border); position: relative;">
+              <span style="position: absolute; top: -12px; left: 24px; background: var(--cyan); color: #000; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">PASO 1</span>
+              <h3 style="font-size: 16px; margin-bottom: 12px; margin-top: 8px; display: flex; align-items: center; gap: 8px;">📦 Catálogo de Productos</h3>
+              <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Sube tu inventario en formato CSV o Excel. <br><strong style="color:var(--cyan)">¿A dónde va esto?</strong> Nuestro sistema backend procesa tu lista de forma segura y se la pasa a nuestra IA para generar los guiones y anuncios automáticamente.</p>
+              <input type="file" id="csvUploader" style="display:none;" accept=".csv, .xlsx" onchange="handleFileUpload()">
+              <button type="button" class="btn btn-outline" style="background:rgba(255,255,255,0.05); color:white; border: 1px solid var(--border);" onclick="document.getElementById('csvUploader').click()">Seleccionar Archivo CSV / Excel</button>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.03); padding: 24px; border-radius: 16px; border: 1px solid var(--border); position: relative;">
+              <span style="position: absolute; top: -12px; left: 24px; background: var(--emerald); color: #000; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">PASO 2</span>
+              <h3 style="font-size: 16px; margin-bottom: 12px; margin-top: 8px; display: flex; align-items: center; gap: 8px;">💳 Pagos y Contacto</h3>
+              <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Ingresá tus datos de venta. <br><strong style="color:var(--emerald)">¿Quién los administra?</strong> Solo tú. Estos links se conectan directo a los botones de tu Tienda Digital pública para que tus clientes te paguen sin intermediarios ni comisiones de nuestra parte.</p>
+              <div class="form-group">
+                <label>Link de Pago (MercadoPago / PayPal)</label>
+                <input type="url" id="storePaymentLink" placeholder="https://link.mercadopago.com.ar/...">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>WhatsApp de Contacto</label>
+                <input type="text" id="storeWhatsApp" placeholder="54911...">
+              </div>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.03); padding: 24px; border-radius: 16px; border: 1px solid var(--border); position: relative;">
+              <span style="position: absolute; top: -12px; left: 24px; background: var(--violet); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">PASO 3</span>
+              <h3 style="font-size: 16px; margin-bottom: 12px; margin-top: 8px; display: flex; align-items: center; gap: 8px;">🚀 Auto-Publicación</h3>
+              <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Vincula tus redes sociales. <br><strong style="color:var(--violet)">¿Para qué sirve?</strong> Quedan guardados de forma encriptada en tu perfil en la nube. El robot de Content Factory los usará para subir los videos que genera la IA en tu nombre.</p>
+              <div class="form-group">
+                <label>Usuario de Instagram</label>
+                <input type="text" id="storeIgHandle" placeholder="@mi_tienda">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>URL de Facebook</label>
+                <input type="url" id="storeFbUrl" placeholder="https://facebook.com/...">
+              </div>
+            </div>
+            
+          </div>
+          
+          <button type="submit" class="btn btn-primary" id="btnSaveStore" style="max-width: 300px; margin: 0 auto; font-size: 14px;">💾 Guardar Configuración</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Paywall Overlay -->
+  <div id="paywallOverlay" style="display:none; position:fixed; inset:0; background:rgba(3,3,7,0.95); z-index:1000; align-items:center; justify-content:center; flex-direction:column; padding:24px; text-align:center;">
+    <div style="background:var(--bg-card); border:1px solid var(--cyan); border-radius:24px; padding:40px; max-width:500px; width:100%; box-shadow:0 0 40px rgba(34,211,238,0.2);">
+      <h2 style="font-size:24px; margin-bottom:24px;">Activá tu cuenta</h2>
+      
+      <!-- Plan Selector Toggle -->
+      <div style="display:flex; background:rgba(255,255,255,0.05); padding:4px; border-radius:12px; margin-bottom:24px;">
+        <button id="btnPlanStarter" onclick="switchPaywallPlan('starter')" style="flex:1; padding:12px; border-radius:8px; border:none; background:transparent; color:var(--muted); font-weight:600; cursor:pointer; transition:all 0.2s;">
+          Content Factory<br><span style="font-size:12px; font-weight:400;">$49/mes</span>
+        </button>
+        <button id="btnPlanStore" onclick="switchPaywallPlan('store')" style="flex:1; padding:12px; border-radius:8px; border:none; background:transparent; color:var(--muted); font-weight:600; cursor:pointer; transition:all 0.2s;">
+          Tienda Digital<br><span style="font-size:12px; font-weight:400;">$29/mes</span>
+        </button>
+      </div>
+
+      <p id="paywallDesc" style="color:var(--muted); font-size:14px; margin-bottom:32px; min-height:42px;">Cargando detalles de tu suscripción...</p>
+      
+      <div id="paypal-sub-container"></div>
+      
+      <div style="margin-top:24px; font-size:12px; color:var(--muted);">
+        Los pagos se procesan de forma segura a través de PayPal. Podés cancelar cuando quieras.
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast" id="toast">Cambios guardados</div>
+
+  <script>
+    let supabaseClient = null;
+    let currentUser = null;
+    let dbUserId = null; // ID in users_config table
+    let paypalClientId = null;
+    let userPlanStatus = 'trial';
+    
+    // Toast UI
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = 'toast show' + (isError ? ' error' : '');
+      setTimeout(() => { toast.className = 'toast'; }, 3000);
+    }
+    
+    // Auth Check
+    async function init() {
+      try {
+        const res = await fetch('/api/public-config');
+        if (!res.ok) throw new Error('No config');
+        const config = await res.json();
+        paypalClientId = config.paypalClientId;
+        supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+        
+        const { data } = await supabaseClient.auth.getSession();
+        if (!data.session) {
+          window.location.href = '/auth.html';
+          return;
+        }
+        
+        currentUser = data.session.user;
+        document.getElementById('userEmail').textContent = currentUser.email;
+        document.getElementById('mainContainer').style.display = 'grid';
+        
+        // Fetch user config from our backend (to get the UUID of the users_config row)
+        // Wait, the API needs the user ID. But wait! The client only knows their auth.uid()!
+        // We need an endpoint to get the config for the CURRENT user.
+        await loadUserConfig();
+        
+      } catch (e) {
+        console.error(e);
+        window.location.href = '/auth.html';
+      }
+    }
+    
+    async function loadUserConfig() {
+      try {
+        const res = await fetch('/api/users/init', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: currentUser.id, email: currentUser.email })
+        });
+        
+        if (!res.ok) throw new Error('Error de backend');
+        const data = await res.json();
+        
+        dbUserId = data.id;
+        userPlanStatus = data.plan_status;
+        
+        // ADMIN BYPASS FOR TESTING
+        const adminEmails = ['rodolforanura@gmail.com', 'admin@generarise.space', 'test@prueba.com'];
+        if (adminEmails.includes(currentUser.email) || currentUser.email.startsWith('test')) {
+          userPlanStatus = 'active';
+          console.log('Admin bypass active: Paywall skipped.');
+        }
+        
+        // Fill form
+        document.getElementById('brandName').value = data.brand_name || '';
+        document.getElementById('niche').value = data.content_niche || '';
+        document.getElementById('language').value = data.language || 'es';
+        
+        const plats = data.platforms_enabled || [];
+        ['instagram','facebook','tiktok','youtube'].forEach(p => {
+          document.getElementById(`plat_${p}`).checked = plats.includes(p);
+        });
+        
+        // Load Avatar Settings
+        const savedAvatar = JSON.parse(localStorage.getItem('avatarConfig') || '{}');
+        if (savedAvatar.voice) document.getElementById('avatarVoice').value = savedAvatar.voice;
+        if (savedAvatar.image) document.getElementById('avatarImage').value = savedAvatar.image;
+        if (savedAvatar.enabled) document.getElementById('enableAvatar').checked = savedAvatar.enabled;
+        
+        // Load Store Settings
+        document.getElementById('storePaymentLink').value = data.payment_link || '';
+        document.getElementById('storeWhatsApp').value = data.whatsapp_number || '';
+        document.getElementById('storeIgHandle').value = data.instagram_handle || '';
+        document.getElementById('storeFbUrl').value = data.facebook_url || '';
+        
+        
+        // Check active view based on plan
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('plan')) {
+          localStorage.setItem('generarise_plan', urlParams.get('plan'));
+        }
+        const planType = localStorage.getItem('generarise_plan') || 'starter';
+        if (planType === 'store') {
+          document.getElementById('contentFactoryView').style.display = 'none';
+          document.getElementById('storeView').style.display = 'grid';
+          document.title = "Mi Panel — Tienda Digital";
+        } else {
+          document.getElementById('contentFactoryView').style.display = 'contents';
+          document.getElementById('storeView').style.display = 'none';
+          document.title = "Mi Panel — Content Factory";
+        }
+        
+        // Load their posts
+        if (planType !== 'store') {
+          loadPosts();
+        }
+        
+        // Check paywall
+        if (userPlanStatus !== 'active') {
+          showPaywall();
+        }
+      } catch (error) {
+        showToast('Error inicializando perfil. Hablá con soporte.', true);
+      }
+    }
+    
+    function showPaywall() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let planType = urlParams.get('plan') || localStorage.getItem('generarise_plan') || 'starter';
+      
+      document.getElementById('paywallOverlay').style.display = 'flex';
+      switchPaywallPlan(planType);
+    }
+    
+    function switchPaywallPlan(planType) {
+      localStorage.setItem('generarise_plan', planType);
+      const isStore = planType === 'store';
+      
+      // Update toggle UI
+      const btnStarter = document.getElementById('btnPlanStarter');
+      const btnStore = document.getElementById('btnPlanStore');
+      
+      if (isStore) {
+        btnStore.style.background = 'linear-gradient(135deg, var(--cyan), var(--emerald))';
+        btnStore.style.color = '#000';
+        btnStarter.style.background = 'transparent';
+        btnStarter.style.color = 'var(--muted)';
+        
+        document.getElementById('paywallDesc').textContent = 'Activá tu Tienda Digital y publicación automática en redes.';
+      } else {
+        btnStarter.style.background = 'linear-gradient(135deg, var(--cyan), var(--emerald))';
+        btnStarter.style.color = '#000';
+        btnStore.style.background = 'transparent';
+        btnStore.style.color = 'var(--muted)';
+        
+        document.getElementById('paywallDesc').textContent = 'Activá Content Factory para mantener tu robot publicando en automático todos los días.';
+      }
+      
+      // Load PayPal JS SDK if not loaded, otherwise re-render buttons
+      if (!document.getElementById('paypal-sdk-script')) {
+        const script = document.createElement('script');
+        script.id = 'paypal-sdk-script';
+        script.src = `https://www.paypal.com/sdk/js?client-id=${paypalClientId}&vault=true&intent=subscription`;
+        script.onload = () => renderPayPalSubButton(isStore);
+        document.head.appendChild(script);
+      } else {
+        renderPayPalSubButton(isStore);
+      }
+    }
+    
+    function renderPayPalSubButton(isStore) {
+      document.getElementById('paypal-sub-container').innerHTML = '';
+      
+      // CONFIRMED by live PayPal test:
+      // P-6MG0852387841300SNH774RA = Content Factory ($49/mes)
+      // P-4W851602GN427531GNH776WA = Tienda Digital ($29/mes)
+      const targetPlanId = isStore ? 'P-4W851602GN427531GNH776WA' : 'P-6MG0852387841300SNH774RA';
+      
+      paypal.Buttons({
+        style: {
+          shape: 'rect', color: 'gold', layout: 'vertical', label: 'subscribe'
+        },
+        createSubscription: function(data, actions) {
+          return actions.subscription.create({
+            plan_id: targetPlanId
+          });
+        },
+        onApprove: async function(data, actions) {
+          showToast('¡Pago exitoso! Activando tu cuenta...');
+          // Enviar al backend para activar la cuenta
+          try {
+            await fetch(`/api/users/${dbUserId}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ plan_status: 'active', paypal_subscription_id: data.subscriptionID })
+            });
+            document.getElementById('paywallOverlay').style.display = 'none';
+            userPlanStatus = 'active';
+            showToast('¡Bienvenido al Content Factory!');
+          } catch(e) {
+            showToast('Hubo un error registrando tu pago. Hablá con soporte.', true);
+          }
+        }
+      }).render('#paypal-sub-container');
+    }
+    
+    async function saveConfig(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSaveConfig');
+      btn.disabled = true;
+      
+      const platforms_enabled = ['instagram','facebook','tiktok','youtube']
+        .filter(p => document.getElementById(`plat_${p}`).checked);
+        
+      const payload = {
+        brand_name: document.getElementById('brandName').value,
+        content_niche: document.getElementById('niche').value,
+        language: document.getElementById('language').value,
+        platforms_enabled
+      };
+      
+      try {
+        const res = await fetch(`/api/users/${dbUserId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!res.ok) throw new Error('Error al guardar');
+        showToast('Configuración actualizada. El Robot IA está analizando tu marca...');
+        
+        // Add fake processing visual to feed
+        document.getElementById('postsContainer').innerHTML = `
+          <div class="post-item" style="background: rgba(34,211,238,0.05); border-radius: 12px; margin-bottom: 12px; border: 1px solid rgba(34,211,238,0.2);">
+            <div class="post-time" style="color:var(--cyan)">⏳ Ahora</div>
+            <div class="post-content">
+              <div class="post-title" style="color:white">🤖 Robot IA analizando: ${payload.brand_name}</div>
+              <div class="post-caption">Estamos recopilando información sobre tu nicho y diseñando la estrategia de contenido. Tus primeros posts aparecerán aquí pronto.</div>
+            </div>
+          </div>
+        `;
+      } catch (err) {
+        showToast(err.message, true);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+    
+    function saveAvatar() {
+      const voice = document.getElementById('avatarVoice').value;
+      const image = document.getElementById('avatarImage').value;
+      const enabled = document.getElementById('enableAvatar').checked;
+      
+      localStorage.setItem('avatarConfig', JSON.stringify({ voice, image, enabled }));
+      showToast('🎭 Identidad de Avatar guardada correctamente.');
+    }
+    
+    async function handleFileUpload() {
+      const file = document.getElementById('csvUploader').files[0];
+      if (!file) return;
+      
+      showToast(`Subiendo archivo "${file.name}" a tu catálogo...`);
+      
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `catalogo_${Date.now()}.${fileExt}`;
+        const filePath = `${currentUser.id}/${fileName}`;
+        
+        const { data, error } = await supabaseClient.storage
+          .from('catalogs')
+          .upload(filePath, file, { upsert: true });
+          
+        if (error) throw error;
+        
+        showToast('✅ Catálogo subido exitosamente. La IA lo procesará.');
+      } catch (err) {
+        showToast(`❌ Error al subir: ${err.message}`, true);
+      }
+    }
+    
+    async function saveStoreConfig(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSaveStore');
+      btn.disabled = true;
+      
+      const payload = {
+        payment_link: document.getElementById('storePaymentLink').value,
+        whatsapp_number: document.getElementById('storeWhatsApp').value,
+        instagram_handle: document.getElementById('storeIgHandle').value,
+        facebook_url: document.getElementById('storeFbUrl').value
+      };
+      
+      try {
+        const res = await fetch(`/api/users/${dbUserId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!res.ok) throw new Error('Error al guardar la configuración');
+        showToast('Configuración de tienda guardada correctamente.');
+      } catch (err) {
+        showToast(err.message, true);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+    
+    // Función para el botón de Conectar TikTok (Demo Video)
+    async function connectTikTok() {
+      try {
+        const res = await fetch('/api/public-config');
+        const config = await res.json();
+        
+        // Generamos valores pseudo-aleatorios simples para la PKCE en el frontend
+        // NOTA: Esto es principalmente para que funcione el flujo visual de autorización en el video.
+        const state = Math.random().toString(36).substring(2, 15);
+        const codeVerifier = '1234567890123456789012345678901234567890123'; // Min 43 chars
+        
+        // Codificamos el challenge usando SHA-256 en el navegador
+        const encoder = new TextEncoder();
+        const data = encoder.encode(codeVerifier);
+        const hash = await crypto.subtle.digest('SHA-256', data);
+        const codeChallenge = btoa(String.fromCharCode(...new Uint8Array(hash)))
+          .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+          
+        const redirectUri = 'https://app.generarise.space/callback/tiktok';
+        
+        const authUrl = new URL('https://www.tiktok.com/v2/auth/authorize/');
+        authUrl.searchParams.set('client_key', config.tiktokClientKey);
+        authUrl.searchParams.set('response_type', 'code');
+        authUrl.searchParams.set('scope', 'user.info.basic,video.publish');
+        authUrl.searchParams.set('redirect_uri', redirectUri);
+        authUrl.searchParams.set('state', state);
+        authUrl.searchParams.set('code_challenge', codeChallenge);
+        authUrl.searchParams.set('code_challenge_method', 'S256');
+        
+        window.location.href = authUrl.toString();
+      } catch(err) {
+        showToast('Error al conectar con TikTok', true);
+      }
+    }
+    
+    async function loadPosts() {
+      const container = document.getElementById('postsContainer');
+      try {
+        const res = await fetch(`/api/calendar/recent/${dbUserId}`);
+        if (!res.ok) throw new Error('Error fetch posts');
+        const posts = await res.json();
+        
+        if (posts.length === 0) {
+          container.innerHTML = '<p style="text-align:center;color:var(--muted);padding:40px 0;">Todavía no hay posts generados. El robot creará tu contenido pronto.</p>';
+          return;
+        }
+        
+        container.innerHTML = posts.map(p => {
+          const isPublished = p.status === 'published';
+          const mediaHtml = p.image_url 
+            ? `<img src="${p.image_url}" class="post-media" alt="Post">` 
+            : `<div class="post-media">${p.post_type.includes('video') ? '🎥' : '📝'}</div>`;
+            
+          return `
+            <div class="post-item">
+              <div class="post-time">
+                <div style="font-size:14px;color:var(--text)">${p.post_date.substring(5)}</div>
+                <div>${p.publish_time}</div>
+              </div>
+              <div class="post-content">
+                <div class="post-title">${p.topic}</div>
+                <div class="post-caption">${p.caption || 'Generando texto...'}</div>
+                <span class="status-badge status-${p.status}">${p.status}</span>
+                <span style="font-size:10px;color:var(--muted);margin-left:8px">${(p.platforms||[]).join(', ')}</span>
+              </div>
+              ${mediaHtml}
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        container.innerHTML = `<p style="text-align:center;color:var(--rose);padding:40px 0;">Error al cargar los posts.</p>`;
+      }
+    }
+    
+    async function logout() {
+      await supabaseClient.auth.signOut();
+      window.location.href = '/auth.html';
+    }
+    
+    // Start
+    init();
+  </script>
+</body>
+</html>

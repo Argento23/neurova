@@ -1,0 +1,537 @@
+{
+    "name": "Chatbot Estudio Jurídico - AI Legal Assistant",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "whatsapp-abogados",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "id": "webhook",
+            "name": "Webhook WhatsApp",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                240,
+                400
+            ],
+            "webhookId": "whatsapp-abogados"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "from",
+                            "name": "from",
+                            "value": "={{ $json.body.data.key.remoteJid }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "message",
+                            "name": "message",
+                            "value": "={{ $json.body.data.message.conversation || $json.body.data.message.extendedTextMessage.text }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "phone",
+                            "name": "phone",
+                            "value": "={{ $json.from.replace('@s.whatsapp.net', '') }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "extract_data",
+            "name": "Extraer Mensaje",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                460,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.message.toLowerCase() }}",
+                            "rightValue": "urgente|judicial|audiencia|vencimiento|plazo",
+                            "operator": {
+                                "type": "string",
+                                "operation": "regex"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_urgent",
+            "name": "Es Urgente?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                680,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "response",
+                            "name": "response",
+                            "value": "⚠️ Derivando tu consulta urgente a un abogado ahora mismo. Te contactamos en minutos.",
+                            "type": "string"
+                        },
+                        {
+                            "id": "urgent",
+                            "name": "urgent",
+                            "value": "true",
+                            "type": "boolean"
+                        }
+                    ]
+                }
+            },
+            "id": "urgent_response",
+            "name": "Respuesta Urgente",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                900,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "estudio_nombre",
+                            "name": "estudio_nombre",
+                            "value": "NOMBRE_ESTUDIO_JURIDICO",
+                            "type": "string"
+                        },
+                        {
+                            "id": "especialidades",
+                            "name": "especialidades",
+                            "value": "Laboral, Familia, Civil, Penal, Comercial",
+                            "type": "string"
+                        },
+                        {
+                            "id": "horario",
+                            "name": "horario",
+                            "value": "Lunes a Viernes 9-19hs",
+                            "type": "string"
+                        },
+                        {
+                            "id": "ubicacion",
+                            "name": "ubicacion",
+                            "value": "Av. Corrientes 1500, CABA",
+                            "type": "string"
+                        },
+                        {
+                            "id": "consulta_precio",
+                            "name": "consulta_precio",
+                            "value": "$15,000 (primera consulta)",
+                            "type": "string"
+                        },
+                        {
+                            "id": "faqs",
+                            "name": "faqs",
+                            "value": "Consultas:\n- Primera consulta: $15,000 (1 hora)\n- Consultas posteriores: según complejidad\n- Aceptamos Mercado Pago, efectivo, transferencia\n- Podemos hacer consultas virtuales (Zoom/Meet)\n\nProcesos:\n- Divorcios express: desde $80,000\n- Despidos: desde $50,000 + % éxito\n- Sucesiones: desde $120,000\n- Contratos: desde $30,000\n\nDocumentación:\n- Para consulta: DNI + documentos del caso\n- Reserva turnos con 48hs anticipación\n- Cancelación gratuita hasta 24hs antes",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "config",
+            "name": "CONFIG",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                680,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq_model",
+            "name": "Groq AI Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                900,
+                620
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres el asistente virtual de {{$('CONFIG').item.json.estudio_nombre}}, estudio jurídico.\n\nESPECIALIDADES:\n{{$('CONFIG').item.json.especialidades}}\n\nHORARIO:\n{{$('CONFIG').item.json.horario}}\n\nUBICACIÓN:\n{{$('CONFIG').item.json.ubicacion}}\n\nINFO IMPORTANTE:\n{{$('CONFIG').item.json.faqs}}\n\nCONSULTA DEL CLIENTE:\n{{ $('Extraer Mensaje').item.json.message }}\n\nINSTRUCCIONES:\n1. Responde de forma profesional y empática\n2. Para consultas legales específicas: recomendar agendar consulta con abogado\n3. Para info general (precios, horarios, ubicación): responder directamente\n4. Si mencionan caso específico, NO des asesoramiento legal, solo info del proceso\n5. Máximo 4 líneas\n6. Tono: profesional pero cercano\n7. Si preguntan por turno: pedir nombre, área legal, día preferido\n8. NUNCA dar consejo legal específico, solo información general\n\nEjemplos:\n- \"¿Cuánto cuesta un divorcio?\" → Responder con precio base + recomendar consulta\n- \"Mi jefe me despidió\" → Empatía + recomendar consulta laboral urgente\n- \"¿Dónde están?\" → Responder dirección + horarios\n\nRespuesta:",
+                "hasOutputParser": false
+            },
+            "id": "ai_agent",
+            "name": "AI Legal Assistant",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                900,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.output.toLowerCase() }}",
+                            "rightValue": "turno|consulta|agendar|reunión",
+                            "operator": {
+                                "type": "string",
+                                "operation": "regex"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "wants_appointment",
+            "name": "Quiere Turno?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1120,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "calendly_link",
+                            "name": "calendly_link",
+                            "value": "={{ $('AI Legal Assistant').item.json.output }}\n\n📅 Agendá tu consulta aquí: https://calendly.com/estudio-juridico/consulta\n\n(O respondé con tu nombre + área legal + día preferido y te agendamos nosotros)",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "add_calendly",
+            "name": "Agregar Link Calendly",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                1340,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "url": "=https://evolution-api.com/message/sendText/{{$('CONFIG').item.json.instance_name}}",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"number\": \"{{ $('Extraer Mensaje').item.json.phone }}\",\n  \"text\": \"{{ $json.response || $json.calendly_link || $json.output }}\"\n}",
+                "options": {}
+            },
+            "id": "send_whatsapp",
+            "name": "Enviar WhatsApp",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1560,
+                400
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_EVOLUTION_API_KEY",
+                    "name": "Evolution API"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "consultas",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Fecha": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+                        "Telefono": "={{ $('Extraer Mensaje').item.json.phone }}",
+                        "Consulta": "={{ $('Extraer Mensaje').item.json.message }}",
+                        "Respuesta": "={{ $('Enviar WhatsApp').item.json.text }}",
+                        "Urgente": "={{ $json.urgent || 'false' }}",
+                        "Quiere_Turno": "={{ $json.wants_appointment || 'false' }}"
+                    }
+                }
+            },
+            "id": "log_conversation",
+            "name": "Log Consulta",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                1780,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.urgent }}",
+                            "rightValue": "true",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "check_urgent",
+            "name": "Revisar si Urgente",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                2000,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "fromEmail": "agentes.space@gmail.com",
+                "toEmail": "estudio@abogados.com.ar",
+                "subject": "🚨 CONSULTA URGENTE - Atender AHORA",
+                "emailType": "html",
+                "message": "=<html>\n<body style=\"font-family: Arial; max-width: 600px;\">\n  <h2 style=\"color: #d32f2f;\">🚨 CONSULTA LEGAL URGENTE</h2>\n  \n  <p><strong>Teléfono:</strong> {{ $('Extraer Mensaje').item.json.phone }}</p>\n  \n  <p><strong>Consulta:</strong></p>\n  <div style=\"background: #f5f5f5; padding: 15px; border-left: 4px solid #d32f2f;\">\n    {{ $('Extraer Mensaje').item.json.message }}\n  </div>\n  \n  <p><strong>Palabras clave urgentes detectadas:</strong> urgente, judicial, audiencia, vencimiento, plazo</p>\n  \n  <p style=\"color: #d32f2f;\"><strong>⚠️ CONTACTAR INMEDIATAMENTE vía WhatsApp</strong></p>\n  \n  <p>Respuesta automática enviada: \"Derivando a abogado\"</p>\n</body>\n</html>",
+                "options": {}
+            },
+            "id": "email_urgent",
+            "name": "Email Urgente a Estudio",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2.1,
+            "position": [
+                2220,
+                200
+            ],
+            "credentials": {
+                "gmailOAuth2": {
+                    "id": "YOUR_GMAIL_CREDENTIAL_ID",
+                    "name": "Gmail account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\"success\": true, \"processed\": true}",
+                "options": {}
+            },
+            "id": "response",
+            "name": "Response OK",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                2440,
+                400
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Extraer Mensaje",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extraer Mensaje": {
+            "main": [
+                [
+                    {
+                        "node": "Es Urgente?",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "CONFIG",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Es Urgente?": {
+            "main": [
+                [
+                    {
+                        "node": "Respuesta Urgente",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Respuesta Urgente": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "CONFIG": {
+            "main": [
+                [
+                    {
+                        "node": "AI Legal Assistant",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq AI Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Legal Assistant",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Legal Assistant": {
+            "main": [
+                [
+                    {
+                        "node": "Quiere Turno?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Quiere Turno?": {
+            "main": [
+                [
+                    {
+                        "node": "Agregar Link Calendly",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Agregar Link Calendly": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar WhatsApp": {
+            "main": [
+                [
+                    {
+                        "node": "Log Consulta",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Log Consulta": {
+            "main": [
+                [
+                    {
+                        "node": "Revisar si Urgente",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Revisar si Urgente": {
+            "main": [
+                [
+                    {
+                        "node": "Email Urgente a Estudio",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Response OK",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Email Urgente a Estudio": {
+            "main": [
+                [
+                    {
+                        "node": "Response OK",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "chatbot-abogados-v1"
+}

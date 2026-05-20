@@ -1,0 +1,411 @@
+{
+    "name": "GenerArise - Video Publisher (TikTok + YouTube)",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "hours",
+                            "hoursInterval": 6
+                        }
+                    ]
+                }
+            },
+            "id": "cron",
+            "name": "Cron Cada 6 Horas",
+            "type": "n8n-nodes-base.cron",
+            "typeVersion": 1,
+            "position": [
+                240,
+                400
+            ]
+        },
+        {
+            "parameters": {},
+            "id": "manual",
+            "name": "Manual Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                240,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "read",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "video_calendar",
+                    "mode": "list"
+                }
+            },
+            "id": "read_calendar",
+            "name": "Leer Calendario Videos",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                460,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.Estado }}",
+                            "rightValue": "Listo",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        },
+                        {
+                            "leftValue": "={{ new Date($json.Fecha + ' ' + $json['Hora Publicación']).getTime() }}",
+                            "rightValue": "={{ $now.toMillis() }}",
+                            "operator": {
+                                "type": "number",
+                                "operation": "lte"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "filter_ready",
+            "name": "Filtrar Videos Listos",
+            "type": "n8n-nodes-base.filter",
+            "typeVersion": 2,
+            "position": [
+                680,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "title",
+                            "name": "title",
+                            "value": "={{ $json.Titulo }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "description",
+                            "name": "description",
+                            "value": "={{ $json.Descripcion + '\\n\\n' + $json.Hashtags }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "video_url",
+                            "name": "video_url",
+                            "value": "={{ $json.Video_URL }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "redes",
+                            "name": "redes",
+                            "value": "={{ $json['Red Social'].split('|') }}",
+                            "type": "array"
+                        }
+                    ]
+                }
+            },
+            "id": "prep_data",
+            "name": "Preparar Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                900,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "redes",
+                "options": {}
+            },
+            "id": "split_networks",
+            "name": "Dividir por Red",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 3,
+            "position": [
+                1120,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.redes }}",
+                            "rightValue": "TikTok",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_tiktok",
+            "name": "Es TikTok?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1340,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://open.tiktokapis.com/v2/post/publish/video/init/",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"post_info\": {\n    \"title\": \"{{ $('Preparar Data').item.json.title }}\",\n    \"description\": \"{{ $('Preparar Data').item.json.description }}\",\n    \"privacy_level\": \"PUBLIC_TO_EVERYONE\",\n    \"disable_duet\": false,\n    \"disable_comment\": false,\n    \"disable_stitch\": false,\n    \"video_cover_timestamp_ms\": 1000\n  },\n  \"source_info\": {\n    \"source\": \"FILE_URL\",\n    \"video_url\": \"{{ $('Preparar Data').item.json.video_url }}\"\n  }\n}",
+                "options": {}
+            },
+            "id": "post_tiktok",
+            "name": "Publicar TikTok",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1560,
+                200
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_TIKTOK_CREDENTIAL_ID",
+                    "name": "TikTok API"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.redes }}",
+                            "rightValue": "YouTube",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_youtube",
+            "name": "Es YouTube?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1340,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "oAuth2Api",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "X-Upload-Content-Type",
+                            "value": "video/*"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"snippet\": {\n    \"title\": \"{{ $('Preparar Data').item.json.title }}\",\n    \"description\": \"{{ $('Preparar Data').item.json.description }}\",\n    \"tags\": {{ $('Preparar Data').item.json.description.match(/#\\w+/g) }},\n    \"categoryId\": \"22\"\n  },\n  \"status\": {\n    \"privacyStatus\": \"public\",\n    \"selfDeclaredMadeForKids\": false\n  }\n}",
+                "options": {}
+            },
+            "id": "post_youtube",
+            "name": "Publicar YouTube",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1560,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "video_calendar",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Estado": "Publicado",
+                        "Fecha_Publicacion": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}"
+                    }
+                }
+            },
+            "id": "update_status",
+            "name": "Marcar como Publicado",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                1780,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Cron Cada 6 Horas": {
+            "main": [
+                [
+                    {
+                        "node": "Leer Calendario Videos",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Leer Calendario Videos",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Leer Calendario Videos": {
+            "main": [
+                [
+                    {
+                        "node": "Filtrar Videos Listos",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtrar Videos Listos": {
+            "main": [
+                [
+                    {
+                        "node": "Preparar Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Preparar Data": {
+            "main": [
+                [
+                    {
+                        "node": "Dividir por Red",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Dividir por Red": {
+            "main": [
+                [
+                    {
+                        "node": "Es TikTok?",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Es YouTube?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Es TikTok?": {
+            "main": [
+                [
+                    {
+                        "node": "Publicar TikTok",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Es YouTube?": {
+            "main": [
+                [
+                    {
+                        "node": "Publicar YouTube",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Publicar TikTok": {
+            "main": [
+                [
+                    {
+                        "node": "Marcar como Publicado",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Publicar YouTube": {
+            "main": [
+                [
+                    {
+                        "node": "Marcar como Publicado",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "cm-video-publisher-v1"
+}

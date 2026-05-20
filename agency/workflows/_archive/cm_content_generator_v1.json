@@ -1,0 +1,327 @@
+{
+    "name": "GenerArise - Social Media Content Generator (MVP)",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "hours",
+                            "triggerAtHour": 8
+                        }
+                    ]
+                }
+            },
+            "id": "cron",
+            "name": "Cron Diario (8am)",
+            "type": "n8n-nodes-base.cron",
+            "typeVersion": 1,
+            "position": [
+                240,
+                400
+            ]
+        },
+        {
+            "parameters": {},
+            "id": "manual",
+            "name": "Manual Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                240,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "read",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "content_calendar",
+                    "mode": "list"
+                },
+                "filters": {}
+            },
+            "id": "read_calendar",
+            "name": "Leer Calendario",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                460,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": false
+                    },
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.Estado }}",
+                            "rightValue": "Pendiente",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        },
+                        {
+                            "leftValue": "={{ $json.Fecha }}",
+                            "rightValue": "={{ $now.format('yyyy-MM-dd') }}",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "filter_today",
+            "name": "Filtrar Posts de Hoy",
+            "type": "n8n-nodes-base.filter",
+            "typeVersion": 2,
+            "position": [
+                680,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// Cargar prompt library\nconst tipoPost = $json['Tipo Post'];\nconst tema = $json.Tema;\n\n// Mapeo de tipos\nconst promptMap = {\n  'Tip Práctico': 'tip_practico',\n  'Caso de Uso': 'caso_uso',\n  'Tendencia IA': 'tendencia_ia',\n  'Behind Scenes': 'behind_scenes',\n  'Quote': 'quote',\n  'Educación': 'educacion',\n  'Community': 'community',\n  'Video Corto': 'video_corto'\n};\n\nconst promptKey = promptMap[tipoPost] || 'tip_practico';\n\nreturn {\n  tipo_post: tipoPost,\n  tema: tema,\n  prompt_key: promptKey,\n  redes: $json['Red Social'],\n  hora: $json['Hora Publicación'],\n  row_number: $item\n};"
+            },
+            "id": "prep",
+            "name": "Preparar Data",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                900,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq",
+            "name": "Groq AI Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                1120,
+                620
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "YOUR_GROQ_CREDENTIAL_ID",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres experto en automatización B2B que genera posts para redes sociales de GenerArise.\n\nTipo de post: {{ $json.tipo_post }}\nTema: {{ $json.tema }}\n\nGenera:\n1. Caption atractivo (150-200 palabras)\n2. 5 hashtags relevantes\n3. CTA al final\n\nTono: Profesional pero accesible, sin jerga excesiva.\n\nFormato JSON:\n{\n  \"caption\": \"texto del post...\",\n  \"hashtags\": \"#Hash1 #Hash2 #Hash3 #Hash4 #Hash5\",\n  \"cta\": \"texto del call to action\"\n}",
+                "hasOutputParser": true
+            },
+            "id": "ai_gen_caption",
+            "name": "Generar Caption",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1120,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://cloud.leonardo.ai/api/rest/v1/generations",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "prompt",
+                            "value": "={{ 'Modern tech illustration about ' + $json.tema + ', minimalist style, corporate colors (blue #6366f1, pink #ec4899), clean background, professional B2B aesthetic, 1080x1080 square format' }}"
+                        },
+                        {
+                            "name": "num_images",
+                            "value": "1"
+                        },
+                        {
+                            "name": "width",
+                            "value": "1024"
+                        },
+                        {
+                            "name": "height",
+                            "value": "1024"
+                        },
+                        {
+                            "name": "modelId",
+                            "value": "6bef9f1b-29cb-40c7-b9df-32b51c1f67d3"
+                        }
+                    ]
+                }
+            },
+            "id": "leonardo",
+            "name": "Generar Imagen (Leonardo AI)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1340,
+                400
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_LEONARDO_CREDENTIAL_ID",
+                    "name": "Leonardo AI"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "content_calendar",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Caption": "={{ $('Generar Caption').item.json.caption }}",
+                        "Hashtags": "={{ $('Generar Caption').item.json.hashtags }}",
+                        "Estado": "Listo",
+                        "Imagen_URL": "={{ $json.generations[0].url }}"
+                    }
+                },
+                "options": {
+                    "cellFormat": "USER_ENTERED",
+                    "useAppend": false
+                }
+            },
+            "id": "update_calendar",
+            "name": "Actualizar Calendario",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                1560,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Cron Diario (8am)": {
+            "main": [
+                [
+                    {
+                        "node": "Leer Calendario",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Leer Calendario",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Leer Calendario": {
+            "main": [
+                [
+                    {
+                        "node": "Filtrar Posts de Hoy",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtrar Posts de Hoy": {
+            "main": [
+                [
+                    {
+                        "node": "Preparar Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Preparar Data": {
+            "main": [
+                [
+                    {
+                        "node": "Generar Caption",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq AI Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Generar Caption",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generar Caption": {
+            "main": [
+                [
+                    {
+                        "node": "Generar Imagen (Leonardo AI)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generar Imagen (Leonardo AI)": {
+            "main": [
+                [
+                    {
+                        "node": "Actualizar Calendario",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "cm-content-generator-v1-mvp"
+}

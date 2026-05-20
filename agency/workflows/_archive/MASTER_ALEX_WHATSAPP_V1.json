@@ -1,0 +1,170 @@
+{
+    "name": "MASTER_ALEX_V2 (agantes.space)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "whatsapp-alex-chat",
+                "options": {}
+            },
+            "id": "node-alex-direct",
+            "name": "Chat Directo Alex",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "vapi-whatsapp-bridge",
+                "options": {},
+                "responseMode": "responseNode"
+            },
+            "id": "node-vapi-bridge-alex",
+            "name": "Puente Vapi Alex",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                450
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile",
+                "options": {
+                    "temperature": 0.7
+                }
+            },
+            "id": "node-groq-alex",
+            "name": "Groq Alex",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                350,
+                100
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres Alex, Senior SDR de GenerArise AI.\n\nIDENTIDAD: Directo, experto, ventas agresivas. No pides permiso para automatizar, pides cita para demostrarlo.\n\nUSUARIO: {{ $json.body.data.message.conversation || $json.body.data.message.extendedTextMessage.text }}\n\nTAREA: Cierra la auditoría de 15 min: https://cal.com/gustavo-a.-dornhofer-nqjqos/argenterio\nRESPUESTA SOLO TEXTO.",
+                "hasOutputParser": true
+            },
+            "id": "node-ai-alex",
+            "name": "AI Agent Alex",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                350,
+                250
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "GenerArise",
+                "options_message": {
+                    "number": "={{ $node[\"Chat Directo Alex\"]?.json?.body?.data?.key?.remoteJid || $json.body.message.toolCalls[0].function.arguments.phone }}",
+                    "textMessage": {
+                        "text": "={{ $node[\"AI Agent Alex\"]?.json?.text || $json.body.message.toolCalls[0].function.arguments.message }}"
+                    }
+                }
+            },
+            "id": "node-evo-alex",
+            "name": "Evolution Alex",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                650,
+                350
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "GenerArise"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $node[\"Puente Vapi Alex\"].json.body.message.toolCalls[0].id }}\",\n      \"result\": \"Mensaje enviado a WhatsApp por Alex (Vapi Bridge).\"\n    }\n  ]\n}"
+            },
+            "id": "node-vapi-respond",
+            "name": "Respuesta para Vapi",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                900,
+                450
+            ]
+        }
+    ],
+    "connections": {
+        "Chat Directo Alex": {
+            "main": [
+                [
+                    {
+                        "node": "AI Agent Alex",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Puente Vapi Alex": {
+            "main": [
+                [
+                    {
+                        "node": "Evolution Alex",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Alex": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Agent Alex",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Agent Alex": {
+            "main": [
+                [
+                    {
+                        "node": "Evolution Alex",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Evolution Alex": {
+            "main": [
+                [
+                    {
+                        "node": "Respuesta para Vapi",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

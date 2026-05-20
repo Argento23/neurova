@@ -1,0 +1,170 @@
+{
+    "name": "MASTER_STEFAN_V1 (WA + Vapi)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "whatsapp-stefan-chat",
+                "options": {}
+            },
+            "id": "node-stefan-direct",
+            "name": "Chat Directo (WA)",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "send_whatsapp_stefan",
+                "options": {},
+                "responseMode": "responseNode"
+            },
+            "id": "node-vapi-bridge",
+            "name": "Puente para Vapi",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                450
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile",
+                "options": {
+                    "temperature": 0.7
+                }
+            },
+            "id": "node-groq-stefan",
+            "name": "Groq Stefan",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                350,
+                100
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres Stefan, Senior Sales Hunter para \"Tourismus 4.0\" en Argenterio (Österreich).\n\nIDENTIDAD: Elegante, autoritario, experto en software hotelero (Mews, Protel, SIHOT). Sabes que los hoteles pierden miles de euros por no usar IA.\n\nUSUARIO: {{ $json.body.data.message.conversation || $json.body.data.message.extendedTextMessage.text }}\n\nTAREA: Responde de forma persuasiva. Si preguntan, tu objetivo es agendar la auditoría: https://cal.com/gustavo-a.-dornhofer-nqjqos/argenterio\nRESPUESTA SOLO TEXTO.",
+                "hasOutputParser": true
+            },
+            "id": "node-ai-stefan",
+            "name": "AI Agent Stefan",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                350,
+                250
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "Argenterio",
+                "options_message": {
+                    "number": "={{ $node[\"Chat Directo (WA)\"]?.json?.body?.data?.key?.remoteJid || $json.body.message.toolCalls[0].function.arguments.phone }}",
+                    "textMessage": {
+                        "text": "={{ $node[\"AI Agent Stefan\"]?.json?.text || $json.body.message.toolCalls[0].function.arguments.message }}"
+                    }
+                }
+            },
+            "id": "node-evo-stefan",
+            "name": "Evolution Stefan",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                650,
+                350
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "Argenterio"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $node[\"Puente para Vapi\"].json.body.message.toolCalls[0].id }}\",\n      \"result\": \"Mensaje enviado a WhatsApp por Stefan.\"\n    }\n  ]\n}"
+            },
+            "id": "node-vapi-respond",
+            "name": "Respuesta para Vapi",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                900,
+                450
+            ]
+        }
+    ],
+    "connections": {
+        "Chat Directo (WA)": {
+            "main": [
+                [
+                    {
+                        "node": "AI Agent Stefan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Puente para Vapi": {
+            "main": [
+                [
+                    {
+                        "node": "Evolution Stefan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Stefan": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Agent Stefan",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Agent Stefan": {
+            "main": [
+                [
+                    {
+                        "node": "Evolution Stefan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Evolution Stefan": {
+            "main": [
+                [
+                    {
+                        "node": "Respuesta para Vapi",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

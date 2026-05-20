@@ -1,0 +1,239 @@
+{
+    "name": "Austria Voice Assistant V11 (MULTILINGUAL + IMAGE)",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "webhook-trigger",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                200,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "content": "✅ V11 MULTILINGUAL + IMAGE\n\n1. IDIOMA EXACTO: Lee el campo 'idioma' del JSON. Adiós voz gringa.\n2. IMAGEN: Nuevo soporte para enviar gráficos.\n   Si AI dice 'accion: tarifario', envía la imagen.\n3. FIX INPUT: Mantiene la corrección de eco V10.",
+                "height": 300,
+                "width": 350
+            },
+            "id": "nota-final",
+            "name": "Nota: V11 FINAL",
+            "type": "n8n-nodes-base.stickyNote",
+            "typeVersion": 1,
+            "position": [
+                1320,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// ═══════════════════════════════════════════════════════════════\n// FILTRO V11 - IDIOMA EXACTO + IMAGEN\n// ═══════════════════════════════════════════════════════════════\n\n// A. OBTENER INPUT (Solo output de AI)\nlet inputData = $input.item.json.output || $input.item.json.response || \"\";\n\n// B. OBTENER REMOTE JID\nlet rawRemoteJid = \"\";\ntry {\n  if ($('Webhook').item.json.body.data && $('Webhook').item.json.body.data.key) {\n      rawRemoteJid = $('Webhook').item.json.body.data.key.remoteJid;\n  }\n  else if ($('Webhook').item.json.body.key) {\n      rawRemoteJid = $('Webhook').item.json.body.key.remoteJid;\n  }\n} catch(e) {\n  console.log(\"⚠️ No se pudo leer el RemoteJid\");\n}\n\n// Variables por defecto\nlet textoVoz = \"\";\nlet accionFinal = \"info\";\nlet mensajeTexto = \"\";\nlet idiomaIA = \"es\"; // Por defecto español si falla\n\n// C. LÓGICA DE PARSEO ROBUSTA\nif (typeof inputData === 'object' && inputData !== null) {\n  textoVoz = inputData.respuesta_voz || \"\";\n  accionFinal = inputData.accion_requerida || \"info\";\n  idiomaIA = inputData.idioma || \"es\";\n} \nelse if (typeof inputData === 'string') {\n  let cleanString = inputData.replace(/```json/g, \"\").replace(/```/g, \"\").trim();\n  const firstBrace = cleanString.indexOf('{');\n  const lastBrace = cleanString.lastIndexOf('}');\n  if (firstBrace !== -1 && lastBrace !== -1) {\n      cleanString = cleanString.substring(firstBrace, lastBrace + 1);\n  }\n\n  try {\n    const parsed = JSON.parse(cleanString);\n    textoVoz = parsed.respuesta_voz || cleanString;\n    accionFinal = parsed.accion_requerida || \"info\";\n    idiomaIA = parsed.idioma || \"es\";\n  } catch (e) {\n    textoVoz = cleanString;\n    accionFinal = \"info\";\n    idiomaIA = \"es\"; // Fallback\n  }\n}\n\n// D. SELECCIÓN DE VOZ DIRECTA (Sin adivinar)\n// El prompt V4 nos da 'de', 'en', 'es', 'it' explícitamente\nconst googleVoices = {\n  de: { languageCode: \"de-DE\", name: \"de-DE-Neural2-F\", ssmlGender: \"FEMALE\" },\n  en: { languageCode: \"en-US\", name: \"en-US-Neural2-F\", ssmlGender: \"FEMALE\" },\n  es: { languageCode: \"es-US\", name: \"es-US-Neural2-B\", ssmlGender: \"MALE\" },\n  it: { languageCode: \"it-IT\", name: \"it-IT-Neural2-A\", ssmlGender: \"FEMALE\" }\n};\n\n// Normalizamos el idioma (minusculas, trim)\nlet langCode = idiomaIA.toLowerCase().trim().substring(0, 2);\nconst selectedVoice = googleVoices[langCode] || googleVoices.es;\n\n// E. LIMPIEZA PARA TTS\nfunction cleanForTTS(text) {\n  if (!text) return \"\";\n  return text\n    .replace(/[\\u{1F600}-\\u{1F64F}\\u{1F300}-\\u{1F5FF}]/gu, \"\")\n    .replace(/(https?:\\/\\/[^\\s]+)/g, \"el enlace\")\n    .replace(/[\"*{}\\[\\]_]/g, \"\")\n    .trim();\n}\n\n// F. GENERAR MENSAJE TEXTO + IMAGEN LOGIC\nlet urlImagen = \"\";\n\nif (accionFinal === \"agendar\") {\n  mensajeTexto = \"🔗 Agenda tu auditoria aqui:\\n\\nhttps://cal.com/gustavo-a.-dornhofer-nqjqos/auditoria-ia-gratuita-free-ai-audit-kostenloses-ki-audit\\n\\nElegi dia y horario. Duracion: 30 min\";\n}\nelse if (accionFinal === \"contacto\") {\n  mensajeTexto = \"Contacto directo:\\n\\n• WhatsApp: +54 9 11 7371-9972\\n• Email: agentes.space@gmail.com\\n\\nEn que mas puedo ayudarte?\";\n}\nelse if (accionFinal === \"derivar\") {\n  mensajeTexto = \"He notificado a un especialista humano sobre tu caso. Te contactaran a la brevedad.\";\n}\nelse if (accionFinal === \"tarifario\") {\n  // Ejemplo de imagen (puedes cambiar la URL)\n  urlImagen = \"https://i.imgur.com/example_pricing.png\"; \n  mensajeTexto = \"Aqui tienes nuestro tarifario actualizado.\";\n}\n\nreturn {\n  json: {\n    clean_voice: cleanForTTS(textoVoz),              \n    accion: accionFinal.toLowerCase().trim(),\n    mensaje_texto: mensajeTexto,\n    url_imagen: urlImagen,\n    remote_jid: rawRemoteJid,\n    idioma: langCode,\n    tts_language_code: selectedVoice.languageCode,\n    tts_voice_name: selectedVoice.name,\n    tts_gender: selectedVoice.ssmlGender\n  }\n};"
+            },
+            "id": "filtro-js-v11",
+            "name": "Filtro V11 (Idioma Exacto)",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                224,
+                416
+            ]
+        },
+        {
+            "parameters": {
+                "dataType": "string",
+                "value1": "={{ $json.accion }}",
+                "rules": {
+                    "rules": [
+                        {
+                            "value2": "agendar"
+                        },
+                        {
+                            "value2": "contacto"
+                        },
+                        {
+                            "value2": "derivar"
+                        },
+                        {
+                            "value2": "tarifario"
+                        }
+                    ]
+                }
+            },
+            "id": "switch-accion",
+            "name": "Switch1 (Copia GenerArise)",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 1,
+            "position": [
+                528,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "USA",
+                "remoteJid": "={{ $('Webhook').item.json.body.data.key.remoteJid }}",
+                "messageText": "={{ $json.mensaje_texto }}"
+            },
+            "id": "evolution-text",
+            "name": "Enviar texto (USA)",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                976,
+                200
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "mWJjZLDXsIhJxZcX",
+                    "name": "USA"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "operation": "send-image",
+                "instanceName": "USA",
+                "remoteJid": "={{ $('Webhook').item.json.body.data.key.remoteJid }}",
+                "media": "={{ $json.url_imagen }}",
+                "caption": "={{ $json.mensaje_texto }}"
+            },
+            "id": "evolution-image",
+            "name": "Enviar Imagen (USA)",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                976,
+                350
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "mWJjZLDXsIhJxZcX",
+                    "name": "USA"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "text": "={{ $json.clean_voice }}",
+                "languageCode": "={{ $json.tts_language_code }}",
+                "voiceName": "={{ $json.tts_voice_name }}",
+                "voiceGender": "MALE",
+                "options": {}
+            },
+            "id": "tts-node",
+            "name": "Generar Audio (TTS)",
+            "type": "n8n-nodes-google-cloud-tts.googleCloudTts",
+            "typeVersion": 1,
+            "position": [
+                544,
+                416
+            ],
+            "credentials": {
+                "googleCloudTtsApi": {
+                    "id": "p6gzWofxOKTKQf2l",
+                    "name": "Google Cloud Text-to-Speech account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "operation": "send-audio",
+                "instanceName": "USA",
+                "remoteJid": "={{ $('Webhook').item.json.body.data.key.remoteJid }}",
+                "media": "={{ $json.audioData }}",
+                "options_message": {}
+            },
+            "id": "enviar-audio",
+            "name": "Enviar Audio (USA)",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                976,
+                416
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "mWJjZLDXsIhJxZcX",
+                    "name": "USA"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Filtro V11 (Idioma Exacto)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtro V11 (Idioma Exacto)": {
+            "main": [
+                [
+                    {
+                        "node": "Switch1 (Copia GenerArise)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Generar Audio (TTS)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Switch1 (Copia GenerArise)": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar texto (USA)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Enviar texto (USA)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Enviar texto (USA)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Enviar Imagen (USA)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generar Audio (TTS)": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Audio (USA)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

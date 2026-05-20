@@ -1,0 +1,251 @@
+{
+    "name": "MASTER_STEFAN_V3_FINAL_COMPATIBLE",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "whatsapp-stefan-chat",
+                "options": {}
+            },
+            "id": "stefan-chat-wh",
+            "name": "Incoming Direct WA",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                140
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "send_whatsapp_stefan",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "WebhookVapiStefan",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "id": "stefan-vapi-wh",
+            "position": [
+                100,
+                340
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "name": "phone",
+                            "value": "={{ $json.body?.data?.key?.remoteJid || ($json.body.message.toolCalls[0].function.arguments.phone || \"\").toString().replace(/\\D/g, '') }}",
+                            "type": "string"
+                        },
+                        {
+                            "name": "msg_vapi",
+                            "value": "={{ ($json.body.message.toolCalls[0].function.arguments.message || \"\").toString() }}",
+                            "type": "string"
+                        },
+                        {
+                            "name": "toolCallId",
+                            "value": "={{ $json.body?.message?.toolCalls?.[0].id || \"no-id\" }}",
+                            "type": "string"
+                        },
+                        {
+                            "name": "user_text",
+                            "value": "={{ $json.body?.data?.message?.conversation || $json.body?.data?.message?.extendedTextMessage?.text }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "name": "PrepareData",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "id": "stefan-set",
+            "position": [
+                300,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $json.toolCallId }}\",\n      \"result\": \"SUCCESS: Stefan enviando mensaje.\"\n    }\n  ]\n}",
+                "options": {}
+            },
+            "name": "Instant Response Vapi",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "id": "stefan-resp",
+            "position": [
+                500,
+                340
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{ $json.toolCallId }}",
+                            "operation": "notEqual",
+                            "value2": "no-id"
+                        }
+                    ]
+                }
+            },
+            "name": "Is Vapi Flow?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "id": "stefan-if",
+            "position": [
+                500,
+                140
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile",
+                "options": {
+                    "temperature": 0.7
+                }
+            },
+            "name": "Groq Stefan",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "id": "stefan-groq",
+            "position": [
+                700,
+                0
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=Eres Stefan, Senior Sales Hunter para Austria.\n\nIDENTIDAD: Hotelería 5 estrellas, elegante. Sabes de Mews, Protel, SIHOT.\n\nUSUARIO: {{ $json.user_text }}\n\nTAREA: Responde de forma persuasiva para agendar: https://cal.com/gustavo-a.-dornhofer-nqjqos/auditoria-estrategica-ia\nRESPUESTA SOLO TEXTO.",
+                "hasOutputParser": true
+            },
+            "name": "AI SDR Stefan",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "id": "stefan-ai",
+            "position": [
+                700,
+                180
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "Argenterio",
+                "options_message": {
+                    "number": "={{ $json.phone }}",
+                    "textMessage": {
+                        "text": "={{ $node[\"AI SDR Stefan\"]?.json?.text || $json.msg_vapi }}"
+                    }
+                }
+            },
+            "name": "Evolution Stefan",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "id": "stefan-evo",
+            "position": [
+                950,
+                180
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "Argenterio"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Incoming Direct WA": {
+            "main": [
+                [
+                    {
+                        "node": "PrepareData",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "WebhookVapiStefan": {
+            "main": [
+                [
+                    {
+                        "node": "PrepareData",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "PrepareData": {
+            "main": [
+                [
+                    {
+                        "node": "Is Vapi Flow?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is Vapi Flow?": {
+            "main": [
+                [
+                    {
+                        "node": "Instant Response Vapi",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Evolution Stefan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "AI SDR Stefan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Stefan": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI SDR Stefan",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI SDR Stefan": {
+            "main": [
+                [
+                    {
+                        "node": "Evolution Stefan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

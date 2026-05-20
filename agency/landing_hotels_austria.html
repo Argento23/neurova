@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mehrsprachiger KI-Chatbot für österreichische Hotels | Argenterío</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --austria-red: #ED2939;
+            --dark-bg: #0a0e27;
+            --text-gray: #94a3b8;
+            --green: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: #e0e7ff;
+            line-height: 1.6;
+        }
+
+        nav {
+            position: fixed;
+            width: 100%;
+            background: rgba(10, 14, 39, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(237, 41, 57, 0.2);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--austria-red), #ff6b9d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .lang-switcher {
+            display: flex;
+            gap: 15px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            color: #94a3b8;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .lang-btn.active {
+            background: var(--austria-red);
+            color: white;
+        }
+
+        .btn-nav {
+            background: var(--austria-red);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+
+        /* Hero with Background Image */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            margin-top: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.25;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(10, 14, 39, 0.9), rgba(237, 41, 57, 0.2));
+        }
+
+        .austria-flag {
+            position: absolute;
+            top: 100px;
+            right: 50px;
+            width: 200px;
+            height: auto;
+            opacity: 0.6;
+            z-index: 1;
+        }
+
+        .hero-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-content {
+            max-width: 800px;
+        }
+
+        .hero-content h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 25px;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, var(--austria-red), #ff6b9d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-content p {
+            font-size: 1.4rem;
+            color: #e0e7ff;
+            margin-bottom: 35px;
+            line-height: 1.8;
+        }
+
+        .btn-primary {
+            background: var(--austria-red);
+            color: white;
+            padding: 20px 50px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(237, 41, 57, 0.4);
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(237, 41, 57, 0.6);
+        }
+
+        .trust-badges {
+            display: flex;
+            gap: 30px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .trust-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #e0e7ff;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .trust-badge::before {
+            content: "✓";
+            color: var(--green);
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .stats {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 20px;
+            padding: 60px;
+            margin: 80px auto;
+            max-width: 1200px;
+            border: 1px solid rgba(237, 41, 57, 0.3);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--austria-red), #ff6b9d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--text-gray);
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+
+        .features {
+            padding: 120px 20px;
+            background: linear-gradient(180deg, var(--dark-bg), #0f1629);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-badge {
+            background: rgba(237, 41, 57, 0.1);
+            color: var(--austria-red);
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+
+        .section-header p {
+            font-size: 1.3rem;
+            color: var(--text-gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 35px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.7));
+            border-radius: 20px;
+            padding: 45px;
+            border: 1px solid rgba(237, 41, 57, 0.2);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(237, 41, 57, 0.6);
+            box-shadow: 0 20px 40px rgba(237, 41, 57, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 3.5rem;
+            margin-bottom: 25px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.7rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .feature-card p {
+            color: var(--text-gray);
+            line-height: 1.9;
+            font-size: 1.1rem;
+        }
+
+        .pricing {
+            padding: 120px 20px;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 35px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.7));
+            border-radius: 20px;
+            padding: 55px;
+            border: 2px solid rgba(237, 41, 57, 0.2);
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .pricing-card.featured {
+            border-color: var(--austria-red);
+            box-shadow: 0 25px 60px rgba(237, 41, 57, 0.4);
+            transform: scale(1.05);
+        }
+
+        .pricing-badge {
+            position: absolute;
+            top: -18px;
+            right: 35px;
+            background: var(--austria-red);
+            color: white;
+            padding: 8px 25px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .pricing-card h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .pricing-price {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--austria-red);
+            margin: 20px 0;
+        }
+
+        .pricing-price span {
+            font-size: 1.3rem;
+            color: var(--text-gray);
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin: 35px 0;
+        }
+
+        .pricing-features li {
+            padding: 14px 0;
+            color: #e0e7ff;
+            display: flex;
+            gap: 12px;
+            font-size: 1.05rem;
+        }
+
+        .pricing-features li::before {
+            content: "✓";
+            color: var(--green);
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .pricing-cta {
+            width: 100%;
+            padding: 20px;
+            background: transparent;
+            border: 2px solid var(--austria-red);
+            color: #fff;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.15rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pricing-card.featured .pricing-cta {
+            background: var(--austria-red);
+        }
+
+        .pricing-cta:hover {
+            background: var(--austria-red);
+            transform: translateY(-2px);
+        }
+
+        .final-cta {
+            padding: 150px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(237, 41, 57, 0.15), rgba(118, 75, 162, 0.15));
+        }
+
+        .final-cta h2 {
+            font-size: 3.8rem;
+            font-weight: 900;
+            margin-bottom: 30px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .final-cta p {
+            font-size: 1.4rem;
+            color: var(--text-gray);
+            margin-bottom: 50px;
+        }
+
+        .cta-form {
+            max-width: 650px;
+            margin: 0 auto;
+            display: flex;
+            gap: 20px;
+        }
+
+        .cta-form input {
+            flex: 1;
+            padding: 22px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid rgba(237, 41, 57, 0.3);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.15rem;
+        }
+
+        .cta-form button {
+            padding: 22px 55px;
+            background: var(--austria-red);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.15rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cta-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(237, 41, 57, 0.5);
+        }
+
+        footer {
+            background: #0a0e27;
+            padding: 60px 20px 30px;
+            border-top: 1px solid rgba(237, 41, 57, 0.2);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(237, 41, 57, 0.1);
+            color: var(--text-gray);
+            font-size: 1rem;
+        }
+
+        .lang-content {
+            display: none;
+        }
+
+        .lang-content.active {
+            display: block;
+        }
+
+        @media (max-width: 1024px) {
+            .stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .hero-content h1 {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2.2rem;
+            }
+
+            .section-header h2 {
+                font-size: 2.2rem;
+            }
+
+            .cta-form {
+                flex-direction: column;
+            }
+
+            .stat-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo" style="display: flex; align-items: center; gap: 12px;">
+                <img src="logo.png" alt="Argenterío" style="height: 42px;">
+                Argenterío
+            </div>
+            <div style="display: flex; gap: 30px; align-items: center;">
+                <div class="lang-switcher">
+                    <button class="lang-btn active" onclick="switchLang('de')">🇦🇹 DE</button>
+                    <button class="lang-btn" onclick="switchLang('en')">🇬🇧 EN</button>
+                    <button class="lang-btn" onclick="switchLang('es')">🇪🇸 ES</button>
+                </div>
+                <a href="#cta" class="btn-nav">Kontakt</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- GERMAN CONTENT -->
+    <div class="lang-content active" data-lang="de">
+        <section class="hero">
+            <!-- Background Image: Austrian Alps -->
+            <img src="../assets/swiss-village-beautiful-mountains-austria.jpg" alt="Austrian Alps"
+                class="hero-bg-image">
+            <div class="hero-overlay"></div>
+            <!-- Austrian Flag -->
+            <img src="../assets/flag-austria-with-ensign.jpg" alt="Austria Flag" class="austria-flag">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <h1>
+                        <span class="highlight">Mehrsprachiger KI-Chatbot</span><br>
+                        für österreichische Hotels
+                    </h1>
+                    <p>
+                        Automatisieren Sie Buchungsanfragen in Deutsch, Englisch, Spanisch und Italienisch.
+                        Perfekt für Hotels mit lateinamerikanischen Gästen.
+                    </p>
+                    <button class="btn-primary"
+                        onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                        Kostenloser Demo-Call
+                    </button>
+                    <div class="trust-badges">
+                        <div class="trust-badge">40% mehr Direktbuchungen</div>
+                        <div class="trust-badge">DSGVO-konform</div>
+                        <div class="trust-badge">Setup in 8 Tagen</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container">
+            <div class="stats">
+                <div class="stat-grid">
+                    <div>
+                        <div class="stat-number">245K+</div>
+                        <div class="stat-label">LATAM-Touristen/Jahr in Österreich</div>
+                    </div>
+                    <div>
+                        <div class="stat-number">40%</div>
+                        <div class="stat-label">Mehr Direktbuchungen</div>
+                    </div>
+                    <div>
+                        <div class="stat-number">24/7</div>
+                        <div class="stat-label">In 4 Sprachen</div>
+                    </div>
+                    <div>
+                        <div class="stat-number">60s</div>
+                        <div class="stat-label">Durchschn. Antwortzeit</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-badge">🏨 Speziell für Hotels entwickelt</span>
+                    <h2>Warum Argenterio?</h2>
+                    <p>Entwickelt in Buenos Aires, optimiert für österreichische Hotels</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🌍</div>
+                        <h3>Mehrsprachig (DE/EN/ES/IT)</h3>
+                        <p>Natürliche Konversationen in allen 4 Sprachen. Perfekt für internationale Gäste aus
+                            Lateinamerika, die nach Wien, Salzburg und Innsbruck reisen.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📅</div>
+                        <h3>Automatische Buchungsanfragen</h3>
+                        <p>Erfasst Zimmerwünsche, Reisedaten, Gästezahl. Leitet qualifizierte Anfragen sofort an Ihr
+                            Team weiter. Keine verpassten Reservierungen mehr.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💰</div>
+                        <h3>Lateinamerikanischer Markt</h3>
+                        <p>245.000+ Touristen aus Argentinien, Mexiko, Brasilien besuchen Österreich jährlich. Viele
+                            sprechen kein Deutsch. Erfassen Sie diese Gäste automatisch!</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🏔️</div>
+                        <h3>Info zu Amenities</h3>
+                        <p>Beantwortet Fragen zu Spa, Frühstück, Parkplatz, Skipässen, Wanderrouten - automatisch und in
+                            der Sprache des Gastes.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Analytics & Reporting</h3>
+                        <p>Sehen Sie genau: Anfragen nach Sprache, Peak-Zeiten, Konversionsrate. Optimieren Sie Ihr
+                            Marketing basierend auf Daten.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>DSGVO-konform</h3>
+                        <p>Alle Daten werden in Europa gespeichert. Vollständige Compliance mit österreichischen und
+                            EU-Datenschutzgesetzen.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="pricing" id="pricing">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-badge">💎 Transparente Preise</span>
+                    <h2>Investition für Ihr Hotel</h2>
+                    <p>Alle Pläne inkludieren mehrsprachige Unterstützung (DE/EN/ES/IT)</p>
+                </div>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <h3>Basic</h3>
+                        <div class="pricing-price">€797<span>/Monat</span></div>
+                        <ul class="pricing-features">
+                            <li>WhatsApp + Email Integration</li>
+                            <li>500 Anfragen/Monat</li>
+                            <li>4 Sprachen (DE/EN/ES/IT)</li>
+                            <li>Buchungsanfragen automatisch</li>
+                            <li>Google Sheets Logging</li>
+                            <li>Email-Support</li>
+                        </ul>
+                        <button class="pricing-cta"
+                            onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                            Kontakt aufnehmen
+                        </button>
+                    </div>
+
+                    <div class="pricing-card featured">
+                        <div class="pricing-badge">⭐ FÜR HOTELS EMPFOHLEN</div>
+                        <h3>Pro</h3>
+                        <div class="pricing-price">€1,297<span>/Monat</span></div>
+                        <ul class="pricing-features">
+                            <li>Alles aus Basic +</li>
+                            <li>2,000 Anfragen/Monat</li>
+                            <li>CRM-Integration (z.B. Protel, SIHOT)</li>
+                            <li>Erweiterte Analytics-Dashboards</li>
+                            <li>WhatsApp + Email + Website-Widget</li>
+                            <li>Priority Support (24h Response)</li>
+                            <li>Custom Training für Ihr Hotel</li>
+                        </ul>
+                        <button class="pricing-cta"
+                            onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                            Jetzt Demo buchen
+                        </button>
+                    </div>
+
+                    <div class="pricing-card">
+                        <h3>Enterprise</h3>
+                        <div class="pricing-price">€1,997<span>/Monat</span></div>
+                        <ul class="pricing-features">
+                            <li>Alles aus Pro +</li>
+                            <li>Unbegrenzte Anfragen</li>
+                            <li>Multi-Property Support (Hotelketten)</li>
+                            <li>API-Zugang für eigene Systeme</li>
+                            <li>Dedizierter Account Manager</li>
+                            <li>White-Label Option</li>
+                            <li>SLA-Garantie (99.9% Uptime)</li>
+                        </ul>
+                        <button class="pricing-cta"
+                            onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                            Individuelle Demo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="final-cta" id="cta">
+            <div class="container">
+                <h2>Erfassen Sie mehr lateinamerikanische Gäste</h2>
+                <p>
+                    Buchen Sie einen kostenlosen 20-Minuten Demo-Call. Wir zeigen Ihnen, wie Hotels in Wien bereits 40%
+                    mehr Direktbuchungen erzielen.
+                </p>
+
+                <!-- Contact Buttons -->
+                <div style="display: flex; gap: 20px; justify-content: center; margin: 40px 0; flex-wrap: wrap;">
+                    <a href="https://wa.me/5491168630003?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20el%20chatbot%20para%20hoteles"
+                        style="background: #25D366; color: white; padding: 20px 40px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; transition: transform 0.3s;"
+                        onmouseover="this.style.transform='translateY(-3px)'"
+                        onmouseout="this.style.transform='translateY(0)'">
+                        <span style="font-size: 1.5rem;">💬</span> WhatsApp kontaktieren
+                    </a>
+                    <a href="mailto:gusdo@generarise.space?subject=Demo-Anfrage%20Hotel&body=Hallo%2C%0A%0AIch%20interessiere%20mich%20f%C3%BCr%20eine%20Demo%20des%20mehrsprachigen%20Chatbots%20f%C3%BCr%20mein%20Hotel."
+                        style="background: var(--austria-red); color: white; padding: 20px 40px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; transition: transform 0.3s;"
+                        onmouseover="this.style.transform='translateY(-3px)'"
+                        onmouseout="this.style.transform='translateY(0)'">
+                        <span style="font-size: 1.5rem;">✉️</span> Email schreiben
+                    </a>
+                    <a href="https://www.linkedin.com/in/gustavodornhofer" target="_blank"
+                        style="background: #0077B5; color: white; padding: 20px 40px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; transition: transform 0.3s;"
+                        onmouseover="this.style.transform='translateY(-3px)'"
+                        onmouseout="this.style.transform='translateY(0)'">
+                        <span style="font-size: 1.5rem;">💼</span> LinkedIn Kontakt
+                    </a>
+                </div>
+
+                <p style="margin-top: 20px; color: var(--text-gray); font-size: 0.95rem;">
+                    Oder füllen Sie das Formular aus:
+                </p>
+
+                <form class="cta-form" onsubmit="handleSubmit(event)">
+                    <input type="email" placeholder="Ihre Hotel-Email" required>
+                    <button type="submit">Demo-Call buchen</button>
+                </form>
+                <p style="margin-top: 30px; color: var(--text-gray); font-size: 1.1rem;">
+                    🇦🇹 Entwickelt von österreichischem Unternehmer mit Sitz in Buenos Aires
+                </p>
+            </div>
+        </section>
+    </div>
+
+    <!-- ENGLISH CONTENT -->
+    <div class="lang-content" data-lang="en">
+        <section class="hero">
+            <img src="../assets/swiss-village-beautiful-mountains-austria.jpg" alt="Austrian Alps"
+                class="hero-bg-image">
+            <div class="hero-overlay"></div>
+            <img src="../assets/flag-austria-with-ensign.jpg" alt="Austria Flag" class="austria-flag">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <h1>
+                        <span class="highlight">Multilingual AI Chatbot</span><br>
+                        for Austrian Hotels
+                    </h1>
+                    <p>
+                        Automate booking inquiries in German, English, Spanish, and Italian.
+                        Perfect for hotels serving Latin American guests.
+                    </p>
+                    <button class="btn-primary"
+                        onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                        Book Free Demo
+                    </button>
+                    <div class="trust-badges">
+                        <div class="trust-badge">40% more direct bookings</div>
+                        <div class="trust-badge">GDPR compliant</div>
+                        <div class="trust-badge">Setup in 8 days</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container">
+            <div class="stats">
+                <div class="stat-grid">
+                    <div>
+                        <div class="stat-number">245K+</div>
+                        <div class="stat-label">LATAM tourists/year to Austria</div>
+                    </div>
+                    <div>
+                        <div class="stat-number">40%</div>
+                        <div class="stat-label">More direct bookings</div>
+                    </div>
+                    <div>
+                        <div class="stat-number">24/7</div>
+                        <div class="stat-label">In 4 languages</div>
+                    </div>
+                    <div>
+                        <div class="stat-number">60s</div>
+                        <div class="stat-label">Avg. response time</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-badge">🏨 Built for Hotels</span>
+                    <h2>Why Argenterio?</h2>
+                    <p>Developed in Buenos Aires, optimized for Austrian hotels</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🌍</div>
+                        <h3>Multilingual (DE/EN/ES/IT)</h3>
+                        <p>Natural conversations in all 4 languages. Perfect for international guests from Latin America
+                            visiting Vienna, Salzburg and Innsbruck.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📅</div>
+                        <h3>Automated Booking Requests</h3>
+                        <p>Captures room preferences, travel dates, guest count. Routes qualified inquiries directly to
+                            your team. No more missed reservations.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💰</div>
+                        <h3>Latin American Market</h3>
+                        <p>245,000+ tourists from Argentina, Mexico, Brazil visit Austria annually. Many don't speak
+                            German. Capture these guests automatically!</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🏔️</div>
+                        <h3>Amenities Information</h3>
+                        <p>Answers questions about spa, breakfast, parking, ski passes, hiking routes - automatically in
+                            the guest's language.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Analytics & Reporting</h3>
+                        <p>See exactly: inquiries by language, peak times, conversion rate. Optimize your marketing
+                            based on data.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>GDPR Compliant</h3>
+                        <p>All data stored in Europe. Full compliance with Austrian and EU data protection laws.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    </div>
+    </section>
+
+    <section class="pricing">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">💎 Transparent Pricing</span>
+                <h2>Investment for Your Hotel</h2>
+                <p>All plans include multilingual support (DE/EN/ES/IT)</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Basic</h3>
+                    <div class="pricing-price">$797<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li>WhatsApp + Email integration</li>
+                        <li>500 inquiries/month</li>
+                        <li>4 languages (DE/EN/ES/IT)</li>
+                        <li>Automated booking requests</li>
+                        <li>Google Sheets logging</li>
+                        <li>Email support</li>
+                    </ul>
+                    <button class="pricing-cta"
+                        onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                        Contact Us
+                    </button>
+                </div>
+
+                <div class="pricing-card featured">
+                    <div class="pricing-badge">⭐ RECOMMENDED FOR HOTELS</div>
+                    <h3>Pro</h3>
+                    <div class="pricing-price">$1,297<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li>Everything in Basic +</li>
+                        <li>2,000 inquiries/month</li>
+                        <li>CRM integration (Protel, SIHOT)</li>
+                        <li>Advanced analytics dashboards</li>
+                        <li>WhatsApp + Email + Website widget</li>
+                        <li>Priority support (24h response)</li>
+                        <li>Custom training for your hotel</li>
+                    </ul>
+                    <button class="pricing-cta"
+                        onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                        Book Demo Now
+                    </button>
+                </div>
+
+                <div class="pricing-card">
+                    <h3>Enterprise</h3>
+                    <div class="pricing-price">$1,997<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li>Everything in Pro +</li>
+                        <li>Unlimited inquiries</li>
+                        <li>Multi-property support (hotel chains)</li>
+                        <li>API access for custom systems</li>
+                        <li>Dedicated account manager</li>
+                        <li>White-label option</li>
+                        <li>SLA guarantee (99.9% uptime)</li>
+                    </ul>
+                    <button class="pricing-cta"
+                        onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                        Custom Demo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="final-cta">
+        <div class="container">
+            <h2>Capture More Latin American Guests</h2>
+            <p>
+                Book a free 20-minute demo call. We'll show you how hotels in Vienna are already achieving 40% more
+                direct bookings.
+            </p>
+            <form class="cta-form" onsubmit="handleSubmit(event)">
+                <input type="email" placeholder="Your hotel email" required>
+                <button type="submit">Book Demo Call</button>
+            </form>
+            <p style="margin-top: 30px; color: var(--text-gray); font-size: 1.1rem;">
+                🇦🇹 Built by Austrian entrepreneur based in Buenos Aires
+            </p>
+        </div>
+    </section>
+    </div>
+
+    <!-- SPANISH CONTENT -->
+    <div class="lang-content" data-lang="es">
+        <section class="hero">
+            <img src="../assets/swiss-village-beautiful-mountains-austria.jpg" alt="Austrian Alps"
+                class="hero-bg-image">
+            <div class="hero-overlay"></div>
+            <img src="../assets/flag-austria-with-ensign.jpg" alt="Austria Flag" class="austria-flag">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <h1>
+                        <span class="highlight">Chatbot IA Multiidioma</span><br>
+                        para Hoteles en Austria
+                    </h1>
+                    <p>
+                        Automatiza consultas de reservas en alemán, inglés, español e italiano.
+                        Perfecto para hoteles que reciben huéspedes latinoamericanos.
+                    </p>
+                    <button class="btn-primary"
+                        onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                        Agendar Demo Gratis
+                    </button>
+                    <div class="trust-badges">
+                        <div class="trust-badge">40% más reservas directas</div>
+                        <div class="trust-badge">Conforme GDPR</div>
+                        <div class="trust-badge">Setup en 8 días</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container">
+            <div class="stats">
+                <div class="stat-grid">
+                    <div>
+                        <div class="stat-number">245K+</div>
+                        <div class="stat-label">Turistas LATAM/año en Austria</div>
+                    </div>
+                    <div>
+                        <div class="stat-number">40%</div>
+                        <div class="stat-label">Más reservas directas</div>
+                    </div>
+                    <div>
+                        <div class="stat-number">24/7</div>
+                        <div class="stat-label">En 4 idiomas</div>
+                    </div>
+                    <div>
+                        <div class="stat-number">60s</div>
+                        <div class="stat-label">Tiempo de respuesta</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-badge">🏨 Diseñado para Hoteles</span>
+                    <h2>¿Por qué Argenterio?</h2>
+                    <p>Desarrollado en Buenos Aires, optimizado para hoteles austriacos</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🌍</div>
+                        <h3>Multiidioma (DE/EN/ES/IT)</h3>
+                        <p>Conversaciones naturales en los 4 idiomas. Perfecto para huéspedes internacionales de
+                            Latinoamérica que visitan Viena, Salzburgo e Innsbruck.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📅</div>
+                        <h3>Solicitudes de Reserva Automáticas</h3>
+                        <p>Captura preferencias de habitación, fechas de viaje, número de huéspedes. Deriva consultas
+                            calificadas directamente a tu equipo. Ya no pierdas reservas.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💰</div>
+                        <h3>Mercado Latinoamericano</h3>
+                        <p>245,000+ turistas de Argentina, México, Brasil visitan Austria cada año. Muchos no hablan
+                            alemán. ¡Captura estos huéspedes automáticamente!</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🏔️</div>
+                        <h3>Info sobre Amenities</h3>
+                        <p>Responde preguntas sobre spa, desayuno, estacionamiento, pases de esquí, rutas de senderismo
+                            - automáticamente en el idioma del huésped.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Analytics & Reportes</h3>
+                        <p>Ve exactamente: consultas por idioma, horarios pico, tasa de conversión. Optimiza tu
+                            marketing con datos reales.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>Conforme GDPR</h3>
+                        <p>Todos los datos almacenados en Europa. Cumplimiento total con leyes de protección de datos de
+                            Austria y la UE.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="pricing">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-badge">💎 Precios Transparentes</span>
+                    <h2>Inversión para tu Hotel</h2>
+                    <p>Todos los planes incluyen soporte multiidioma (DE/EN/ES/IT)</p>
+                </div>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <h3>Basic</h3>
+                        <div class="pricing-price">€797<span>/mes</span></div>
+                        <ul class="pricing-features">
+                            <li>Integración WhatsApp + Email</li>
+                            <li>500 consultas/mes</li>
+                            <li>4 idiomas (DE/EN/ES/IT)</li>
+                            <li>Solicitudes de reserva automáticas</li>
+                            <li>Logging en Google Sheets</li>
+                            <li>Soporte por email</li>
+                        </ul>
+                        <button class="pricing-cta"
+                            onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                            Contactar
+                        </button>
+                    </div>
+
+                    <div class="pricing-card featured">
+                        <div class="pricing-badge">⭐ RECOMENDADO PARA HOTELES</div>
+                        <h3>Pro</h3>
+                        <div class="pricing-price">€1,297<span>/mes</span></div>
+                        <ul class="pricing-features">
+                            <li>Todo de Basic +</li>
+                            <li>2,000 consultas/mes</li>
+                            <li>Integración CRM (Protel, SIHOT)</li>
+                            <li>Dashboards de analytics avanzados</li>
+                            <li>WhatsApp + Email + Widget web</li>
+                            <li>Soporte prioritario (respuesta 24h)</li>
+                            <li>Entrenamiento personalizado</li>
+                        </ul>
+                        <button class="pricing-cta"
+                            onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                            Agendar Demo
+                        </button>
+                    </div>
+
+                    <div class="pricing-card">
+                        <h3>Enterprise</h3>
+                        <div class="pricing-price">€1,997<span>/mes</span></div>
+                        <ul class="pricing-features">
+                            <li>Todo de Pro +</li>
+                            <li>Consultas ilimitadas</li>
+                            <li>Soporte multi-propiedad (cadenas)</li>
+                            <li>Acceso API para sistemas propios</li>
+                            <li>Account manager dedicado</li>
+                            <li>Opción white-label</li>
+                            <li>Garantía SLA (99.9% uptime)</li>
+                        </ul>
+                        <button class="pricing-cta"
+                            onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+                            Demo Personalizado
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="final-cta">
+            <div class="container">
+                <h2>Captura Más Huéspedes Latinoamericanos</h2>
+                <p>
+                    Agenda una llamada demo gratuita de 20 minutos. Te mostraremos cómo hoteles en Viena ya logran 40%
+                    más reservas directas.
+                </p>
+                <form class="cta-form" onsubmit="handleSubmit(event)">
+                    <input type="email" placeholder="Email de tu hotel" required>
+                    <button type="submit">Agendar Demo</button>
+                </form>
+                <p style="margin-top: 30px; color: var(--text-gray); font-size: 1.1rem;">
+                    🇦🇹 Creado por emprendedor austriaco con base en Buenos Aires
+                </p>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <div class="footer-bottom">
+            © 2026 Argenterio. Built with ❤️ in Buenos Aires for Austrian Hotels
+        </div>
+    </footer>
+
+    <script>
+        function switchLang(lang) {
+            // Ocultar todos los contenidos
+            document.querySelectorAll('.lang-content').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Mostrar el contenido del idioma seleccionado
+            document.querySelector(`.lang-content[data-lang="${lang}"]`).classList.add('active');
+
+            // Actualizar botones
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Marcar botón activo
+            event.target.classList.add('active');
+
+            // Actualizar idioma del HTML
+            document.documentElement.lang = lang;
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            const email = e.target.querySelector('input').value;
+            alert('Vielen Dank! Wir kontaktieren Sie an: ' + email);
+        }
+    </script>
+</body>
+
+</html>

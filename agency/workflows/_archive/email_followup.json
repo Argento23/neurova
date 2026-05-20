@@ -1,0 +1,450 @@
+{
+    "name": "GenerArise - Follow-up Automation",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "days",
+                            "daysInterval": 1
+                        },
+                        {
+                            "field": "hours",
+                            "triggerAtHour": 11
+                        }
+                    ]
+                }
+            },
+            "id": "cron",
+            "name": "Cron Diario 11am",
+            "type": "n8n-nodes-base.cron",
+            "typeVersion": 1,
+            "position": [
+                240,
+                400
+            ]
+        },
+        {
+            "parameters": {},
+            "id": "manual",
+            "name": "Manual Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                240,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "read",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "leads_outreach",
+                    "mode": "list"
+                }
+            },
+            "id": "read_leads",
+            "name": "Leer Leads",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                460,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.Estado }}",
+                            "rightValue": "Enviado",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "filter_sent",
+            "name": "Filtrar Enviados",
+            "type": "n8n-nodes-base.filter",
+            "typeVersion": 2,
+            "position": [
+                680,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const items = [];\nconst now = new Date();\n\nfor (const item of $input.all()) {\n  const fechaEnvio = new Date(item.json.Fecha_Envio);\n  const daysSince = Math.floor((now - fechaEnvio) / (1000 * 60 * 60 * 24));\n  \n  // Solo procesar si han pasado 3 o 7 días exactamente\n  if (daysSince === 3 || daysSince === 7) {\n    items.push({\n      json: {\n        ...item.json,\n        days_since: daysSince,\n        follow_up_type: daysSince === 3 ? 'first' : 'final'\n      }\n    });\n  }\n}\n\nreturn items;"
+            },
+            "id": "calculate_days",
+            "name": "Calcular Días Transcurridos",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                900,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "nombre",
+                            "name": "nombre",
+                            "value": "={{ $json.Nombre }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "empresa",
+                            "name": "empresa",
+                            "value": "={{ $json.Empresa }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "email",
+                            "name": "email",
+                            "value": "={{ $json.Email }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "industria",
+                            "name": "industria",
+                            "value": "={{ $json.Industria }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "follow_up_type",
+                            "name": "follow_up_type",
+                            "value": "={{ $json.follow_up_type }}",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "prep_data",
+            "name": "Preparar Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                1120,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.follow_up_type }}",
+                            "rightValue": "first",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_day3",
+            "name": "Es Día 3?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1340,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {},
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.follow_up_type }}",
+                            "rightValue": "final",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "is_day7",
+            "name": "Es Día 7?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1340,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "subject",
+                            "name": "subject",
+                            "value": "Re: {{ $json.nombre }}, ¿mala timing?",
+                            "type": "string"
+                        },
+                        {
+                            "id": "body",
+                            "name": "body",
+                            "value": "={{ $json.nombre }},\n\n¿Mal momento?\n\nSolo quería confirmar si viste mi mensaje anterior sobre automatización de consultas para {{ $json.empresa }}.\n\nSi no es prioridad ahora, lo entiendo totalmente.\n\n¿Te lo reenvío en marzo?\n\nSaludos,\nGustavo",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "template_day3",
+            "name": "Template Día 3",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                1560,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "subject",
+                            "name": "subject",
+                            "value": "Re: Última vez que molesto, {{ $json.nombre }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "body",
+                            "name": "body",
+                            "value": "={{ $json.nombre }},\n\nÚltima vez que molesto, lo prometo.\n\nPreparé un video de 90 segundos mostrando cómo funciona la automatización con IA para {{ $json.industria }}:\n\n👉 https://www.loom.com/share/demo-generarise-{{ $json.industria.toLowerCase() }}\n\n(Es solo un ejemplo rápido con un caso real)\n\nSi ves valor, genial. Si no, borro tu contacto y no te vuelvo a escribir.\n\nAbrazo,\nGustavo\n\nP.S.: Si conocés a alguien que le pueda servir, te agradezco el contacto.",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "template_day7",
+            "name": "Template Día 7",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                1560,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "fromEmail": "agentes.space@gmail.com",
+                "toEmail": "={{ $json.email }}",
+                "subject": "={{ $json.subject }}",
+                "emailType": "text",
+                "message": "={{ $json.body }}",
+                "options": {}
+            },
+            "id": "send_email",
+            "name": "Enviar Follow-up",
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2.1,
+            "position": [
+                1780,
+                400
+            ],
+            "credentials": {
+                "gmailOAuth2": {
+                    "id": "YOUR_GMAIL_CREDENTIAL_ID",
+                    "name": "Gmail account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "documentId": {
+                    "__rl": true,
+                    "value": "YOUR_SHEET_ID",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "leads_outreach",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Estado": "={{ $json.follow_up_type === 'first' ? 'Follow-up 1' : 'Follow-up 2 (Final)' }}",
+                        "Ultimo_Contacto": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}"
+                    }
+                }
+            },
+            "id": "update_status",
+            "name": "Actualizar Estado",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                2000,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "YOUR_GOOGLE_CREDENTIAL_ID",
+                    "name": "Google Sheets account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Cron Diario 11am": {
+            "main": [
+                [
+                    {
+                        "node": "Leer Leads",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Leer Leads",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Leer Leads": {
+            "main": [
+                [
+                    {
+                        "node": "Filtrar Enviados",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filtrar Enviados": {
+            "main": [
+                [
+                    {
+                        "node": "Calcular Días Transcurridos",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Calcular Días Transcurridos": {
+            "main": [
+                [
+                    {
+                        "node": "Preparar Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Preparar Data": {
+            "main": [
+                [
+                    {
+                        "node": "Es Día 3?",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Es Día 7?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Es Día 3?": {
+            "main": [
+                [
+                    {
+                        "node": "Template Día 3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Es Día 7?": {
+            "main": [
+                [
+                    {
+                        "node": "Template Día 7",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Template Día 3": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Follow-up",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Template Día 7": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Follow-up",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar Follow-up": {
+            "main": [
+                [
+                    {
+                        "node": "Actualizar Estado",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "versionId": "follow-up-automation-v1"
+}

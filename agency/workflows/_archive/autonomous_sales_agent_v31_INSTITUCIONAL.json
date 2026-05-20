@@ -1,0 +1,476 @@
+{
+    "name": "Agente V31 - INSTITUCIONAL (WA Texto + Email Equipo)",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "hours",
+                            "triggerAtHour": 10
+                        }
+                    ]
+                }
+            },
+            "id": "schedule",
+            "name": "Cron Diario (10am)",
+            "type": "n8n-nodes-base.cron",
+            "typeVersion": 1,
+            "position": [
+                240,
+                400
+            ]
+        },
+        {
+            "parameters": {},
+            "id": "start",
+            "name": "Manual Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                240,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "values": {
+                    "string": [
+                        {
+                            "name": "search_term",
+                            "value": "Dentistas"
+                        },
+                        {
+                            "name": "location",
+                            "value": "Buenos Aires, Argentina"
+                        },
+                        {
+                            "name": "banner_url",
+                            "value": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop"
+                        }
+                    ]
+                }
+            },
+            "id": "config",
+            "name": "CONFIG",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 1,
+            "position": [
+                460,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://serpapi.com/search.json",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "queryAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "api_key",
+                            "value": "9be0d43581dc9220232e9a2819f308c303a32082a1e62f97c9c87b75dfde8d72"
+                        },
+                        {
+                            "name": "engine",
+                            "value": "google_maps"
+                        },
+                        {
+                            "name": "q",
+                            "value": "={{ $json.search_term + ' en ' + $json.location }}"
+                        },
+                        {
+                            "name": "num",
+                            "value": "10"
+                        }
+                    ]
+                }
+            },
+            "id": "serp",
+            "name": "Google Maps",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                680,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "local_results"
+            },
+            "id": "split",
+            "name": "Dividir",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 3,
+            "position": [
+                900,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "batchSize": 1
+            },
+            "id": "loop",
+            "name": "Loop",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 2,
+            "position": [
+                1120,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "url": "={{ $json.website }}",
+                "options": {
+                    "timeout": 5000
+                }
+            },
+            "id": "web",
+            "name": "Visitar Web",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1340,
+                400
+            ],
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "jsCode": "const html = $input.item.json.data || '';\nconst text = html.replace(/<[^>]*>/g, ' ').replace(/\\s+/g, ' ');\nconst title = $('Loop').item.json.title || 'Sin nombre';\nconst phone = $('Loop').item.json.phone || '';\n\nreturn {\n  text: text.substring(0, 2500),\n  title: title,\n  phone_from_maps: phone\n};"
+            },
+            "id": "clean",
+            "name": "Limpiar HTML",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1560,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "model": "meta-llama/llama-3.3-70b-versatile"
+            },
+            "id": "groq",
+            "name": "Groq Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                1780,
+                620
+            ],
+            "credentials": {
+                "groqApi": {
+                    "id": "t7iYzRwAE19Qfzou",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=CONTEXTO:\nEres el Equipo de **GenerArise**, agencia de automatización con IA.\n\nNEGOCIO:\nWeb: {{ $json.text }}\nNombre: {{ $json.title }}\nTel Maps: {{ $json.phone_from_maps }}\n\nTAREA:\n1. EXTRAE datos (tel/wa con 549, email)\n2. IDENTIFICA industria\n3. GENERA WA TEXTO (1 párrafo corto, profesional, sin presentarte como persona, sino como 'Equipo GenerArise').\n4. GENERA HTML EMAIL (institucional, 'nosotros', sin nombre propio en primera instancia).\n5. Menciona alguna opción generica de automatización de acuerdo al rubro. Algún comentario sobre una posible solución.\n\"Usa la siguiente estructura HTML EXACTA y reemplaza {{nombre_negocio}} y {{propuesta_valor_personalizada}} con el contenido que generes, manteniendo el resto del diseño igual:\"\n<div style=\"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; color: #333333; line-height: 1.6;\">\n    \n    <!-- HEADER -->\n    <div style=\"text-align: center; padding: 20px 0; border-bottom: 2px solid #000000;\">\n        <h2 style=\"margin: 0; color: #000000; letter-spacing: 2px;\">GENERARISE</h2>\n        <p style=\"margin: 5px 0 0; font-size: 12px; color: #666; text-transform: uppercase;\">Automatización Inteligente</p>\n    </div>\n\n    <!-- BODY -->\n    <div style=\"padding: 30px 20px;\">\n        <p style=\"font-size: 16px;\">Estimado equipo de <strong>{{nombre_negocio}}</strong>,</p>\n        \n        <p>Les escribe el equipo de <strong>GenerArise</strong>. Hemos analizado su presencia digital y detectamos una oportunidad clara para potenciar su sector mediante Inteligencia Artificial.</p>\n        \n        <div style=\"background-color: #f8f9fa; border-left: 4px solid #000000; padding: 15px; margin: 25px 0;\">\n            <p style=\"margin: 0; font-weight: bold; color: #000;\">Nuestra propuesta para su industria:</p>\n            <p style=\"margin: 5px 0 0;\">{{propuesta_valor_personalizada}}</p>\n        </div>\n\n        <p>Implementar agentes autónomos les permitiría:</p>\n        <ul style=\"color: #444;\">\n            <li>Atender consultas 24/7 sin personal extra.</li>\n            <li>Automatizar agendamiento y tareas repetitivas.</li>\n            <li>Reducir costos operativos hasta un 40%.</li>\n        </ul>\n\n        <div style=\"text-align: center; margin-top: 35px;\">\n            <a href=\"https://generarise.space\" style=\"background-color: #000000; color: #ffffff; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 4px;\">AGENDAR DEMO (15 MIN)</a>\n        </div>\n    </div>\n\n    <!-- FOOTER -->\n    <div style=\"background-color: #f4f4f4; padding: 20px; text-align: center; font-size: 12px; color: #888;\">\n        <p style=\"margin: 0;\"><strong>GenerArise AI Solutions</strong></p>\n        <p style=\"margin: 5px 0;\">Buenos Aires, Argentina | <a href=\"https://generarise.space\" style=\"color: #666;\">generarise.space</a></p>\n        <p style=\"margin: 10px 0 0;\">¿No le interesa? Responda \"BAJA\" para desuscribirse.</p>\n    </div>\n</div>\n\nJSON:\n{\n  \"phone\": \"549...\",\n  \"email\": \"...\",\n  \"score\": 8,\n  \"wa_msg\": \"Hola [Nombre]...\",\n  \"email_html\": \"<p>...</p>\"\n}",
+                "hasOutputParser": true
+            },
+            "id": "ai",
+            "name": "IA Extractor PRO",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.4,
+            "position": [
+                1780,
+                400
+            ],
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "jsCode": "const data = $input.item.json;\nconst title = $('Loop').item.json.title || 'Sin nombre';\nconst phone_maps = $('Loop').item.json.phone || '';\nconst banner = $('CONFIG').item.json.banner_url;\n\n// Datos con fallback\nconst phone = data.phone || phone_maps || '5491112345678';\nconst email = data.email || 'test@ejemplo.com';\nconst score = data.score || 5;\n\n// Email Header\nconst email_header = `<div style=\"text-align:center; margin-bottom:20px;\"><img src=\"${banner}\" alt=\"GenerArise AI\" style=\"width:100%; max-width:600px; border-radius:8px;\"></div>`;\nconst email_footer = `<p style=\"margin-top:30px; border-top:1px solid #eee; padding-top:15px; font-size:0.9em; color:#555;\"><strong>Equipo GenerArise</strong><br>Soluciones de Inteligencia Artificial<br>📧 contacto@generarise.space<br>🌐 generarise.space</p>`;\n\nconst email_html_final = email_header + (data.email_html || `<p>Estimado equipo de <strong>${title}</strong>...</p>`) + email_footer;\n\nreturn {\n  text: title,\n  score: score,\n  email_address: email,\n  phone: phone,\n  wa_msg: data.wa_msg || `Hola equipo de ${title}, somos GenerArise. Automatizamos procesos con IA para escalar negocios. ¿Les interesa una demo? 🚀`,\n  email_html: email_html_final,\n  search_term: $('CONFIG').item.json.search_term,\n  location: $('CONFIG').item.json.location,\n  raw_ai: JSON.stringify(data)\n};"
+            },
+            "id": "parse",
+            "name": "Preparar Datos",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                2000,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "messages-api",
+                "instanceName": "LATAM",
+                "options_message": {
+                    "number": "={{ $json.phone }}",
+                    "textMessage": {
+                        "text": "={{ $json.wa_msg }}"
+                    }
+                }
+            },
+            "id": "evo",
+            "name": "Enviar WhatsApp (Texto)",
+            "type": "n8n-nodes-evolution-api.evolutionApi",
+            "typeVersion": 1,
+            "position": [
+                2220,
+                400
+            ],
+            "credentials": {
+                "evolutionApi": {
+                    "id": "bzWosesjRnlSmCBY",
+                    "name": "LATAM"
+                }
+            },
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "senderEmail": "contacto@generarise.space",
+                "toEmail": "={{ $json.email_address }}",
+                "subject": "Propuesta de Automatización - GenerArise",
+                "htmlContent": "={{ $json.email_html }}"
+            },
+            "id": "brevo",
+            "name": "Enviar Email",
+            "type": "n8n-nodes-base.sendInBlue",
+            "typeVersion": 2,
+            "position": [
+                2440,
+                400
+            ],
+            "credentials": {
+                "sendInBlueApi": {
+                    "id": "dRbziQm4hHXAh3GR",
+                    "name": "Brevo account"
+                }
+            },
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "1HSNrK1Zmk2WqU14QZgxpFmvShdPSRWA41GxRPQ956Eo",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "Hoja 1",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "text": "={{ $json.text }}",
+                        "score": "={{ $json.score }}",
+                        "email_address": "={{ $json.email_address }}",
+                        "search_term": "={{ $json.search_term }}",
+                        "location": "={{ $json.location }}",
+                        "raw": "={{ $json.raw_ai }}"
+                    }
+                }
+            },
+            "id": "sheet",
+            "name": "Guardar en Sheet",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                2660,
+                400
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "zwdmBzveCXv4B3Ec",
+                    "name": "Google Sheets account"
+                }
+            },
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "amount": 120,
+                "unit": "seconds"
+            },
+            "id": "wait",
+            "name": "Esperar (2 min)",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                2880,
+                400
+            ]
+        }
+    ],
+    "connections": {
+        "Cron Diario (10am)": {
+            "main": [
+                [
+                    {
+                        "node": "CONFIG",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "CONFIG",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "CONFIG": {
+            "main": [
+                [
+                    {
+                        "node": "Google Maps",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Maps": {
+            "main": [
+                [
+                    {
+                        "node": "Dividir",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Dividir": {
+            "main": [
+                [
+                    {
+                        "node": "Loop",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop": {
+            "main": [
+                [
+                    {
+                        "node": "Visitar Web",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Visitar Web": {
+            "main": [
+                [
+                    {
+                        "node": "Limpiar HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Limpiar HTML": {
+            "main": [
+                [
+                    {
+                        "node": "IA Extractor PRO",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "IA Extractor PRO",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IA Extractor PRO": {
+            "main": [
+                [
+                    {
+                        "node": "Preparar Datos",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Preparar Datos": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp (Texto)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar WhatsApp (Texto)": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Enviar Email": {
+            "main": [
+                [
+                    {
+                        "node": "Guardar en Sheet",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Guardar en Sheet": {
+            "main": [
+                [
+                    {
+                        "node": "Esperar (2 min)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Esperar (2 min)": {
+            "main": [
+                [
+                    {
+                        "node": "Loop",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
