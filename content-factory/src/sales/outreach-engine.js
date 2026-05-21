@@ -444,18 +444,23 @@ async function runOutreachBatch({ dryRun = false, maxLeads = 50, type = 'new' } 
     return { contacted: 0, failed: 0 };
   }
 
-  // Pre-flight: Check if WhatsApp/Evolution is healthy before burning through leads
+  // Pre-flight: Check if WhatsApp is healthy before burning through leads
   if (!dryRun) {
     const health = await checkEvolutionHealth();
     if (!health.healthy) {
-      logger.error(`Evolution API unhealthy — aborting outreach batch`, { state: health.state, reason: health.reason });
+      const providerLabel = health.provider === 'cloud_api' ? 'Meta Cloud API' : 'Evolution API';
+      logger.error(`${providerLabel} unhealthy — aborting outreach batch`, { state: health.state, reason: health.reason });
+      const fixMsg = health.provider === 'cloud_api'
+        ? `Fix: Check META_CLOUD_TOKEN and META_PHONE_NUMBER_ID in environment variables.`
+        : `Fix: Verify Evolution API instance "${config.EVOLUTION_INSTANCE}" is running and phone is connected.`;
       await telegram.sendAlert(
-        '🚨 Outreach Aborted — WhatsApp Down',
-        `Evolution API state: ${health.state}\nReason: ${health.reason}\n\nFix: Verify Evolution API instance "${config.EVOLUTION_INSTANCE}" is running and phone is connected.`
+        `🚨 Outreach Aborted — WhatsApp Down (${providerLabel})`,
+        `${providerLabel} state: ${health.state}\nReason: ${health.reason}\n\n${fixMsg}`
       );
       return { contacted: 0, failed: 0, aborted: true, reason: health.reason };
     }
-    logger.info(`Evolution API healthy (state: ${health.state})`);
+    const providerLabel = health.provider === 'cloud_api' ? 'Meta Cloud API' : 'Evolution API';
+    logger.info(`${providerLabel} healthy (state: ${health.state})`);
   }
 
   let leads;

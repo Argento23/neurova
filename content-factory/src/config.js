@@ -57,7 +57,7 @@ const config = {
   META_CLOUD_TOKEN: process.env.META_CLOUD_TOKEN || '',
   META_PHONE_NUMBER_ID: process.env.META_PHONE_NUMBER_ID || '',
   META_WABA_ID: process.env.META_WABA_ID || '',
-  META_API_VERSION: process.env.META_API_VERSION || 'v25.0',
+  META_API_VERSION: process.env.META_API_VERSION || 'v19.0',
 
   // WhatsApp Outreach — Evolution API (Legacy/fallback)
   EVOLUTION_API_URL: process.env.EVOLUTION_API_URL || '',

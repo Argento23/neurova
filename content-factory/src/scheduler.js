@@ -615,13 +615,14 @@ async function runStartupHealthCheck() {
     }
   } catch (e) { checks.push(`❌ Supabase: ${e.message}`); }
 
-  // 2. Evolution API (WhatsApp)
+  // 2. WhatsApp Provider
   try {
     const health = await outreachEngine.checkEvolutionHealth();
+    const providerLabel = health.provider === 'cloud_api' ? 'Meta Cloud API' : 'Evolution API';
     if (health.healthy) {
-      checks.push(`✅ WhatsApp (Evolution): Connected (${health.state})`);
+      checks.push(`✅ WhatsApp (${providerLabel}): Connected (${health.state})`);
     } else {
-      checks.push(`❌ WhatsApp (Evolution): ${health.reason || health.state}`);
+      checks.push(`❌ WhatsApp (${providerLabel}): ${health.reason || health.state}`);
     }
   } catch (e) { checks.push(`❌ WhatsApp: ${e.message}`); }
 
