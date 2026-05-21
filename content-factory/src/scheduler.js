@@ -257,7 +257,7 @@ async function publishToPlatform(platform, post, uploadedMediaUrls = {}, creds =
       if (post.videoPath) {
         await tiktokPublisher.publishVideo(post.videoPath, post.caption, creds);
       } else {
-        logger.warn(`TikTok requires video — post ${post.id} has no videoPath, skipping`);
+        throw new Error(`TikTok requires a video — post type '${post.type}' generated no videoPath. Add TikTok only to 'video_corto' posts.`);
       }
       break;
     }
@@ -276,7 +276,7 @@ async function publishToPlatform(platform, post, uploadedMediaUrls = {}, creds =
           creds
         );
       } else {
-        logger.warn(`YouTube requires video — post ${post.id} has no videoPath, skipping`);
+        throw new Error(`YouTube requires a video — post type '${post.type}' generated no videoPath. Add YouTube only to 'video_corto' posts.`);
       }
       break;
     }
