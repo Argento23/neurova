@@ -19,8 +19,18 @@
           "type": "tendencia_ia",
           "platforms": [
             "instagram",
+            "facebook"
+          ],
+          "language": "es"
+        },
+        {
+          "time": "18:00",
+          "type": "video_corto",
+          "platforms": [
+            "instagram",
             "facebook",
-            "tiktok"
+            "tiktok",
+            "youtube"
           ],
           "language": "es"
         }
@@ -92,8 +102,7 @@
           "type": "behind_scenes",
           "platforms": [
             "instagram",
-            "facebook",
-            "tiktok"
+            "facebook"
           ],
           "language": "es"
         },
@@ -103,6 +112,17 @@
           "platforms": [
             "instagram",
             "facebook"
+          ],
+          "language": "es"
+        },
+        {
+          "time": "18:00",
+          "type": "video_corto",
+          "platforms": [
+            "instagram",
+            "facebook",
+            "tiktok",
+            "youtube"
           ],
           "language": "es"
         }
@@ -144,6 +164,17 @@
             "facebook"
           ],
           "language": "es"
+        },
+        {
+          "time": "18:00",
+          "type": "video_corto",
+          "platforms": [
+            "instagram",
+            "facebook",
+            "tiktok",
+            "youtube"
+          ],
+          "language": "es"
         }
       ]
     },
@@ -156,6 +187,17 @@
           "platforms": [
             "instagram",
             "facebook"
+          ],
+          "language": "es"
+        },
+        {
+          "time": "18:00",
+          "type": "video_corto",
+          "platforms": [
+            "instagram",
+            "facebook",
+            "tiktok",
+            "youtube"
           ],
           "language": "es"
         }
