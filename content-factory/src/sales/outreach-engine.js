@@ -123,18 +123,47 @@ async function checkEvolutionHealth() {
 
 // ─── WHATSAPP VIA META CLOUD API (Official — no bans) ───
 
-async function sendWhatsAppCloudAPI(phone, message) {
+async function sendWhatsAppCloudAPI(phone, message, templateData = null) {
   const cleanPhone = phone.replace(/[^\d]/g, '');
   
   try {
-    const response = await axios.post(
-      `https://graph.facebook.com/${config.META_API_VERSION}/${config.META_PHONE_NUMBER_ID}/messages`,
-      {
+    let payload;
+    
+    if (templateData) {
+      // Send official WhatsApp Template (No bans!)
+      payload = {
+        messaging_product: 'whatsapp',
+        to: cleanPhone,
+        type: 'template',
+        template: {
+          name: templateData.name || 'neurova_outreach',
+          language: { code: templateData.language || 'es' },
+          components: [
+            {
+              type: 'body',
+              parameters: templateData.parameters.map(text => ({
+                type: 'text',
+                text: text.substring(0, 1000) // Meta body parameters limit
+              }))
+            }
+          ]
+        }
+      };
+      logger.info(`Sending WhatsApp Cloud API Template "${payload.template.name}" to ${cleanPhone}`);
+    } else {
+      // Send regular text message (only works if 24h customer window is open)
+      payload = {
         messaging_product: 'whatsapp',
         to: cleanPhone,
         type: 'text',
         text: { body: message }
-      },
+      };
+      logger.info(`Sending WhatsApp Cloud API free-text to ${cleanPhone}`);
+    }
+
+    const response = await axios.post(
+      `https://graph.facebook.com/${config.META_API_VERSION}/${config.META_PHONE_NUMBER_ID}/messages`,
+      payload,
       {
         headers: {
           'Authorization': `Bearer ${config.META_CLOUD_TOKEN}`,
@@ -145,7 +174,7 @@ async function sendWhatsAppCloudAPI(phone, message) {
     );
     
     const msgId = response.data?.messages?.[0]?.id;
-    logger.info(`WhatsApp (Cloud API) sent to ${cleanPhone}`, { messageId: msgId });
+    logger.info(`WhatsApp (Cloud API) sent successfully to ${cleanPhone}`, { messageId: msgId });
     return { success: true, messageId: msgId, provider: 'cloud_api' };
   } catch (error) {
     const metaError = error.response?.data?.error;
@@ -205,13 +234,13 @@ async function sendWhatsAppEvolution(phone, message) {
 
 // ─── UNIFIED WHATSAPP SENDER (auto-selects provider) ───
 
-async function sendWhatsApp(phone, message) {
+async function sendWhatsApp(phone, message, templateData = null) {
   if (!phone) return { success: false, error: 'No phone number' };
   
   const provider = getWhatsAppProvider();
   
   if (provider === 'cloud_api') {
-    return sendWhatsAppCloudAPI(phone, message);
+    return sendWhatsAppCloudAPI(phone, message, templateData);
   } else if (provider === 'evolution') {
     return sendWhatsAppEvolution(phone, message);
   }
@@ -345,7 +374,34 @@ async function contactLead(lead, { dryRun = false, channel = 'auto' } = {}) {
     } else {
       message = templates.renderMessage(lead, templateType);
     }
-    result = await sendWhatsApp(lead.phone, message);
+
+    const provider = getWhatsAppProvider();
+    let templateData = null;
+
+    if (provider === 'cloud_api') {
+      // Clean up the greeting "Hola [Nombre]..." from the AI message to prevent duplication
+      // since the Meta template is: "Hola {{1}}, vi tu empresa {{2}}. {{3}}"
+      let cleanMessage = message;
+      
+      // Remove patterns like "Hola [Name], ", "Hola, ", "¡Hola! ", etc. at the start of the message
+      cleanMessage = cleanMessage.replace(/^Hola\s+[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s,]+[.!]\s*/i, '');
+      cleanMessage = cleanMessage.replace(/^¡?Hola!?,?\s*/i, '');
+      
+      // Also remove introductory parts like "vi tu empresa..." if AI hallucinated it
+      cleanMessage = cleanMessage.replace(/^vi\s+(que\s+)?tu\s+empresa\s+[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s,]+[.!]\s*/i, '');
+
+      templateData = {
+        name: 'neurova_outreach',
+        language: 'es',
+        parameters: [
+          lead.name || 'amigo/a',
+          lead.company || lead.industry || 'tu negocio',
+          cleanMessage
+        ]
+      };
+    }
+
+    result = await sendWhatsApp(lead.phone, message, templateData);
     if (result.success) dailyCounters[counterKey]++;
 
     // Log to Supabase
@@ -354,8 +410,10 @@ async function contactLead(lead, { dryRun = false, channel = 'auto' } = {}) {
         lead_id: lead.id,
         channel: 'whatsapp',
         direction: 'outbound',
-        message_preview: message.substring(0, 200),
-        template_used: templateType,
+        message_preview: templateData 
+          ? `[Template: neurova_outreach] | ${templateData.parameters[2].substring(0, 150)}`
+          : message.substring(0, 200),
+        template_used: templateData ? 'meta_template_neurova_outreach' : templateType,
         status: result.success ? 'sent' : 'failed',
         error_message: result.error || null
       });
