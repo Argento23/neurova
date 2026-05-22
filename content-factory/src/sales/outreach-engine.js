@@ -70,8 +70,17 @@ function resetDailyCounters() {
 // ─── WHATSAPP PROVIDER DETECTION ───────────────────
 
 function getWhatsAppProvider() {
-  if (config.META_CLOUD_TOKEN && config.META_PHONE_NUMBER_ID) return 'cloud_api';
+  const provider = config.WHATSAPP_PROVIDER;
+  if (provider === 'cloud_api' && config.META_CLOUD_TOKEN && config.META_PHONE_NUMBER_ID) {
+    return 'cloud_api';
+  }
+  if (provider === 'evolution' && config.EVOLUTION_API_URL && config.EVOLUTION_API_KEY) {
+    return 'evolution';
+  }
+  
+  // Fallback to whichever is configured if preference is missing or invalid
   if (config.EVOLUTION_API_URL && config.EVOLUTION_API_KEY) return 'evolution';
+  if (config.META_CLOUD_TOKEN && config.META_PHONE_NUMBER_ID) return 'cloud_api';
   return null;
 }
 

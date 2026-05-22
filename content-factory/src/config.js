@@ -57,7 +57,13 @@ const config = {
   META_CLOUD_TOKEN: process.env.META_CLOUD_TOKEN || '',
   META_PHONE_NUMBER_ID: process.env.META_PHONE_NUMBER_ID || '',
   META_WABA_ID: process.env.META_WABA_ID || '',
-  META_API_VERSION: process.env.META_API_VERSION || 'v19.0',
+  META_API_VERSION: process.env.META_API_VERSION || 'v22.0',
+
+  // Meta Webhook Verification
+  META_WEBHOOK_VERIFY_TOKEN: process.env.META_WEBHOOK_VERIFY_TOKEN || 'neurova_verify',
+
+  // WhatsApp Provider Preference ('evolution' or 'cloud_api')
+  WHATSAPP_PROVIDER: process.env.WHATSAPP_PROVIDER || 'evolution',
 
   // WhatsApp Outreach — Evolution API (Legacy/fallback)
   EVOLUTION_API_URL: process.env.EVOLUTION_API_URL || '',

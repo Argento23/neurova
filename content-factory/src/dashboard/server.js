@@ -21,7 +21,7 @@ import usersDb from '../db/users-db.js';
 import calendarDb from '../db/calendar-db.js';
 import marketplaceDb from '../db/marketplace-db.js';
 import stripeWebhook from '../payments/stripe-webhook.js';
-import whatsappWebhook from '../sales/whatsapp-webhook.js';
+import whatsappWebhook, { verifyWhatsAppWebhook } from '../sales/whatsapp-webhook.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -216,7 +216,8 @@ app.post('/api/webhooks/instagram', async (req, res) => {
   }
 });
 
-// WhatsApp Webhook (Evolution API)
+// WhatsApp Webhook — Meta Cloud API (primary) + Evolution API (legacy fallback)
+app.get('/api/webhooks/whatsapp', verifyWhatsAppWebhook);
 app.post('/api/webhooks/whatsapp', whatsappWebhook);
 
 // Generic B2B Ingestion Webhook (e.g., from n8n / LinkedIn)
