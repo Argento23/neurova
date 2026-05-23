@@ -80,9 +80,7 @@ async function getLeads(filters = {}) {
   if (filters.region) query = query.eq('region', filters.region);
   if (filters.city) query = query.eq('city', filters.city);
 
-  // Order by ai_score first, fallback to lead_score for V1-only leads
-  query = query.order('ai_score', { ascending: false, nullsFirst: false });
-  query = query.order('lead_score', { ascending: false, nullsFirst: false });
+  // Order by creation date to show the newest leads first
   query = query.order('created_at', { ascending: false });
   query = query.limit(filters.limit || 100);
 

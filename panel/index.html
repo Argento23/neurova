@@ -4336,7 +4336,11 @@ async function fetchSalesLeads() {
                         }).eq('id', l.id).then(() => {});
                     }
                 }
-                salesLeads.sort((a, b) => (b.lead_score || 0) - (a.lead_score || 0));
+                if (currentSalesView === 'new') {
+                    salesLeads.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                } else {
+                    salesLeads.sort((a, b) => (b.lead_score || 0) - (a.lead_score || 0));
+                }
             } catch(e) { salesLeads = []; callLogs = []; }
         }
 
