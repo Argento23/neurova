@@ -4489,10 +4489,15 @@ function renderSalesCommand() {
                         <td style="padding:16px; text-align:right;">
                             <div style="display:flex; gap:6px; justify-content:flex-end; align-items:center; flex-wrap:wrap;">
                                 <button class="btn btn-ghost" style="padding:6px 10px; border:1px solid #8b5cf6; color:#8b5cf6; font-size:10px; ${l.email && !l.email.includes('nodetectado') ? '' : 'opacity:0.3; cursor:not-allowed;'}" onclick="${l.email && !l.email.includes('nodetectado') ? `sendColdEmail('${l.id}')` : `alert('Este lead no tiene email válido')`}" title="Paso 0: Email frío vía Brevo (funciona con fijos)">📧 0. Email</button>
+                                ${l.phone ? `
                                 <button class="btn btn-ghost" style="padding:6px 10px; border:1px solid #22c55e; color:#22c55e; font-size:10px; ${waStyle}" onclick="${waAlert || `sendWhatsAppLead('${l.id}', 'sales', 1)`}" title="Paso 1: Romper hielo (Preguntar permiso)">💬 1. Gancho</button>
                                 <button class="btn btn-ghost" style="padding:6px 10px; border:1px solid #3b82f6; color:#3b82f6; font-size:10px; ${waStyle}" onclick="${waAlert || `sendWhatsAppLead('${l.id}', 'sales', 2)`}" title="Paso 2: Enviar Landing de Autoridad">🔗 2. Demo</button>
                                 <button class="btn btn-ghost" style="padding:6px 10px; border:1px solid #f59e0b; color:#f59e0b; font-size:10px; ${waStyle}" onclick="${waAlert || `sendWhatsAppLead('${l.id}', 'sales', 3)`}" title="Paso 3: Enviar Link de Auditoría">📋 3. Auditoría</button>
                                 <button class="btn btn-ghost" style="padding:4px 6px;font-size:11px;color:#d4af37; border:1px solid #d4af37; ${waStyle}" onclick="${waAlert || `sendWhatsAppLead('${l.id}', 'sales', 5)`}" title="Paso 5: Cierre por WhatsApp">💰 5. Cierre Wpp</button>
+                                ` : `
+                                ${l.instagram_url ? `<a href="${l.instagram_url}" target="_blank" class="btn btn-ghost" style="padding:6px 10px; border:1px solid #E1306C; color:#E1306C; font-size:10px;" onclick="openAiDraft('${l.id}', 'sales')" title="Abrir Instagram y generar mensaje IA">📸 Contactar IG</a>` : ''}
+                                ${l.linkedin_url ? `<a href="${l.linkedin_url}" target="_blank" class="btn btn-ghost" style="padding:6px 10px; border:1px solid #3b82f6; color:#3b82f6; font-size:10px;" onclick="openAiDraft('${l.id}', 'sales')" title="Abrir LinkedIn y generar mensaje IA">🔗 Contactar LI</a>` : ''}
+                                `}
                                 <button class="btn btn-ghost" style="padding:4px 6px;font-size:11px;color:#d4af37; border:1px solid #d4af37;" onclick="sendInvoiceEmail('${l.id}', 'sales')" title="Paso 5: Enviar Factura Final por Email">📧 5. Email</button>
                                 <button class="btn btn-ghost" style="padding:4px 6px;font-size:11px;color:var(--accent)" onclick="openAiDraft('${l.id}', 'sales')" title="IA Draft">🤖 IA</button>
                                 <select class="call-result-select" onchange="updateCallResult('${l.id}',this.value)" title="Registrar estado">
