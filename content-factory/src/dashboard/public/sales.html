@@ -251,7 +251,7 @@ async function loadPipeline() {
 
 async function loadLeads() {
   try {
-    let url = `${API}/api/sales/leads?limit=100`;
+    let url = `${API}/api/sales/leads?limit=1500`;
     if (currentFilter === 'hot') url += '&min_score=70';
     else if (currentFilter !== 'all') url += '&outreach=' + currentFilter;
 

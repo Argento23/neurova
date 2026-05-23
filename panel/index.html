@@ -4311,7 +4311,7 @@ function suggestNext(l) {
 async function fetchSalesLeads() {
             try {
                 const [lr, cr] = await Promise.all([
-                    sb.from('sales_leads').select('*').order('created_at', { ascending: false }).limit(600),
+                    sb.from('sales_leads').select('*').order('created_at', { ascending: false }).limit(1500),
                     sb.from('sales_call_log').select('*').order('created_at', { ascending: false }).limit(20)
                 ]);
                 salesLeads = (lr.error && lr.error.code === '42P01') ? [] : (lr.data || []);
@@ -4460,10 +4460,21 @@ function renderSalesCommand() {
                         </td>
                         <td style="padding:16px; font-weight:600; color:var(--sky); font-family:'Inter', monospace; font-size:13px;">${l.company || '—'}</td>
                         <td style="padding:16px;">
+                            ${l.phone ? `
                             <div style="font-weight:500; font-size:13px; display:flex; align-items:center; gap:6px;">
                                 <span title="${pType.label}">${pType.icon}</span> 
                                 <span>${phoneStr} ${country}</span>
-                            </div>
+                            </div>` : ''}
+                            ${l.instagram_url ? `
+                            <div style="font-size:12px; margin-top:4px;">
+                                📸 <a href="${l.instagram_url}" target="_blank" style="color:#E1306C; text-decoration:none; font-weight:600;">Instagram</a>
+                            </div>` : ''}
+                            ${l.linkedin_url ? `
+                            <div style="font-size:12px; margin-top:4px;">
+                                🔗 <a href="${l.linkedin_url}" target="_blank" style="color:#3b82f6; text-decoration:none; font-weight:600;">LinkedIn</a>
+                            </div>` : ''}
+                            ${!l.phone && !l.instagram_url && !l.linkedin_url ? `
+                            <span style="color:var(--muted); opacity:0.6;">Sin datos</span>` : ''}
                         </td>
                         <td style="padding:16px;">
                             <span style="color:var(--sky); font-weight:600; font-size:12px; background:rgba(14,165,233,0.05); padding:4px 10px; border-radius:8px;">${l.industry || '—'}</span>
