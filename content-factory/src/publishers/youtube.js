@@ -77,12 +77,19 @@ class YouTubePublisher {
       }
       const videoBuffer = readFileSync(videoPath);
 
+      // Ensure title including '#Shorts' does not exceed 100 characters
+      let cleanTitle = title || 'Video Corto';
+      if (cleanTitle.length > 90) {
+        cleanTitle = cleanTitle.substring(0, 90);
+      }
+      const finalTitle = `${cleanTitle} #Shorts`;
+
       // Step 1: Start resumable upload
       const initRes = await axios.post(
         'https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status',
         {
           snippet: {
-            title: `${title} #Shorts`,
+            title: finalTitle,
             description: `${description}\n\n${config.BRAND_NAME} — ${config.BRAND_TAGLINE}\n${config.BRAND_URL}`,
             tags: [...tags, 'Shorts', 'AI', 'Automation', config.BRAND_NAME],
             categoryId: '28', // Science & Technology
