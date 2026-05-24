@@ -15,7 +15,7 @@ const TELEGRAM_CHAT  = process.env.TELEGRAM_CHAT_ID;
 
 // Instancias a monitorear (nombre : api_key)
 const INSTANCES = {
-  GenerArise: process.env.GENERARISE_KEY || 'KEY_GENERARISE',
+  GenerAriseV2: process.env.GENERARISE_KEY || 'KEY_GENERARISE',
   Argenterio: process.env.ARGENTERIO_KEY || 'KEY_ARGENTERIO',
   durando:    process.env.DURANDO_KEY    || 'KEY_DURANDO',
 };

@@ -1,13 +1,10 @@
 // ═══════════════════════════════════════════════════
-// OUTREACH TEMPLATES — By Industry & Language
-// ═══════════════════════════════════════════════════
-
-const TEMPLATES = {
+/const TEMPLATES = {
   // ─── HOTEL ───────────────────────────────────
   hotel: {
     es: {
       whatsapp_first: (lead) =>
-        `Hola ${lead.name}. Qué increíble el nivel de ${lead.company || 'su hotel'}. Vi su perfil y noté que podrían estar atrayendo muchas más reservas directas de forma automática.\n\nArmé un sistema cerrado que aplica ganchos virales para atraer huéspedes y capta reservas 24/7, para que ustedes solo se enfoquen en la experiencia. Tengo un cupo de prueba para mostrarles cómo funciona. ¿Les interesa verlo?`,
+        `Hola ${lead.name}. Qué excelente nivel tiene ${lead.company || 'su hotel'}. Te escribo rápido porque diseñé una idea de 1 minuto sobre cómo podrían captar reservas directas automáticamente directo desde sus redes sociales sin depender de comisiones.\n\nArmé un ejemplo rápido de cómo se vería para ustedes sin ningún compromiso. ¿Te interesa verlo?`,
       whatsapp_followup: (lead) =>
         `Hola de nuevo ${lead.name}. Solo quería confirmar si pudieron ver mi mensaje anterior. El sistema que armé ya está generándole tráfico y reservas a otros alojamientos. ¿Les sirve que les mande un videíto de 2 minutos mostrando cómo funciona?`,
       email_subject: (lead) => `${lead.company || 'Su hotel'} — Tráfico y reservas automáticas`,
@@ -31,7 +28,7 @@ const TEMPLATES = {
   inmobiliaria: {
     es: {
       whatsapp_first: (lead) =>
-        `Hola ${lead.name}. Qué increíbles propiedades manejan en ${lead.company || 'su inmobiliaria'}. Vi su perfil y noté que sus agentes deben perder mucho tiempo con "curiosos".\n\nArmé un sistema cerrado que genera tráfico orgánico y filtra automáticamente a los curiosos, pasándoles solo compradores listos para invertir. Tengo un cupo de prueba para mostrarles cómo funciona. ¿Les interesa verlo?`,
+        `Hola ${lead.name}. Qué excelente portafolio de propiedades tienen en ${lead.company || 'su inmobiliaria'}. Te escribo porque armé una estrategia de 1 minuto para atraer inversores calificados y pre-filtrar consultas automáticamente, para que sus agentes solo hablen con compradores listos.\n\nDiseñé una demo rápida aplicada a su marca. ¿Te interesa verla sin compromiso?`,
       whatsapp_followup: (lead) =>
         `Hola ${lead.name}. Solo quería retomar mi mensaje: el sistema ya está ahorrándole decenas de horas a otros agentes al filtrar curiosos. ¿Les sirve si les mando un video cortito de cómo funciona?`,
       email_subject: (lead) => `${lead.company} — Tráfico orgánico y filtrado de curiosos`,
@@ -46,7 +43,7 @@ const TEMPLATES = {
   clinica: {
     es: {
       whatsapp_first: (lead) =>
-        `Hola ${lead.name}. Qué excelente reputación tiene ${lead.company || 'su clínica'}. Vi su perfil y noté que podrían estar llenando su agenda de pacientes privados mucho más rápido.\n\nArmé un sistema cerrado que genera tráfico local y agenda turnos automáticamente, para que ustedes solo se enfoquen en atender. Tengo un cupo de prueba para mostrarles cómo funciona. ¿Les interesa verlo?`,
+        `Hola ${lead.name}. Qué impecable reputación tiene ${lead.company || 'su clínica'}. Te escribo porque diseñé una idea de 1 minuto para llenar la agenda de turnos con pacientes privados de forma automatizada, optimizando los tiempos de su equipo médico.\n\nArmé un ejemplo sencillo de cómo funcionaría para ustedes. ¿Te interesa verlo sin compromiso?`,
       whatsapp_followup: (lead) =>
         `Hola ${lead.name}. Solo retomo mi mensaje anterior. El sistema ya está ayudando a otras clínicas a eliminar los turnos vacíos (no-shows). ¿Les sirve que les envíe un video de 2 minutos mostrando la plataforma?`,
       email_subject: (lead) => `${lead.company} — Agenda llena y eliminación de turnos vacíos`,
@@ -61,7 +58,7 @@ const TEMPLATES = {
   contador: {
     es: {
       whatsapp_first: (lead) =>
-        `Hola ${lead.name}. Qué sólida trayectoria tiene ${lead.company || 'su estudio'}. Vi su perfil y noté que su equipo técnico debe perder muchísimo tiempo respondiendo las mismas consultas básicas de clientes.\n\nArmé un sistema cerrado que genera tráfico para captar clientes de alto valor y atiende las consultas repetitivas automáticamente. Tengo un cupo de prueba para mostrárselos. ¿Les interesa?`,
+        `Hola ${lead.name}. Qué sólida trayectoria tiene ${lead.company || 'su estudio'}. Te escribo porque diseñé una idea de 1 minuto para automatizar la atención de consultas repetitivas de clientes y filtrar prospectos de alto valor automáticamente.\n\nArmé un borrador rápido de cómo se aplicaría en su estudio. ¿Te interesa verlo sin compromiso?`,
       whatsapp_followup: (lead) =>
         `Hola ${lead.name}. Solo retomo: el sistema puede liberarles más de 40 horas mensuales al filtrar consultas automáticas. ¿Quieren que les mande una demostración rápida por acá?`,
       email_subject: (lead) => `${lead.company} — Captación de clientes y filtrado automático`,
@@ -76,7 +73,7 @@ const TEMPLATES = {
   ecommerce: {
     es: {
       whatsapp_first: (lead) =>
-        `Hola ${lead.name}. Qué buenos productos tienen en ${lead.company || 'su tienda'}. Vi su perfil y noté que podrían escalar muchísimo más sus ventas orgánicas.\n\nArmé un sistema cerrado que crea contenido viral (ganchos y SEO) para llevar tráfico a su tienda, y responde dudas de stock/envíos automáticamente para cerrar la venta. Tengo un cupo de prueba para mostrarles cómo funciona. ¿Les interesa?`,
+        `Hola ${lead.name}. Qué excelente línea de productos tienen en ${lead.company || 'su tienda'}. Te escribo porque diseñé una idea de 1 minuto sobre cómo captar clientes calificados y responder dudas de stock o envíos automáticamente 24/7 para cerrar ventas al instante.\n\nArmé una demo interactiva aplicada a su marca. ¿Te interesa verla sin compromiso?`,
       whatsapp_followup: (lead) =>
         `Hola ${lead.name}. Retomo mi mensaje: el sistema ya está generándole tráfico orgánico y ventas en piloto automático a otras tiendas. ¿Les mando un video cortito para que lo vean en acción?`,
       email_subject: (lead) => `${lead.company} — Tráfico orgánico y ventas en piloto automático`,
@@ -89,7 +86,7 @@ const TEMPLATES = {
   gimnasio: {
     es: {
       whatsapp_first: (lead) =>
-        `Hola ${lead.name}. Qué impecable se ve ${lead.company || 'su centro'}. Vi su perfil y noté que podrían captar muchos más socios nuevos en su zona.\n\nArmé un sistema cerrado que genera tráfico local y agenda clases de prueba automáticamente, para que ustedes solo se enfoquen en entrenar a la gente. Tengo un cupo de prueba para mostrarles cómo funciona. ¿Les interesa verlo?`,
+        `Hola ${lead.name}. Qué impecable nivel tiene ${lead.company || 'su centro'}. Te escribo porque armé una idea rápida para atraer nuevos socios de su zona e inscribirlos en clases de prueba automáticamente 24/7.\n\nDiseñé un flujo de ejemplo aplicado a su gimnasio. ¿Te interesa verlo sin compromiso?`,
       whatsapp_followup: (lead) =>
         `Hola ${lead.name}. Retomo: el sistema convierte el tráfico de redes en socios reales al instante. ¿Les sirve que les envíe un video de cómo agenda clases automáticamente?`,
       email_subject: (lead) => `${lead.company} — Captación de socios en piloto automático`,
@@ -102,7 +99,7 @@ const TEMPLATES = {
   default: {
     es: {
       whatsapp_first: (lead) =>
-        `Hola ${lead.name}. Qué increíble el trabajo que hacen en ${lead.company || 'su negocio'}. Vi su perfil y noté que no están aprovechando todo el tráfico orgánico que podrían tener.\n\nArmé un sistema cerrado que aplica ganchos virales y SEO a su contenido para atraer clientes, y atiende las consultas 24/7 para que ustedes solo se enfoquen en su trabajo. Tengo un cupo de prueba. ¿Les interesa verlo?`,
+        `Hola ${lead.name}. Qué excelente trabajo hacen en ${lead.company || 'su negocio'}. Te escribo rápido porque diseñé una idea de 1 minuto sobre cómo captar prospectos calificados orgánicamente y automatizar su atención las 24 horas para que su equipo solo cierre las ventas.\n\nArmé una demo rápida aplicada a su marca. ¿Te interesa verla sin compromiso?`,
       whatsapp_followup: (lead) =>
         `Hola ${lead.name}. Retomo mi mensaje anterior. El sistema ya le está generando prospectos diarios a empresas similares. ¿Quieren que les mande un videíto corto mostrando cómo funciona?`,
       email_subject: (lead) => `${lead.company} — Sistema cerrado de tráfico y captación`,
