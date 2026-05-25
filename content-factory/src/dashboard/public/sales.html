@@ -107,6 +107,11 @@
     .toast { position:fixed; bottom:20px; right:20px; padding:12px 20px; border-radius:8px; background:var(--bg-card); border:1px solid var(--accent); color:var(--text-primary); font-size:13px; font-weight:500; box-shadow:0 4px 20px rgba(0,0,0,.5); transform:translateY(100px); opacity:0; transition:all .3s; z-index:1000; }
     .toast.show { transform:translateY(0); opacity:1; }
 
+    /* MANUAL OUTREACH CONTROLS */
+    .btn-ghost { background: transparent; border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; font-size: 10px; cursor: pointer; transition: all 0.2s; color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px; font-family: inherit; font-weight: 600; }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--text-primary); background: var(--bg-card); }
+    .call-result-select { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 4px; padding: 4px; font-size: 10px; height: 28px; color: var(--text-primary); cursor: pointer; font-family: inherit; }
+
     @media(max-width:900px) {
       .kpi-row { grid-template-columns:repeat(3,1fr); }
       .pipeline { grid-template-columns:repeat(3,1fr); }
@@ -188,10 +193,55 @@
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>Score</th><th>Name</th><th>Company</th><th>Industry</th><th>Region</th><th>Contact Info</th><th>Stage</th><th>Outreach</th><th>Actions</th>
+          <th>Score</th><th>Información del Lead</th><th>Pasos de Contacto Manual (Email y WhatsApp)</th><th>Etapa</th><th>Acciones</th>
         </tr></thead>
-        <tbody id="leadsBody"><tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:40px">Loading leads...</td></tr></tbody>
+        <tbody id="leadsBody"><tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:40px">Loading leads...</td></tr></tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- WHATSAPP MANUAL MODAL -->
+<div id="waModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center;">
+  <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; width:90%; max-width:550px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+    <h3 style="margin-bottom:12px; font-size:16px; color:white; display:flex; align-items:center; gap:8px;">💬 Enviar WhatsApp Manual</h3>
+    <div style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;" id="waModalLeadInfo">Lead: —</div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:11px; font-weight:700; color:var(--text-secondary); display:block; margin-bottom:6px;">Mensaje a enviar:</label>
+      <textarea id="waModalText" style="width:100%; height:160px; background:var(--bg-primary); border:1px solid var(--border); border-radius:6px; color:white; padding:10px; font-family:inherit; font-size:12px; resize:vertical;"></textarea>
+    </div>
+    <div style="margin-bottom:20px; display:flex; gap:12px; align-items:center;">
+      <div>
+        <label style="font-size:11px; font-weight:700; color:var(--text-secondary); display:block; margin-bottom:6px;">Proveedor de WhatsApp:</label>
+        <select id="waModalProvider" style="background:var(--bg-secondary); border:1px solid var(--border); color:white; border-radius:6px; padding:6px 12px; font-size:12px;">
+          <option value="cloud_api">Meta Cloud API (Oficial - Prioridad)</option>
+          <option value="evolution">Evolution API (Manual/Fallback)</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn" onclick="closeWaModal()">Cancelar</button>
+      <button class="btn primary" id="waModalSendBtn" onclick="submitWaModal()">Enviar Mensaje 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- EMAIL MANUAL MODAL -->
+<div id="emailModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center;">
+  <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; width:90%; max-width:600px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+    <h3 style="margin-bottom:12px; font-size:16px; color:white; display:flex; align-items:center; gap:8px;">📧 Enviar Email Manual (Brevo)</h3>
+    <div style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;" id="emailModalLeadInfo">Lead: —</div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:11px; font-weight:700; color:var(--text-secondary); display:block; margin-bottom:6px;">Asunto:</label>
+      <input type="text" id="emailModalSubject" style="width:100%; background:var(--bg-primary); border:1px solid var(--border); border-radius:6px; color:white; padding:8px 12px; font-size:12px;">
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="font-size:11px; font-weight:700; color:var(--text-secondary); display:block; margin-bottom:6px;">Cuerpo del Email (HTML/Texto):</label>
+      <textarea id="emailModalBody" style="width:100%; height:200px; background:var(--bg-primary); border:1px solid var(--border); border-radius:6px; color:white; padding:10px; font-family:inherit; font-size:12px; resize:vertical;"></textarea>
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn" onclick="closeEmailModal()">Cancelar</button>
+      <button class="btn primary" id="emailModalSendBtn" onclick="submitEmailModal()">Enviar Correo ✉️</button>
     </div>
   </div>
 </div>
@@ -201,14 +251,17 @@
 <script>
 const API = '';
 let currentFilter = 'all';
+let salesLeads = []; // Lead cache
+let activeLeadId = null;
+let activeStep = null;
 
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast show';
-  setTimeout(() => { t.className = 'toast'; }, 4000);
+  setTimeout(() => { t.className = 'toast'; }, 5000);
 }
 
-function scoreClass(s) { return s >= 80 ? 'hot' : s >= 60 ? 'warm' : s >= 40 ? 'cool' : 'cold'; }
+function scoreClass(s) { return s >= 70 ? 'hot' : s >= 50 ? 'warm' : s >= 30 ? 'cool' : 'cold'; }
 
 function setFilter(f, el) {
   currentFilter = f;
@@ -257,35 +310,90 @@ async function loadLeads() {
 
     const res = await fetch(url);
     if (!res.ok) throw new Error('API error');
-    const leads = await res.json();
+    salesLeads = await res.json();
     const tbody = document.getElementById('leadsBody');
 
-    if (!leads.length) {
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:40px">No leads found. Use Discovery to find new leads.</td></tr>';
+    if (!salesLeads.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:40px">No leads found. Use Discovery to find new leads.</td></tr>';
       return;
     }
 
-    tbody.innerHTML = leads.map(l => `<tr>
-      <td><div class="score-wrap"><span class="interest-dot ${scoreClass(l.ai_score)}"></span><div class="score-bar"><div class="score-fill ${scoreClass(l.ai_score)}" style="width:${l.ai_score}%"></div></div><span style="font-weight:700;font-size:13px">${l.ai_score || 0}</span></div></td>
-      <td style="font-weight:600">${l.name || '—'}</td>
-      <td style="color:var(--text-secondary)">${l.company || '—'}</td>
-      <td>${industryIcon(l.industry)} ${l.industry || '—'}</td>
-      <td>${l.city || l.region || '—'}</td>
-      <td>
-        ${l.phone ? `<div title="WhatsApp available">📱 ${l.phone}</div>` : ''}
-        ${l.email ? `<div title="Email available">📧 ${l.email}</div>` : ''}
-        ${l.instagram_url ? `<div title="Instagram available">📸 <a href="${l.instagram_url}" target="_blank" style="color:#E1306C;text-decoration:none">Instagram</a></div>` : ''}
-        ${l.facebook_url ? `<div title="Facebook available">📘 <a href="${l.facebook_url}" target="_blank" style="color:#1877F2;text-decoration:none">Facebook</a></div>` : ''}
-        ${l.linkedin_url ? `<div title="LinkedIn available">🔗 <a href="${l.linkedin_url}" target="_blank" style="color:var(--accent);text-decoration:none">Ver Perfil</a></div>` : ''}
-        ${!l.phone && !l.email && !l.linkedin_url && !l.instagram_url && !l.facebook_url ? '<span style="color:var(--text-muted)">No info</span>' : ''}
-      </td>
-      <td><span class="badge ${l.pipeline_stage || 'discovered'}">${l.pipeline_stage || 'discovered'}</span></td>
-      <td><span class="badge ${l.outreach_status || 'pending'}">${l.outreach_status || 'pending'}</span></td>
-      <td><button class="btn" style="padding:4px 10px;font-size:10px" onclick="advanceStage('${l.id}','${l.pipeline_stage}')">▶ Next</button></td>
-    </tr>`).join('');
+    tbody.innerHTML = salesLeads.map(l => {
+      const phoneStr = l.phone ? '+' + String(l.phone).replace('+', '') : '';
+      const emailVal = l.email && !l.email.includes('nodetectado') ? l.email : null;
+      const linkedinUrl = l.linkedin_url || '';
+      const instagramUrl = l.instagram_url || '';
+      const facebookUrl = l.facebook_url || '';
+      
+      const hasEmail = !!emailVal;
+      const hasPhone = !!l.phone;
+
+      // Filter local phone fixed checks (same alert logic as panel/index.html)
+      const waStyle = !hasPhone ? 'opacity:0.3; cursor:not-allowed;' : '';
+      const waAlert = !hasPhone ? "alert('No tiene un teléfono de contacto')" : null;
+
+      return `<tr>
+        <td>
+          <div class="score-wrap">
+            <span class="interest-dot ${scoreClass(l.ai_score)}"></span>
+            <div class="score-bar"><div class="score-fill ${scoreClass(l.ai_score)}" style="width:${l.ai_score}%"></div></div>
+            <span style="font-weight:700;font-size:13px">${l.ai_score || 0}</span>
+          </div>
+        </td>
+        <td>
+          <div style="font-weight:700; color:white; font-size:13px;">${l.name || '—'}</div>
+          <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">${l.company || '—'} · ${industryIcon(l.industry)} ${l.industry || '—'} · ${l.city || l.region || '—'}</div>
+          <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">
+            ${hasEmail ? `📧 ${l.email}` : ''} ${hasPhone ? ` | 📞 ${phoneStr}` : ''}
+          </div>
+          <div style="margin-top:4px; display:flex; gap:6px;">
+            ${instagramUrl ? `<a href="${instagramUrl}" target="_blank" style="font-size:10px; color:#E1306C; text-decoration:none;">📸 Instagram</a>` : ''}
+            ${facebookUrl ? `<a href="${facebookUrl}" target="_blank" style="font-size:10px; color:#1877F2; text-decoration:none;">📘 Facebook</a>` : ''}
+            ${linkedinUrl ? `<a href="${linkedinUrl}" target="_blank" style="font-size:10px; color:var(--accent); text-decoration:none;">🔗 LinkedIn</a>` : ''}
+          </div>
+        </td>
+        <td>
+          <div style="display:flex; gap:4px; align-items:center; flex-wrap:wrap;">
+            <!-- Step 0 Email -->
+            <button class="btn-ghost" style="border-color:#8b5cf6; color:#8b5cf6; ${hasEmail ? '' : 'opacity:0.3; cursor:not-allowed;'}" onclick="${hasEmail ? `openEmailModal('${l.id}')` : `alert('Este lead no tiene email válido')`}" title="Paso 0: Email frío vía Brevo">📧 0. Email</button>
+            
+            <!-- WhatsApp Steps (1, 2, 3, 5, Msg/IA) -->
+            ${hasPhone ? `
+              <button class="btn-ghost" style="border-color:#22c55e; color:#22c55e;" onclick="openWaModal('${l.id}', 1)" title="Paso 1: Gancho">💬 1. Gancho</button>
+              <button class="btn-ghost" style="border-color:#3b82f6; color:#3b82f6;" onclick="openWaModal('${l.id}', 2)" title="Paso 2: Demo Landing">🔗 2. Demo</button>
+              <button class="btn-ghost" style="border-color:#f59e0b; color:#f59e0b;" onclick="openWaModal('${l.id}', 3)" title="Paso 3: Link de Auditoría">📋 3. Audit</button>
+              <button class="btn-ghost" style="border-color:#d4af37; color:#d4af37;" onclick="openWaModal('${l.id}', 5)" title="Paso 5: Cierre por WhatsApp">💰 5. Cierre Wpp</button>
+              <button class="btn-ghost" style="border-color:var(--accent); color:var(--accent);" onclick="openWaModal('${l.id}', 0, true)" title="Mensaje WhatsApp Personalizado / IA Draft">🤖 IA / Msg</button>
+            ` : ''}
+            
+            <!-- Step 5 Email -->
+            <button class="btn-ghost" style="border-color:#d4af37; color:#d4af37; ${hasEmail ? '' : 'opacity:0.3; cursor:not-allowed;'}" onclick="${hasEmail ? `openEmailModal('${l.id}', true)` : `alert('Este lead no tiene email')`}" title="Paso 5: Enviar Factura/Cierre por Email">📧 5. Email</button>
+          </div>
+        </td>
+        <td>
+          <span class="badge ${l.pipeline_stage || 'discovered'}">${l.pipeline_stage || 'discovered'}</span>
+          <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Outreach: <span class="badge ${l.outreach_status || 'pending'}" style="padding:1px 4px; font-size:8px;">${l.outreach_status || 'pending'}</span></div>
+        </td>
+        <td>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <select class="call-result-select" onchange="updateCallResult('${l.id}',this.value)" title="Registrar estado">
+              <option value="">— Estado —</option>
+              <option value="interested" ${l.last_call_result==='interested'?'selected':''}>✅ Interesado</option>
+              <option value="callback" ${l.last_call_result==='callback'?'selected':''}>🔄 Callback</option>
+              <option value="no_answer" ${l.last_call_result==='no_answer'?'selected':''}>📵 No contestó</option>
+              <option value="not_interested" ${l.last_call_result==='not_interested'?'selected':''}>❌ No interesado</option>
+              <option value="closed" ${l.last_call_result==='closed'?'selected':''}>🏆 Cerrado</option>
+            </select>
+            
+            <button class="btn" style="padding:4px 8px; font-size:10px;" onclick="advanceStage('${l.id}','${l.pipeline_stage}')" title="Siguiente etapa">▶ Next</button>
+            <button class="btn-ghost" style="border-color:#ef4444; color:#ef4444; padding:4px 8px;" onclick="deleteSalesLead('${l.id}')" title="Eliminar lead">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
   } catch(e) {
     console.error('Leads error:', e);
-    document.getElementById('leadsBody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--error);padding:20px">Error loading leads. Check Supabase config.</td></tr>';
+    document.getElementById('leadsBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--error);padding:20px">Error loading leads. Check Supabase config.</td></tr>';
   }
 }
 
@@ -303,6 +411,181 @@ async function advanceStage(id, current) {
     showToast(`Lead moved to ${next}`);
     loadAll();
   } catch(e) { showToast('Error: ' + e.message); }
+}
+
+async function updateCallResult(id, val) {
+  if (!val) return;
+  try {
+    await fetch(`${API}/api/sales/leads/${id}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ last_call_result: val }) });
+    showToast(`Estado actualizado a: ${val}`);
+    loadAll();
+  } catch(e) { showToast('Error: ' + e.message); }
+}
+
+async function deleteSalesLead(id) {
+  if (!confirm('⚠️ ¿Estás seguro de que deseas eliminar este prospecto permanentemente? Esta acción no se puede deshacer.')) return;
+  try {
+    const res = await fetch(`${API}/api/sales/leads/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      showToast('🗑️ Lead eliminado con éxito');
+      loadAll();
+    } else {
+      showToast('❌ No se pudo eliminar el lead');
+    }
+  } catch(e) { showToast('Error: ' + e.message); }
+}
+
+// ─── MANUAL WHATSAPP DIALOG FLOW ───
+
+async function openWaModal(id, step, isIa = false) {
+  const lead = salesLeads.find(l => l.id === id);
+  if (!lead) return;
+
+  activeLeadId = id;
+  activeStep = step;
+
+  document.getElementById('waModalLeadInfo').textContent = `Lead: ${lead.name || '—'} (${lead.phone || 'Sin teléfono'}) · Empresa: ${lead.company || '—'}`;
+  document.getElementById('waModalText').value = 'Generando borrador...';
+  document.getElementById('waModalSendBtn').disabled = true;
+  document.getElementById('waModal').style.display = 'flex';
+
+  try {
+    const channel = isIa ? 'ia' : 'whatsapp';
+    const res = await fetch(`${API}/api/sales/leads/${id}/draft?channel=${channel}&step=${step}`);
+    if (!res.ok) throw new Error('Error al obtener draft');
+    const data = await res.json();
+    document.getElementById('waModalText').value = data.message || '';
+    document.getElementById('waModalSendBtn').disabled = false;
+  } catch (err) {
+    document.getElementById('waModalText').value = 'Error al cargar el borrador. Podés escribirlo manualmente aquí.';
+    document.getElementById('waModalSendBtn').disabled = false;
+  }
+}
+
+function closeWaModal() {
+  document.getElementById('waModal').style.display = 'none';
+  activeLeadId = null;
+  activeStep = null;
+}
+
+async function submitWaModal() {
+  const msg = document.getElementById('waModalText').value.trim();
+  const provider = document.getElementById('waModalProvider').value;
+
+  if (!msg) return showToast('⚠️ Escribí un mensaje válido');
+  
+  showToast('📤 Enviando WhatsApp...');
+  document.getElementById('waModalSendBtn').disabled = true;
+
+  try {
+    const res = await fetch(`${API}/api/sales/leads/${activeLeadId}/whatsapp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg, step: activeStep, provider })
+    });
+    
+    const data = await res.json();
+    if (res.ok) {
+      showToast(`✅ Enviado con éxito vía ${data.provider}`);
+      closeWaModal();
+      loadAll();
+    } else {
+      showToast(`❌ Error al enviar: ${data.error}`);
+      document.getElementById('waModalSendBtn').disabled = false;
+    }
+  } catch (e) {
+    showToast('❌ Error de conexión al enviar');
+    document.getElementById('waModalSendBtn').disabled = false;
+  }
+}
+
+// ─── MANUAL EMAIL DIALOG FLOW ───
+
+async function openEmailModal(id, isClosing = false) {
+  const lead = salesLeads.find(l => l.id === id);
+  if (!lead) return;
+
+  activeLeadId = id;
+
+  document.getElementById('emailModalLeadInfo').textContent = `Lead: ${lead.name || '—'} (${lead.email || 'Sin email'})`;
+  document.getElementById('emailModalSubject').value = 'Generando asunto...';
+  document.getElementById('emailModalBody').value = 'Generando cuerpo...';
+  document.getElementById('emailModalSendBtn').disabled = true;
+  document.getElementById('emailModal').style.display = 'flex';
+
+  try {
+    const res = await fetch(`${API}/api/sales/leads/${id}/draft?channel=email`);
+    if (!res.ok) throw new Error('Error al obtener draft');
+    const data = await res.json();
+    
+    if (isClosing) {
+      // Custom Template closing invoice email
+      document.getElementById('emailModalSubject').value = `📄 Propuesta Comercial & Factura - ${lead.company || lead.name}`;
+      document.getElementById('emailModalBody').value = `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+  <h2 style="color: #7c3aed; margin-top:0;">GenerArise · Cierre & Factura</h2>
+  <p>Hola <strong>${lead.name}</strong>,</p>
+  <p>Un placer conversar con vos. De acuerdo a lo conversado, te adjuntamos el detalle de tu propuesta comercial y factura digital lista para comenzar el onboarding de automatizaciones de IA.</p>
+  <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #e2e8f0;">
+    <h3 style="margin-top:0; color:#1e293b;">Resumen del Plan:</h3>
+    <ul style="color:#475569; font-size:14px; padding-left:20px;">
+      <li>Desarrollo de Agente de IA para WhatsApp/Meta Cloud</li>
+      <li>Integración de Calendario & Automatizaciones de Captación</li>
+      <li>Soporte y Monitoreo Proactivo de Licencia Mensual</li>
+    </ul>
+    <p style="font-size:12px; color:#64748b; margin-top:15px; margin-bottom:0;">
+      Por favor, respondé a este email para coordinar los accesos técnicos e iniciar el set-up.
+    </p>
+  </div>
+  <p style="font-size: 11px; color: #94a3b8; margin-top: 30px;">
+    GenerArise AI Agency · Global Operations
+  </p>
+</div>`;
+    } else {
+      document.getElementById('emailModalSubject').value = data.subject || '';
+      document.getElementById('emailModalBody').value = data.body || '';
+    }
+    
+    document.getElementById('emailModalSendBtn').disabled = false;
+  } catch (err) {
+    document.getElementById('emailModalSubject').value = 'Error al cargar borrador';
+    document.getElementById('emailModalBody').value = 'Error al cargar borrador';
+    document.getElementById('emailModalSendBtn').disabled = false;
+  }
+}
+
+function closeEmailModal() {
+  document.getElementById('emailModal').style.display = 'none';
+  activeLeadId = null;
+}
+
+async function submitEmailModal() {
+  const subject = document.getElementById('emailModalSubject').value.trim();
+  const body = document.getElementById('emailModalBody').value.trim();
+
+  if (!subject || !body) return showToast('⚠️ Escribí asunto y cuerpo válidos');
+
+  showToast('📤 Enviando correo Brevo...');
+  document.getElementById('emailModalSendBtn').disabled = true;
+
+  try {
+    const res = await fetch(`${API}/api/sales/leads/${activeLeadId}/email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subject, body })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showToast('✅ Correo enviado con éxito');
+      closeEmailModal();
+      loadAll();
+    } else {
+      showToast(`❌ Error al enviar: ${data.error}`);
+      document.getElementById('emailModalSendBtn').disabled = false;
+    }
+  } catch (e) {
+    showToast('❌ Error de conexión al enviar');
+    document.getElementById('emailModalSendBtn').disabled = false;
+  }
 }
 
 async function triggerDiscover() {

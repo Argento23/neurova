@@ -107,6 +107,15 @@ async function updateLead(id, updates) {
   return data;
 }
 
+async function deleteLead(id) {
+  const db = ensureClient();
+  const { error } = await db.from('sales_leads')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+  return true;
+}
+
 async function getUnscoredLeads(limit = 50) {
   const db = ensureClient();
   const { data, error } = await db.from('sales_leads')
@@ -275,6 +284,7 @@ export default {
   getLeads,
   getLeadById,
   updateLead,
+  deleteLead,
   getUnscoredLeads,
   getPendingOutreach,
   getFollowUpLeads,

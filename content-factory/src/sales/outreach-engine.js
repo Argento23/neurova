@@ -244,10 +244,10 @@ async function sendWhatsAppEvolution(phone, message) {
 
 // ─── UNIFIED WHATSAPP SENDER (auto-selects provider) ───
 
-async function sendWhatsApp(phone, message, templateData = null) {
+async function sendWhatsApp(phone, message, templateData = null, forceProvider = null) {
   if (!phone) return { success: false, error: 'No phone number' };
   
-  const provider = getWhatsAppProvider();
+  const provider = forceProvider || getWhatsAppProvider();
   
   if (provider === 'cloud_api') {
     return sendWhatsAppCloudAPI(phone, message, templateData);
@@ -625,5 +625,6 @@ export default {
   resetDailyCounters,
   sendWhatsApp,
   sendEmail,
-  checkEvolutionHealth
+  checkEvolutionHealth,
+  generateAIOutreach
 };

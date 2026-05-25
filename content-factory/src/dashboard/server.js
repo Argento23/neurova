@@ -16,6 +16,7 @@ import youtubePublisher from '../publishers/youtube.js';
 import supabaseClient from '../sales/supabase-client.js';
 import leadFinder from '../sales/lead-finder.js';
 import outreachEngine from '../sales/outreach-engine.js';
+import outreachTemplates from '../sales/outreach-templates.js';
 // Multi-tenant modules
 import usersDb from '../db/users-db.js';
 import calendarDb from '../db/calendar-db.js';
@@ -161,6 +162,156 @@ app.patch('/api/sales/leads/:id', async (req, res) => {
     const lead = await supabaseClient.updateLead(req.params.id, req.body);
     res.json(lead);
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Delete lead
+app.delete('/api/sales/leads/:id', async (req, res) => {
+  try {
+    await supabaseClient.deleteLead(req.params.id);
+    res.json({ success: true, message: 'Lead deleted successfully' });
+  } catch (err) {
+    logger.error('Error deleting lead', { error: err.message });
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get pre-rendered draft for a lead
+app.get('/api/sales/leads/:id/draft', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { channel, step, category } = req.query;
+
+    const lead = await supabaseClient.getLeadById(id);
+    if (!lead) return res.status(404).json({ error: 'Lead not found' });
+
+    if (channel === 'email') {
+      const subject = outreachTemplates.renderEmailSubject(lead);
+      const body = outreachTemplates.renderEmailBody(lead);
+      return res.json({ subject, body });
+    }
+
+    if (channel === 'whatsapp') {
+      let message = '';
+      if (step === '1') message = outreachTemplates.renderMessage(lead, 'whatsapp_first');
+      else if (step === '2') message = outreachTemplates.renderMessage(lead, 'whatsapp_second');
+      else if (step === '3') message = outreachTemplates.renderMessage(lead, 'whatsapp_third');
+      else if (step === '5') message = outreachTemplates.renderMessage(lead, 'whatsapp_closing');
+      else message = outreachTemplates.renderMessage(lead, 'whatsapp_first'); // Fallback
+
+      return res.json({ message });
+    }
+
+    if (channel === 'ia') {
+      const msg = await outreachEngine.generateAIOutreach(lead, category || 'outreach_industrial');
+      if (msg) {
+        return res.json({ message: msg });
+      } else {
+        return res.json({ message: outreachTemplates.renderMessage(lead, 'whatsapp_first'), fallback: true });
+      }
+    }
+
+    res.status(400).json({ error: 'Invalid channel. Use "whatsapp", "email", or "ia"' });
+  } catch (err) {
+    logger.error('Error generating lead draft', { error: err.message });
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Send manual WhatsApp message (official Meta priority with manual Evolution fallback support)
+app.post('/api/sales/leads/:id/whatsapp', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { message, step, provider } = req.body;
+    if (!message) return res.status(400).json({ error: 'Message content is required' });
+
+    const lead = await supabaseClient.getLeadById(id);
+    if (!lead || !lead.phone) return res.status(404).json({ error: 'Lead not found or has no phone' });
+
+    logger.info(`Sending manual WhatsApp to ${lead.name} using provider: ${provider || 'default (config)'}`);
+    const result = await outreachEngine.sendWhatsApp(lead.phone, message, null, provider);
+
+    if (result.success) {
+      // Update lead stages/status
+      const updateData = {
+        outreach_last_at: new Date().toISOString(),
+        outreach_count: (lead.outreach_count || 0) + 1
+      };
+      
+      if (step) {
+        const stepNum = parseInt(step);
+        if (stepNum === 1) {
+          updateData.pipeline_stage = 'contacted';
+          updateData.outreach_status = 'contacted';
+          updateData.step1_sent_at = new Date().toISOString();
+        } else if (stepNum === 2) {
+          updateData.pipeline_stage = 'demo';
+          updateData.step2_sent_at = new Date().toISOString();
+        } else if (stepNum === 3) {
+          updateData.pipeline_stage = 'responded';
+          updateData.form_sent = true;
+        } else if (stepNum === 5) {
+          updateData.pipeline_stage = 'closed';
+        }
+      }
+      
+      await supabaseClient.updateLead(id, updateData);
+
+      // Log to history
+      await supabaseClient.logOutreach({
+        lead_id: id,
+        channel: 'whatsapp',
+        status: 'sent',
+        message_sent: message,
+        created_at: new Date().toISOString()
+      });
+
+      res.json({ success: true, provider: result.provider, messageId: result.messageId });
+    } else {
+      res.status(500).json({ error: result.error || 'Failed to send WhatsApp message' });
+    }
+  } catch (err) {
+    logger.error('Error sending manual WhatsApp', { error: err.message });
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Send manual Email (SMTP Brevo)
+app.post('/api/sales/leads/:id/email', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { subject, body } = req.body;
+    if (!subject || !body) return res.status(400).json({ error: 'Subject and body are required' });
+
+    const lead = await supabaseClient.getLeadById(id);
+    if (!lead || !lead.email) return res.status(404).json({ error: 'Lead not found or has no email' });
+
+    logger.info(`Sending manual Email to ${lead.name} (${lead.email})`);
+    const result = await outreachEngine.sendEmail(lead.email, subject, body);
+
+    if (result.success) {
+      const updateData = {
+        outreach_last_at: new Date().toISOString(),
+        outreach_count: (lead.outreach_count || 0) + 1
+      };
+      await supabaseClient.updateLead(id, updateData);
+
+      // Log to history
+      await supabaseClient.logOutreach({
+        lead_id: id,
+        channel: 'email',
+        status: 'sent',
+        message_sent: `Subject: ${subject}\n\n${body}`,
+        created_at: new Date().toISOString()
+      });
+
+      res.json({ success: true, messageId: result.messageId });
+    } else {
+      res.status(500).json({ error: result.error || 'Failed to send email' });
+    }
+  } catch (err) {
+    logger.error('Error sending manual Email', { error: err.message });
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Get pipeline stats
