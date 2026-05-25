@@ -71,16 +71,26 @@ function resetDailyCounters() {
 
 function getWhatsAppProvider() {
   const provider = config.WHATSAPP_PROVIDER;
-  if (provider === 'cloud_api' && config.META_CLOUD_TOKEN && config.META_PHONE_NUMBER_ID) {
-    return 'cloud_api';
-  }
-  if (provider === 'evolution' && config.EVOLUTION_API_URL && config.EVOLUTION_API_KEY) {
-    return 'evolution';
+  
+  if (provider === 'cloud_api') {
+    if (config.META_CLOUD_TOKEN && config.META_PHONE_NUMBER_ID) {
+      return 'cloud_api';
+    }
+    logger.error('WHATSAPP_PROVIDER is set to cloud_api, but META_CLOUD_TOKEN or META_PHONE_NUMBER_ID is missing!');
+    return null;
   }
   
-  // Fallback to whichever is configured if preference is missing or invalid
-  if (config.EVOLUTION_API_URL && config.EVOLUTION_API_KEY) return 'evolution';
+  if (provider === 'evolution') {
+    if (config.EVOLUTION_API_URL && config.EVOLUTION_API_KEY) {
+      return 'evolution';
+    }
+    logger.error('WHATSAPP_PROVIDER is set to evolution, but EVOLUTION_API_URL or EVOLUTION_API_KEY is missing!');
+    return null;
+  }
+
+  // Fallback ONLY if WHATSAPP_PROVIDER is not explicitly set
   if (config.META_CLOUD_TOKEN && config.META_PHONE_NUMBER_ID) return 'cloud_api';
+  if (config.EVOLUTION_API_URL && config.EVOLUTION_API_KEY) return 'evolution';
   return null;
 }
 
