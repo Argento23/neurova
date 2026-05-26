@@ -1,11 +1,13 @@
 import axios from 'axios';
 import fs from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import config from '../config.js';
 import logger from '../logger.js';
 import supabase from './supabase-client.js';
 import templates from './outreach-templates.js';
 import telegram from '../notifications/telegram.js';
+import chatwoot from './chatwoot.js';
 
 // ═══════════════════════════════════════════════════
 // OUTREACH ENGINE — Automated Multi-Channel Contact
@@ -35,10 +37,44 @@ const INDUSTRIAL_INDUSTRIES = [
 
 async function generateAIOutreach(lead, category = 'outreach_industrial') {
   try {
-    const promptPath = path.join(process.cwd(), 'data', 'prompt_library.json');
-    const library = JSON.parse(await fs.readFile(promptPath, 'utf8'));
-    const entry = library[category];
-    if (!entry) throw new Error(`Category ${category} not found`);
+    let entry = null;
+
+    // Try finding prompt_library.json in various locations
+    const possiblePaths = [
+      path.join(process.cwd(), 'data', 'prompt_library.json'),
+      path.join(process.cwd(), 'content-factory', 'data', 'prompt_library.json'),
+      path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'data', 'prompt_library.json')
+    ];
+
+    for (const promptPath of possiblePaths) {
+      try {
+        const library = JSON.parse(await fs.readFile(promptPath, 'utf8'));
+        if (library && library[category]) {
+          entry = library[category];
+          logger.info(`Loaded outreach template from: ${promptPath}`);
+          break;
+        }
+      } catch (err) {
+        // Ignore and try next path
+      }
+    }
+
+    // Inline fallback if prompt library not found or doesn't have the category
+    if (!entry) {
+      logger.warn(`Could not load category ${category} from prompt_library.json, using high-quality inline fallback`);
+      if (category === 'outreach_industrial') {
+        entry = {
+          system: "Eres un Consultor Senior de Crecimiento y Tráfico Orgánico B2B. Tu objetivo es agendar demostraciones de un sistema cerrado de automatización.",
+          prompt: "Crea un mensaje de contacto inicial (Cold Outreach) super suave y basado en curiosidad para: {name} de la empresa {company}.\n\nContexto:\n- Se dedica a la industria de {industry} en {city}.\n- Objetivo: Ofrecer una demostración de un 'sistema cerrado' que genera tráfico orgánico mediante ganchos virales y atiende consultas automáticamente, para que el cliente solo se enfoque en su trabajo.\n\nReglas del mensaje:\n1. NO parezcas una agencia de marketing ni un robot de ventas. Evita palabras como 'Agencia', 'Bot', 'Ofrecemos', 'Servicios', 'Estimado', 'Venta'. Usa 'Hola {name}'.\n2. Táctica: Halaga sinceramente su trabajo ('Qué excelente nivel de trabajo hacen en {company}' o similar).\n3. NUNCA menciones fallas, dolores invasivos o que les falta algo. NO digas 'noté que les falta...' ni 'podrían atraer más clientes'. Eso se siente repulsivo e invasivo.\n4. Propuesta: Di de forma curiosa que diseñaste una idea o un ejemplo rápido de 1 minuto sobre cómo podrían automatizar la captación de prospectos calificados/reservas/tráfico directamente desde sus redes sin depender de pauta paga ni trabajo manual.\n5. Tono: Consultivo, ultra casual, de igual a igual, sumamente educado y no invasivo.\n6. Máximo 50 palabras. Corto y directo al grano.\n7. Cierre: Pregunta abierta y suave sobre si estarían abiertos a ver la idea/ejemplo (ej: 'Armé un ejemplo rápido de cómo se vería para ustedes sin compromiso. ¿Te interesa verlo?').\n\nEjemplo de tono ideal: 'Hola {name}. Qué excelente nivel de trabajo hacen en {company}. Te escribo rápido porque diseñé una idea de 1 minuto sobre cómo podrían captar prospectos calificados automáticamente desde sus redes sin pauta paga ni trabajo manual. Armé un ejemplo rápido sin ningún compromiso. ¿Estarías abierto a verlo?'"
+        };
+      } else {
+        // Absolute generic backup
+        entry = {
+          system: "Eres Alex, un asistente de ventas de Neurova.",
+          prompt: "Genera un mensaje de contacto inicial breve y personalizado para {name} de la empresa {company}."
+        };
+      }
+    }
 
     let prompt = entry.prompt
       .replace('{name}', lead.name || 'amigo/a')
@@ -128,7 +164,7 @@ async function checkEvolutionHealth() {
     }
   }
   
-  return { healthy: false, reason: 'no_whatsapp_provider_configured' };
+  return { healthy: false, state: 'not_configured', provider: 'none', reason: 'no_whatsapp_provider_configured' };
 }
 
 // ─── WHATSAPP VIA META CLOUD API (Official — no bans) ───
@@ -402,7 +438,7 @@ async function contactLead(lead, { dryRun = false, channel = 'auto' } = {}) {
 
       templateData = {
         name: 'neurova_outreach',
-        language: 'es',
+        language: config.META_TEMPLATE_LANGUAGE || 'es',
         parameters: [
           lead.name || 'amigo/a',
           lead.company || lead.industry || 'tu negocio',
@@ -427,6 +463,14 @@ async function contactLead(lead, { dryRun = false, channel = 'auto' } = {}) {
         status: result.success ? 'sent' : 'failed',
         error_message: result.error || null
       });
+    }
+
+    // Sync outbound outreach to Chatwoot dashboard
+    if (result.success) {
+      const preview = templateData
+        ? `Hola ${lead.name || 'amigo/a'}. ${templateData.parameters[2]}`
+        : message;
+      chatwoot.syncMessageToChatwoot(lead, preview, 'outgoing').catch(err => {});
     }
   } else if (channel === 'email') {
     const subject = templates.renderEmailSubject(lead);
@@ -525,14 +569,21 @@ async function runOutreachBatch({ dryRun = false, maxLeads = 50, type = 'new' } 
   if (!dryRun) {
     const health = await checkEvolutionHealth();
     if (!health.healthy) {
-      const providerLabel = health.provider === 'cloud_api' ? 'Meta Cloud API' : 'Evolution API';
+      let providerLabel, fixMsg;
+      if (health.provider === 'cloud_api') {
+        providerLabel = 'Meta Cloud API';
+        fixMsg = `Fix: Check META_CLOUD_TOKEN and META_PHONE_NUMBER_ID in environment variables. Token may be expired — regenerate at developers.facebook.com.`;
+      } else if (health.provider === 'evolution') {
+        providerLabel = 'Evolution API';
+        fixMsg = `Fix: Verify Evolution API instance "${config.EVOLUTION_INSTANCE}" is running and phone is connected.`;
+      } else {
+        providerLabel = 'No Provider';
+        fixMsg = `Fix: Set WHATSAPP_PROVIDER=cloud_api in .env and ensure META_CLOUD_TOKEN + META_PHONE_NUMBER_ID are set. Then redeploy.`;
+      }
       logger.error(`${providerLabel} unhealthy — aborting outreach batch`, { state: health.state, reason: health.reason });
-      const fixMsg = health.provider === 'cloud_api'
-        ? `Fix: Check META_CLOUD_TOKEN and META_PHONE_NUMBER_ID in environment variables.`
-        : `Fix: Verify Evolution API instance "${config.EVOLUTION_INSTANCE}" is running and phone is connected.`;
       await telegram.sendAlert(
-        `🚨 Outreach Aborted — WhatsApp Down (${providerLabel})`,
-        `${providerLabel} state: ${health.state}\nReason: ${health.reason}\n\n${fixMsg}`
+        `🚨 Outreach Aborted — WhatsApp Down`,
+        `Provider: ${providerLabel}\nState: ${health.state}\nReason: ${health.reason}\n\n${fixMsg}`
       );
       return { contacted: 0, failed: 0, aborted: true, reason: health.reason };
     }

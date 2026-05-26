@@ -23,8 +23,8 @@ const config = {
   PEXELS_API_KEY: process.env.PEXELS_API_KEY || '',
 
   // Instagram
-  IG_ACCESS_TOKEN: process.env.IG_ACCESS_TOKEN || '',
-  IG_USER_ID: process.env.IG_USER_ID || '',
+  IG_ACCESS_TOKEN: (process.env.IG_ACCESS_TOKEN || '').trim().split(/\s+/)[0],
+  IG_USER_ID: (process.env.IG_USER_ID || '').trim().split(/\s+/)[0],
 
   // Facebook Page (uses same Meta token as Instagram)
   FB_PAGE_ID: process.env.FB_PAGE_ID || '', // Auto-detected if empty
@@ -58,6 +58,7 @@ const config = {
   META_PHONE_NUMBER_ID: process.env.META_PHONE_NUMBER_ID || '',
   META_WABA_ID: process.env.META_WABA_ID || '',
   META_API_VERSION: process.env.META_API_VERSION || 'v22.0',
+  META_TEMPLATE_LANGUAGE: process.env.META_TEMPLATE_LANGUAGE || 'es',
 
   // Meta Webhook Verification
   META_WEBHOOK_VERIFY_TOKEN: process.env.META_WEBHOOK_VERIFY_TOKEN || 'neurova_verify',
@@ -76,6 +77,8 @@ const config = {
   EMAIL_FROM: process.env.EMAIL_FROM || 'gustavo@generarise.space',
   EMAIL_SMTP_HOST: process.env.EMAIL_SMTP_HOST || '',
   CHATWOOT_API_TOKEN: process.env.CHATWOOT_API_TOKEN || '',
+  CHATWOOT_API_URL: process.env.CHATWOOT_API_URL || 'https://woot.generarise.space',
+  CHATWOOT_ACCOUNT_ID: process.env.CHATWOOT_ACCOUNT_ID || '1',
 
   // Telegram
   TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || '',

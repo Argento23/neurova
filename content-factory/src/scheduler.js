@@ -618,7 +618,9 @@ async function runStartupHealthCheck() {
   // 2. WhatsApp Provider
   try {
     const health = await outreachEngine.checkEvolutionHealth();
-    const providerLabel = health.provider === 'cloud_api' ? 'Meta Cloud API' : 'Evolution API';
+    const providerLabel = health.provider === 'cloud_api' ? 'Meta Cloud API' 
+      : health.provider === 'evolution' ? 'Evolution API' 
+      : 'No Provider';
     if (health.healthy) {
       checks.push(`✅ WhatsApp (${providerLabel}): Connected (${health.state})`);
     } else {

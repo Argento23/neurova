@@ -73,6 +73,7 @@ async function getLeads(filters = {}) {
   if (filters.pipeline_stage) query = query.eq('pipeline_stage', filters.pipeline_stage);
   if (filters.industry) query = query.eq('industry', filters.industry);
   if (filters.outreach_status) query = query.eq('outreach_status', filters.outreach_status);
+  if (filters.phone) query = query.eq('phone', filters.phone);
   if (filters.min_score) {
     // Consider both ai_score and lead_score (Panel V1 compat)
     query = query.or(`ai_score.gte.${filters.min_score},lead_score.gte.${filters.min_score}`);
