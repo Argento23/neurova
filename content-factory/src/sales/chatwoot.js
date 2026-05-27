@@ -39,33 +39,45 @@ export async function syncMessageToChatwoot(lead, messageContent, direction = 'o
     // 2. If no conversation ID, search contact in Chatwoot by phone number
     if (!conversationId && lead.phone) {
       const cleanPhone = lead.phone.replace(/[^\d]/g, '');
+      logger.info(`Searching Chatwoot contact for phone: ${cleanPhone}`);
       
-      // Build search variants (Chatwoot may store numbers differently)
-      const searchVariants = [cleanPhone];
-      if (cleanPhone.startsWith('54') && !cleanPhone.startsWith('549')) {
-        searchVariants.push('549' + cleanPhone.substring(2)); // Add Argentine mobile 9
-      } else if (cleanPhone.startsWith('549')) {
-        searchVariants.push('54' + cleanPhone.substring(3)); // Remove Argentine mobile 9
+      // Build search queries list to try different formats (crucial for Argentina 9 prefix +/no-plus mismatch)
+      const searchQueries = [`+${cleanPhone}`, cleanPhone];
+      if (cleanPhone.startsWith('54')) {
+        if (cleanPhone.startsWith('549')) {
+          const without9 = '54' + cleanPhone.substring(3);
+          searchQueries.push(`+${without9}`, without9);
+        } else {
+          const with9 = '549' + cleanPhone.substring(2);
+          searchQueries.push(`+${with9}`, with9);
+        }
       }
-      // Also try with + prefix (Chatwoot often stores +XXXXXXXXXXX)
-      searchVariants.push(`+${cleanPhone}`);
-      
-      logger.info(`Searching Chatwoot contact for phone variants: ${searchVariants.join(', ')}`);
-      try {
-        let contacts = [];
-        for (const variant of searchVariants) {
+
+      let contacts = [];
+      let contactId = null;
+
+      // Try searching contact with different phone formats
+      for (const query of searchQueries) {
+        try {
+          logger.debug(`Trying Chatwoot contact search with query: ${query}`);
           const searchRes = await axios.get(
-            `${baseUrl}/api/v1/accounts/${accountId}/contacts/search?q=${variant}`,
-            { headers, timeout: 10000 }
+            `${baseUrl}/api/v1/accounts/${accountId}/contacts/search?q=${encodeURIComponent(query)}`,
+            { headers, timeout: 8000 }
           );
-          contacts = searchRes.data?.payload || [];
-          if (contacts.length > 0) {
-            logger.info(`Found Chatwoot contact with variant: ${variant}`);
+          const found = searchRes.data?.payload || [];
+          if (found.length > 0) {
+            contacts = found;
+            logger.info(`Found contact in Chatwoot using query: ${query}`);
             break;
           }
+        } catch (searchErr) {
+          logger.warn(`Chatwoot contact search failed for query: ${query}`, { error: searchErr.message });
         }
+      }
+
+      try {
         if (contacts.length > 0) {
-          const contactId = contacts[0].id;
+          contactId = contacts[0].id;
           
           // Get contact's conversations
           const convRes = await axios.get(
@@ -98,18 +110,45 @@ export async function syncMessageToChatwoot(lead, messageContent, direction = 'o
             await supabase.updateLead(lead.id, { ai_score_breakdown: breakdown });
           }
         } else if (config.CHATWOOT_INBOX_ID) {
-          // Contact doesn't exist. Create contact and then conversation.
+          // Contact doesn't exist in any searched format. Create contact and then conversation.
           logger.info(`Contact not found. Creating new Chatwoot contact for ${lead.name || cleanPhone}`);
-          const newContactRes = await axios.post(
-            `${baseUrl}/api/v1/accounts/${accountId}/contacts`,
-            {
-              inbox_id: config.CHATWOOT_INBOX_ID,
-              name: lead.name || cleanPhone,
-              phone_number: `+${cleanPhone}`
-            },
-            { headers, timeout: 10000 }
-          );
-          const contactId = newContactRes.data?.payload?.contact?.id;
+          
+          let createdPayload = null;
+          try {
+            const newContactRes = await axios.post(
+              `${baseUrl}/api/v1/accounts/${accountId}/contacts`,
+              {
+                inbox_id: config.CHATWOOT_INBOX_ID,
+                name: lead.name || cleanPhone,
+                phone_number: `+${cleanPhone}`
+              },
+              { headers, timeout: 10000 }
+            );
+            createdPayload = newContactRes.data?.payload?.contact;
+          } catch (createErr) {
+            const errMsg = createErr.response?.data?.message || createErr.message;
+            logger.warn(`Failed to create contact with +${cleanPhone}: ${errMsg}`);
+            
+            // If phone number already exists, it means search failed due to index/format but contact exists.
+            // Let's try to search one last time using a wildcard or standard search.
+            if (errMsg.includes('already exists') || errMsg.includes('duplicate')) {
+              logger.info(`Duplicate contact detected. Trying fallback search with truncated phone...`);
+              const truncated = cleanPhone.slice(-8); // Search last 8 digits as backup
+              const fallbackSearch = await axios.get(
+                `${baseUrl}/api/v1/accounts/${accountId}/contacts/search?q=${truncated}`,
+                { headers, timeout: 10000 }
+              );
+              const found = fallbackSearch.data?.payload || [];
+              if (found.length > 0) {
+                contactId = found[0].id;
+                logger.info(`Successfully recovered existing contact ID ${contactId} via fallback search`);
+              }
+            }
+          }
+
+          if (createdPayload) {
+            contactId = createdPayload.id;
+          }
           
           if (contactId) {
             const newConvRes = await axios.post(
@@ -136,21 +175,18 @@ export async function syncMessageToChatwoot(lead, messageContent, direction = 'o
 
     // 3. Post message to the Chatwoot conversation if conversationId is known
     if (conversationId) {
-      // Chatwoot API uses numeric message_type: 0=incoming, 1=outgoing, 2=activity
-      const messageType = direction === 'incoming' ? 0 : 1;
-      logger.info(`Posting ${direction} (type=${messageType}) message to Chatwoot conversation ${conversationId}: "${messageContent.substring(0, 60)}..."`);
+      logger.info(`Posting ${direction} message to Chatwoot conversation ${conversationId}`);
       
       const response = await axios.post(
         `${baseUrl}/api/v1/accounts/${accountId}/conversations/${conversationId}/messages`,
         {
           content: messageContent,
-          message_type: messageType,
+          message_type: direction,
           private: false
         },
         { headers, timeout: 15000 }
       );
 
-      logger.info(`Chatwoot message synced OK (conversation ${conversationId}, type=${messageType}, id=${response.data?.id || 'unknown'})`);
       return response.data;
     } else {
       logger.warn(`Could not sync to Chatwoot: Conversation ID not found for lead ${lead.name}`);

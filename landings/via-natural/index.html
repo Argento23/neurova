@@ -1,822 +1,1302 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vía Natural · Plantas Medicinales · Volvamos a la Madre Tierra</title>
-  <meta name="description" content="Plantas medicinales, hierbas naturales y blends artesanales para tu bienestar. Fitoterapia ancestral con calidad certificada. Envíos a todo el país.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #2D6A4F;
-      --primary-light: #52B788;
-      --primary-dark: #1B4332;
-      --accent: #D4A373;
-      --accent-light: #E9C89B;
-      --cream: #FEFAE0;
-      --earth: #BC6C25;
-      --lavender: #B8A9C9;
-      --bg: #FDFCF7;
-      --bg-warm: #FAF6F0;
-      --bg-card: #FFFFFF;
-      --text: #2C2C2C;
-      --text-light: #6B6B6B;
-      --text-soft: #8B8575;
-      --radius: 20px;
-      --radius-sm: 12px;
-      --shadow: 0 8px 32px rgba(45,106,79,0.08);
-      --shadow-hover: 0 16px 48px rgba(45,106,79,0.14);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vía Natural | Plantas Medicinales y Sabiduría Ancestral</title>
+    <meta name="description" content="Reconecta con el poder curativo de la tierra a través de infusiones orgánicas, tinturas madres y blends medicinales cosechados de forma sustentable.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --color-bg: #FAF8F5;
+            --color-primary: #2D5A27; /* Forest Green */
+            --color-primary-light: #E8EFE9;
+            --color-secondary: #8E7A60; /* Earthy Brown */
+            --color-secondary-light: #F2ECE4;
+            --color-accent: #E6A15C; /* Warm Clay */
+            --color-text-dark: #2F2E2C;
+            --color-text-light: #6E6C68;
+            --color-white: #FFFFFF;
+            --font-title: 'Lora', serif;
+            --font-body: 'Outfit', sans-serif;
+            --shadow-soft: 0 10px 30px rgba(45, 90, 39, 0.08);
+            --shadow-hover: 0 15px 35px rgba(45, 90, 39, 0.15);
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
 
-    body {
-      font-family: 'Outfit', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      overflow-x: hidden;
-    }
+        body {
+            background-color: var(--color-bg);
+            font-family: var(--font-body);
+            color: var(--color-text-dark);
+            overflow-x: hidden;
+            line-height: 1.7;
+        }
 
-    h1, h2, h3 { font-family: 'Cormorant Garamond', serif; }
+        /* Typography */
+        h1, h2, h3, h4 {
+            font-family: var(--font-title);
+            font-weight: 600;
+            color: var(--color-text-dark);
+        }
 
-    /* ── ORGANIC BACKGROUND ── */
-    .bg-organic {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    .bg-organic span {
-      position: absolute;
-      display: block;
-      border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-      opacity: 0.04;
-      animation: morph 25s infinite ease-in-out;
-    }
-    .bg-organic span:nth-child(1) { width: 500px; height: 500px; background: var(--primary); top: -10%; left: -10%; animation-delay: 0s; }
-    .bg-organic span:nth-child(2) { width: 400px; height: 400px; background: var(--accent); top: 50%; right: -10%; animation-delay: 8s; }
-    .bg-organic span:nth-child(3) { width: 350px; height: 350px; background: var(--primary-light); bottom: -5%; left: 30%; animation-delay: 14s; }
+        /* Container */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
 
-    @keyframes morph {
-      0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: rotate(0deg); }
-      25% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; transform: rotate(90deg); }
-      50% { border-radius: 50% 60% 30% 60% / 30% 40% 70% 60%; transform: rotate(180deg); }
-      75% { border-radius: 60% 40% 60% 30% / 70% 30% 50% 60%; transform: rotate(270deg); }
-    }
+        /* Header / Navbar */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(250, 248, 245, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(45, 90, 39, 0.08);
+            transition: var(--transition-smooth);
+        }
 
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 24px;
-      position: relative;
-      z-index: 1;
-    }
+        .nav-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 90px;
+        }
 
-    /* ── NAV ── */
-    nav {
-      padding: 16px 0;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(253,252,247,0.88);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(45,106,79,0.06);
-    }
-    .nav-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--primary);
-      text-decoration: none;
-    }
-    .logo-icon {
-      width: 44px; height: 44px;
-      background: linear-gradient(135deg, var(--primary), var(--primary-light));
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-      box-shadow: 0 4px 16px rgba(45,106,79,0.2);
-    }
-    .nav-links {
-      display: flex;
-      gap: 28px;
-      list-style: none;
-      align-items: center;
-    }
-    .nav-links a {
-      text-decoration: none;
-      color: var(--text-light);
-      font-weight: 500;
-      font-size: 0.95rem;
-      transition: color 0.3s;
-    }
-    .nav-links a:hover { color: var(--primary); }
-    .nav-cta {
-      background: linear-gradient(135deg, var(--primary), var(--primary-light));
-      color: #fff !important;
-      padding: 10px 24px;
-      border-radius: 50px;
-      font-weight: 600 !important;
-      box-shadow: 0 4px 16px rgba(45,106,79,0.25);
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-    .nav-cta:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
 
-    /* ── HERO ── */
-    .hero {
-      padding: 100px 0 80px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 60px;
-      align-items: center;
-    }
-    .hero-content { animation: fade-in-left 0.8s ease-out; }
-    .hero-visual {
-      display: flex;
-      justify-content: center;
-      animation: fade-in-right 0.8s ease-out 0.2s backwards;
-    }
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background-color: var(--color-primary);
+            border-radius: 50% 0 50% 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
 
-    @keyframes fade-in-left {
-      from { opacity: 0; transform: translateX(-30px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    @keyframes fade-in-right {
-      from { opacity: 0; transform: translateX(30px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    @keyframes fade-in-up {
-      from { opacity: 0; transform: translateY(24px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+        .logo-text {
+            font-family: var(--font-title);
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--color-text-dark);
+            letter-spacing: -0.5px;
+        }
 
-    .hero-tagline {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(45,106,79,0.06);
-      padding: 8px 18px;
-      border-radius: 50px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--primary);
-      margin-bottom: 20px;
-      border: 1px solid rgba(45,106,79,0.1);
-    }
-    .hero h1 {
-      font-size: clamp(2.4rem, 4.5vw, 3.6rem);
-      line-height: 1.1;
-      margin-bottom: 20px;
-      color: var(--primary-dark);
-    }
-    .hero h1 em {
-      color: var(--primary-light);
-      font-style: italic;
-    }
-    .hero-desc {
-      font-size: 1.1rem;
-      color: var(--text-light);
-      line-height: 1.7;
-      margin-bottom: 32px;
-      max-width: 460px;
-    }
-    .hero-buttons {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
+        .logo-text span {
+            font-weight: 400;
+            color: var(--color-secondary);
+        }
 
-    /* Hero visual — herb card grid */
-    .herb-showcase {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      max-width: 380px;
-    }
-    .herb-card {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      padding: 24px 18px;
-      text-align: center;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(45,106,79,0.06);
-      transition: transform 0.4s;
-    }
-    .herb-card:hover { transform: translateY(-6px); }
-    .herb-card:nth-child(2) { margin-top: 30px; }
-    .herb-card:nth-child(3) { margin-top: -30px; }
-    .herb-card .plant-emoji { font-size: 2.6rem; display: block; margin-bottom: 10px; }
-    .herb-card h4 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1rem;
-      color: var(--primary-dark);
-      margin-bottom: 4px;
-    }
-    .herb-card p {
-      font-size: 0.78rem;
-      color: var(--text-soft);
-      line-height: 1.4;
-    }
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 36px;
+            align-items: center;
+        }
 
-    /* ── BUTTONS ── */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 14px 30px;
-      border-radius: 50px;
-      font-family: 'Outfit', sans-serif;
-      font-weight: 600;
-      font-size: 0.95rem;
-      text-decoration: none;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--primary-light));
-      color: #fff;
-      box-shadow: 0 6px 24px rgba(45,106,79,0.3);
-    }
-    .btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 36px rgba(45,106,79,0.35);
-    }
-    .btn-outline {
-      background: transparent;
-      color: var(--primary);
-      border: 2px solid rgba(45,106,79,0.2);
-    }
-    .btn-outline:hover {
-      border-color: var(--primary);
-      background: rgba(45,106,79,0.04);
-      transform: translateY(-2px);
-    }
-    .btn-whatsapp {
-      background: linear-gradient(135deg, #25D366, #128C7E);
-      color: #fff;
-      box-shadow: 0 6px 24px rgba(37,211,102,0.3);
-    }
-    .btn-whatsapp:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 36px rgba(37,211,102,0.4);
-    }
+        nav a {
+            text-decoration: none;
+            color: var(--color-text-dark);
+            font-weight: 500;
+            font-size: 15px;
+            transition: var(--transition-smooth);
+            position: relative;
+        }
 
-    /* ── SECTION COMMON ── */
-    section { padding: 80px 0; }
-    .section-header {
-      text-align: center;
-      margin-bottom: 48px;
-    }
-    .section-tag {
-      display: inline-block;
-      padding: 6px 16px;
-      border-radius: 50px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      margin-bottom: 12px;
-    }
-    .section-header h2 {
-      font-size: clamp(1.9rem, 3vw, 2.6rem);
-      color: var(--primary-dark);
-      margin-bottom: 12px;
-    }
-    .section-header p {
-      color: var(--text-light);
-      max-width: 500px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--color-primary);
+            transition: var(--transition-smooth);
+        }
 
-    /* ── QUOTE / PHILOSOPHY ── */
-    .philosophy {
-      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-      border-radius: var(--radius);
-      padding: 60px 48px;
-      text-align: center;
-      color: #fff;
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 0;
-    }
-    .philosophy::before {
-      content: '';
-      position: absolute;
-      top: -80%; left: -50%;
-      width: 200%; height: 300%;
-      background: radial-gradient(circle, rgba(82,183,136,0.15) 0%, transparent 50%);
-      animation: philo-glow 8s ease-in-out infinite;
-    }
-    @keyframes philo-glow {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(3%, 3%) scale(1.05); }
-    }
-    .philosophy blockquote {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.4rem, 2.5vw, 2rem);
-      font-style: italic;
-      font-weight: 500;
-      line-height: 1.5;
-      max-width: 600px;
-      margin: 0 auto;
-      position: relative;
-    }
-    .philosophy .leaf-icon {
-      font-size: 2.5rem;
-      display: block;
-      margin-bottom: 20px;
-      position: relative;
-    }
-    .philosophy cite {
-      display: block;
-      margin-top: 16px;
-      font-style: normal;
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.85rem;
-      opacity: 0.7;
-      letter-spacing: 1px;
-    }
+        nav a:hover::after {
+            width: 100%;
+        }
 
-    /* ── PRODUCTS ── */
-    .products-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 24px;
-    }
-    .product-card {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      transition: transform 0.4s, box-shadow 0.4s;
-      border: 1px solid rgba(45,106,79,0.06);
-    }
-    .product-card:hover {
-      transform: translateY(-6px);
-      box-shadow: var(--shadow-hover);
-    }
-    .product-visual {
-      height: 180px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 4rem;
-    }
-    .pv-1 { background: linear-gradient(135deg, #E8F5E9, #F1F8E9); }
-    .pv-2 { background: linear-gradient(135deg, #FFF8E1, #FFF3E0); }
-    .pv-3 { background: linear-gradient(135deg, #F3E5F5, #FCE4EC); }
-    .pv-4 { background: linear-gradient(135deg, #E0F2F1, #E8F5E9); }
-    .product-body {
-      padding: 20px;
-    }
-    .product-body h3 {
-      font-size: 1.15rem;
-      color: var(--primary-dark);
-      margin-bottom: 6px;
-    }
-    .product-body .use {
-      font-size: 0.82rem;
-      color: var(--primary-light);
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    .product-body .desc {
-      font-size: 0.85rem;
-      color: var(--text-light);
-      line-height: 1.5;
-      margin-bottom: 14px;
-    }
-    .product-body .price {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.35rem;
-      color: var(--primary);
-      font-weight: 700;
-    }
-    .product-body .btn {
-      width: 100%;
-      justify-content: center;
-      margin-top: 12px;
-      padding: 11px 20px;
-      font-size: 0.9rem;
-    }
+        nav a:hover {
+            color: var(--color-primary);
+        }
 
-    /* ── BENEFITS ── */
-    .benefits-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 24px;
-    }
-    .benefit {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      padding: 32px 24px;
-      box-shadow: var(--shadow);
-      transition: transform 0.3s;
-      border: 1px solid rgba(45,106,79,0.06);
-      text-align: center;
-    }
-    .benefit:hover { transform: translateY(-4px); }
-    .benefit .icon {
-      width: 64px; height: 64px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.6rem;
-      margin: 0 auto 16px;
-    }
-    .benefit:nth-child(1) .icon { background: rgba(45,106,79,0.08); }
-    .benefit:nth-child(2) .icon { background: rgba(212,163,115,0.12); }
-    .benefit:nth-child(3) .icon { background: rgba(82,183,136,0.1); }
-    .benefit:nth-child(4) .icon { background: rgba(184,169,201,0.15); }
-    .benefit h3 {
-      font-size: 1.1rem;
-      color: var(--primary-dark);
-      margin-bottom: 8px;
-    }
-    .benefit p {
-      font-size: 0.88rem;
-      color: var(--text-light);
-      line-height: 1.6;
-    }
+        .btn-header {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(45, 90, 39, 0.15);
+        }
 
-    /* ── TESTIMONIALS ── */
-    .testimonials-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px;
-    }
-    .testimonial {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      padding: 28px;
-      box-shadow: var(--shadow);
-      border-left: 4px solid var(--primary-light);
-    }
-    .testimonial .stars {
-      color: var(--accent);
-      font-size: 1rem;
-      margin-bottom: 12px;
-    }
-    .testimonial p {
-      font-size: 0.95rem;
-      line-height: 1.7;
-      color: var(--text-light);
-      font-style: italic;
-      margin-bottom: 14px;
-    }
-    .testimonial .author {
-      font-weight: 600;
-      color: var(--primary-dark);
-      font-size: 0.88rem;
-    }
+        .btn-header:hover {
+            background-color: #1f3f1b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(45, 90, 39, 0.25);
+        }
 
-    /* ── CTA ── */
-    .cta-section {
-      background: var(--bg-warm);
-      border-radius: var(--radius);
-      padding: 60px 40px;
-      text-align: center;
-      margin-bottom: 80px;
-      border: 1px solid rgba(45,106,79,0.08);
-    }
-    .cta-section h2 {
-      font-size: clamp(1.6rem, 3vw, 2.2rem);
-      color: var(--primary-dark);
-      margin-bottom: 12px;
-    }
-    .cta-section p {
-      color: var(--text-light);
-      margin-bottom: 28px;
-      max-width: 480px;
-      margin-left: auto;
-      margin-right: auto;
-      line-height: 1.6;
-    }
+        .btn-header::after {
+            display: none;
+        }
 
-    /* ── FOOTER ── */
-    footer {
-      padding: 40px 0;
-      text-align: center;
-      border-top: 1px solid rgba(45,106,79,0.08);
-    }
-    footer p {
-      font-size: 0.85rem;
-      color: var(--text-soft);
-    }
-    .footer-links {
-      display: flex;
-      gap: 24px;
-      justify-content: center;
-      margin-bottom: 16px;
-    }
-    .footer-links a {
-      color: var(--text-soft);
-      text-decoration: none;
-      font-size: 1.2rem;
-      transition: color 0.3s, transform 0.3s;
-    }
-    .footer-links a:hover { color: var(--primary); transform: scale(1.2); }
+        /* Hero Section */
+        .hero {
+            padding: 180px 0 120px 0;
+            background: radial-gradient(circle at 90% 20%, var(--color-primary-light) 0%, transparent 45%),
+                        radial-gradient(circle at 10% 80%, var(--color-secondary-light) 0%, transparent 40%);
+            position: relative;
+        }
 
-    /* ── MOBILE ── */
-    @media (max-width: 768px) {
-      .hero {
-        grid-template-columns: 1fr;
-        text-align: center;
-        padding: 60px 0 40px;
-        gap: 40px;
-      }
-      .hero-desc { margin: 0 auto 28px; }
-      .hero-buttons { justify-content: center; }
-      .herb-showcase { max-width: 320px; margin: 0 auto; }
-      .nav-links { display: none; }
-      .philosophy { padding: 40px 24px; }
-      .cta-section { padding: 40px 24px; }
-    }
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 60px;
+            align-items: center;
+        }
 
-    /* ── SCROLL ANIMATIONS ── */
-    .reveal {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 0.6s, transform 0.6s;
-    }
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
+        .hero-badge {
+            background-color: var(--color-primary-light);
+            color: var(--color-primary);
+            padding: 6px 16px;
+            border-radius: 30px;
+            display: inline-flex;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
 
-    /* ── WHATSAPP FLOAT ── */
-    .wa-float {
-      position: fixed;
-      bottom: 28px;
-      right: 28px;
-      width: 60px;
-      height: 60px;
-      background: linear-gradient(135deg, #25D366, #128C7E);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8rem;
-      color: #fff;
-      text-decoration: none;
-      box-shadow: 0 6px 24px rgba(37,211,102,0.4);
-      z-index: 1000;
-      transition: transform 0.3s;
-      animation: wa-pulse 2s infinite;
-    }
-    .wa-float:hover { transform: scale(1.1); }
-    @keyframes wa-pulse {
-      0%, 100% { box-shadow: 0 6px 24px rgba(37,211,102,0.4); }
-      50% { box-shadow: 0 6px 36px rgba(37,211,102,0.6); }
-    }
-  </style>
+        .hero h1 {
+            font-size: 52px;
+            line-height: 1.2;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 span {
+            font-style: italic;
+            font-weight: 400;
+            color: var(--color-primary);
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--color-text-light);
+            margin-bottom: 40px;
+            max-width: 550px;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 36px;
+            border-radius: 4px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 15px;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+            border: none;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+            box-shadow: 0 8px 20px rgba(45, 90, 39, 0.2);
+        }
+
+        .btn-primary:hover {
+            background-color: #1f3f1b;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(45, 90, 39, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: var(--color-text-dark);
+            border: 1px solid rgba(45, 90, 39, 0.2);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(45, 90, 39, 0.1);
+        }
+
+        /* Hero Image Showcase */
+        .hero-image-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-img-box {
+            position: relative;
+            z-index: 2;
+            background-color: white;
+            border-radius: 8px;
+            padding: 18px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(45, 90, 39, 0.08);
+            max-width: 400px;
+        }
+
+        .hero-img-box img {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+            display: block;
+        }
+
+        /* Botica / Catalog Section */
+        .botica {
+            padding: 120px 0;
+            background-color: white;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 70px auto;
+        }
+
+        .section-header h2 {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+
+        .section-header p {
+            font-size: 16px;
+            color: var(--color-text-light);
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .product-card {
+            background-color: var(--color-bg);
+            border-radius: 8px;
+            padding: 30px;
+            border: 1px solid rgba(45, 90, 39, 0.06);
+            box-shadow: var(--shadow-soft);
+            transition: var(--transition-smooth);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(45, 90, 39, 0.15);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--color-secondary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .product-img-placeholder {
+            width: 100%;
+            height: 220px;
+            background-color: var(--color-primary-light);
+            border-radius: 4px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-primary);
+            font-size: 52px;
+            opacity: 0.85;
+        }
+
+        .product-card h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .product-card p {
+            color: var(--color-text-light);
+            font-size: 15px;
+            margin-bottom: 24px;
+            flex-grow: 1;
+        }
+
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-price {
+            font-size: 26px;
+            font-weight: 600;
+            color: var(--color-primary);
+            font-family: var(--font-title);
+        }
+
+        .btn-card {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 13px;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-card:hover {
+            background-color: #1f3f1b;
+            box-shadow: 0 4px 12px rgba(45, 90, 39, 0.2);
+        }
+
+        /* Philosophy Section */
+        .philosophy {
+            padding: 120px 0;
+            background: linear-gradient(180deg, white 0%, var(--color-primary-light) 100%);
+        }
+
+        .phil-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .phil-item {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 36px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 6px;
+            box-shadow: var(--shadow-soft);
+            transition: var(--transition-smooth);
+        }
+
+        .phil-item:hover {
+            transform: translateY(-4px);
+        }
+
+        .phil-icon {
+            width: 54px;
+            height: 54px;
+            background-color: var(--color-primary-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-primary);
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .phil-text h3 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .phil-text p {
+            color: var(--color-text-light);
+            font-size: 15px;
+        }
+
+        /* Interactive Plant Index Section */
+        .plant-index {
+            padding: 120px 0;
+            background-color: white;
+        }
+
+        .plant-tabs {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--color-bg);
+            border: 1px solid rgba(45, 90, 39, 0.08);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .plant-tab-header {
+            display: flex;
+            border-bottom: 1px solid rgba(45, 90, 39, 0.08);
+        }
+
+        .plant-tab-btn {
+            flex: 1;
+            padding: 18px;
+            background: none;
+            border: none;
+            font-family: var(--font-title);
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            color: var(--color-text-light);
+        }
+
+        .plant-tab-btn.active {
+            background-color: white;
+            color: var(--color-primary);
+            border-bottom: 3px solid var(--color-primary);
+        }
+
+        .plant-tab-content {
+            padding: 40px;
+            background-color: white;
+            display: none;
+        }
+
+        .plant-tab-content.active {
+            display: block;
+        }
+
+        .plant-tab-content h3 {
+            font-size: 28px;
+            color: var(--color-primary);
+            margin-bottom: 12px;
+        }
+
+        .plant-scientific {
+            font-style: italic;
+            color: var(--color-secondary);
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            padding: 120px 0;
+            background-color: white;
+        }
+
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+        }
+
+        .testimonial-card {
+            background-color: var(--color-bg);
+            border-radius: 8px;
+            padding: 40px;
+            border: 1px solid rgba(45, 90, 39, 0.06);
+            box-shadow: var(--shadow-soft);
+            position: relative;
+        }
+
+        .quote-icon {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 52px;
+            color: var(--color-primary);
+            opacity: 0.08;
+            font-family: var(--font-title);
+        }
+
+        .testimonial-card p {
+            font-size: 16px;
+            font-style: italic;
+            color: var(--color-text-light);
+            margin-bottom: 30px;
+        }
+
+        .testimonial-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+            font-family: var(--font-title);
+        }
+
+        .user-info h4 {
+            font-size: 17px;
+            margin-bottom: 2px;
+        }
+
+        .user-info span {
+            font-size: 13px;
+            color: var(--color-text-light);
+        }
+
+        /* CTA Section */
+        .cta-bottom {
+            padding: 120px 0;
+            background: linear-gradient(135deg, var(--color-primary) 0%, #173812 100%);
+            color: white;
+            text-align: center;
+            position: relative;
+        }
+
+        .cta-bottom h2 {
+            color: white;
+            font-size: 44px;
+            margin-bottom: 24px;
+        }
+
+        .cta-bottom p {
+            font-size: 19px;
+            max-width: 600px;
+            margin: 0 auto 44px auto;
+            opacity: 0.9;
+            font-family: var(--font-title);
+            font-style: italic;
+        }
+
+        .btn-white {
+            background-color: white;
+            color: var(--color-primary);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn-white:hover {
+            background-color: var(--color-primary-light);
+            transform: translateY(-3px);
+        }
+
+        /* Footer */
+        footer {
+            background-color: #232822;
+            color: #C1C6BF;
+            padding: 80px 0 40px 0;
+            font-size: 15px;
+            border-top: 1px solid rgba(45, 90, 39, 0.1);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 50px;
+        }
+
+        .footer-logo {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .footer-logo .logo-icon {
+            background-color: var(--color-accent);
+            color: #232822;
+        }
+
+        .footer-logo .logo-text {
+            color: white;
+        }
+
+        .footer-col h3 {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 24px;
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 14px;
+        }
+
+        .footer-col a {
+            color: #C1C6BF;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+        }
+
+        .footer-col a:hover {
+            color: var(--color-accent);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 40px;
+            text-align: center;
+            color: #8C928A;
+        }
+
+        /* FLOATING CHAT WIDGET (Neurova Expansion Option Showcase) */
+        .neurova-chat-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 9999;
+            font-family: var(--font-body);
+        }
+
+        .chat-trigger {
+            width: 65px;
+            height: 65px;
+            background-color: #25D366; /* WhatsApp Green */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            box-shadow: 0 10px 25px rgba(37, 211, 102, 0.35);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            position: relative;
+        }
+
+        .chat-trigger:hover {
+            transform: scale(1.08);
+        }
+
+        .chat-notification {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background-color: var(--color-accent);
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            animation: pulse-notification 2.5s infinite;
+        }
+
+        .chat-window {
+            position: absolute;
+            bottom: 85px;
+            right: 0;
+            width: 360px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 15px 50px rgba(45, 90, 39, 0.12);
+            border: 1px solid rgba(45, 90, 39, 0.08);
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .chat-window.active {
+            display: flex;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .chat-header {
+            background-color: #075E54;
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: var(--color-primary-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .chat-profile-info h4 {
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .chat-profile-info span {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .chat-profile-info span::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: #25D366;
+            border-radius: 50%;
+        }
+
+        .chat-close {
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: var(--transition-smooth);
+        }
+
+        .chat-close:hover {
+            opacity: 1;
+        }
+
+        .chat-body {
+            height: 280px;
+            padding: 20px;
+            background-color: #ECE5DD;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-msg {
+            max-width: 82%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13.5px;
+            line-height: 1.45;
+        }
+
+        .msg-received {
+            background-color: white;
+            align-self: flex-start;
+            border-top-left-radius: 0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            color: var(--color-text-dark);
+        }
+
+        .msg-sent {
+            background-color: #DCF8C6;
+            align-self: flex-end;
+            border-top-right-radius: 0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            color: var(--color-text-dark);
+        }
+
+        .chat-upgrade-badge {
+            background-color: var(--color-primary-light);
+            border: 1px dashed var(--color-primary);
+            color: var(--color-primary);
+            font-size: 11px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin: 8px 0;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .chat-footer {
+            padding: 16px 20px;
+            background-color: white;
+            border-top: 1px solid rgba(45, 90, 39, 0.08);
+            text-align: center;
+        }
+
+        .chat-footer p {
+            font-size: 11.5px;
+            color: var(--color-text-light);
+            margin-bottom: 12px;
+        }
+
+        .btn-whatsapp-chat {
+            background-color: #25D366;
+            color: white;
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 11px 18px;
+            border-radius: 4px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 14px;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);
+            transition: var(--transition-smooth);
+        }
+
+        .btn-whatsapp-chat:hover {
+            background-color: #20BA56;
+            transform: translateY(-2px);
+        }
+
+        /* Animations */
+        @keyframes pulse-notification {
+            0% { box-shadow: 0 0 0 0 rgba(230, 161, 92, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(230, 161, 92, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(230, 161, 92, 0); }
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 992px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 50px;
+            }
+
+            .hero h1 {
+                font-size: 42px;
+            }
+
+            .hero p {
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .hero-ctas {
+                justify-content: center;
+            }
+
+            .phil-grid {
+                grid-template-columns: 1fr;
+                gap: 50px;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                text-align: center;
+            }
+
+            .footer-logo {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav ul {
+                display: none;
+            }
+
+            .section-header h2 {
+                font-size: 32px;
+            }
+
+            .cta-bottom h2 {
+                font-size: 32px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <!-- Background shapes -->
-  <div class="bg-organic">
-    <span></span><span></span><span></span>
-  </div>
 
-  <!-- WhatsApp Floating Button -->
-  <a href="https://wa.me/5491XXXXXXXXX?text=Hola!%20Quiero%20consultar%20sobre%20plantas%20medicinales%20🌿" target="_blank" class="wa-float" id="wa-float" aria-label="Contactar por WhatsApp">💬</a>
+    <!-- Header / Nav -->
+    <header id="header">
+        <div class="container nav-wrapper">
+            <a href="#" class="logo">
+                <div class="logo-icon">🌿</div>
+                <div class="logo-text">Vía<span>Natural</span></div>
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Inicio</a></li>
+                    <li><a href="#botica">Botica</a></li>
+                    <li><a href="#sabiduria">Sabiduría</a></li>
+                    <li><a href="#testimonios">Opiniones</a></li>
+                </ul>
+            </nav>
+            <a href="https://wa.me/5491122334455?text=Hola%20Via%20Natural!%20Me%20interesa%20conocer%20las%20plantas%20medicinales." class="btn btn-header" id="btn-nav-whatsapp">Escríbenos</a>
+        </div>
+    </header>
 
-  <!-- NAV -->
-  <nav>
-    <div class="container nav-inner">
-      <a href="#" class="logo" id="logo">
-        <span class="logo-icon">🌿</span>
-        Vía Natural
-      </a>
-      <ul class="nav-links">
-        <li><a href="#productos" id="nav-productos">Productos</a></li>
-        <li><a href="#beneficios" id="nav-beneficios">Beneficios</a></li>
-        <li><a href="#opiniones" id="nav-opiniones">Opiniones</a></li>
-        <li><a href="https://wa.me/5491XXXXXXXXX?text=Hola!%20Quiero%20consultar%20sobre%20plantas%20medicinales%20🌿" target="_blank" class="nav-cta" id="nav-cta">Consultar 🌿</a></li>
-      </ul>
+    <!-- Hero Section -->
+    <section class="hero" id="inicio">
+        <div class="container hero-grid">
+            <div class="hero-content">
+                <div class="hero-badge">🍃 100% Orgánico y Artesanal</div>
+                <h1>Volvamos a la <span>Madre Tierra</span></h1>
+                <p>Reconecta con la botánica medicinal ancestral. Elaboramos blends de té, tinturas madre e infusiones 100% orgánicas para devolver el equilibrio y bienestar natural a tu cuerpo y mente.</p>
+                <div class="hero-ctas">
+                    <a href="#botica" class="btn btn-primary" id="hero-btn-botica">Ver Botica</a>
+                    <button class="btn btn-secondary" onclick="openChatWithDemo()" id="hero-btn-ai">Consultar Asesor IA</button>
+                </div>
+            </div>
+            <div class="hero-image-container">
+                <div class="hero-img-box">
+                    <!-- Placeholder SVG representing premium minimalist dried herbs -->
+                    <svg viewBox="0 0 400 400" width="100%" height="100%" style="background-color: #FAF5EE; border-radius: 4px;">
+                        <!-- Minimalist botanical illustration -->
+                        <path d="M200,320 Q180,200 200,80 Q220,200 200,320" fill="none" stroke="#2D5A27" stroke-width="4"/>
+                        <!-- Leaves -->
+                        <path d="M200,120 Q140,90 150,140 Q180,150 200,120" fill="#E8EFE9" stroke="#2D5A27" stroke-width="2"/>
+                        <path d="M200,180 Q260,150 250,200 Q220,210 200,180" fill="#8E7A60" opacity="0.3" stroke="#8E7A60" stroke-width="2"/>
+                        <path d="M200,240 Q130,220 140,260 Q170,270 200,240" fill="#E8EFE9" stroke="#2D5A27" stroke-width="2"/>
+                        <!-- Earth ring -->
+                        <circle cx="200" cy="200" r="140" fill="none" stroke="#8E7A60" stroke-width="1" stroke-dasharray="6,6" opacity="0.5"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Botica Catalog Section -->
+    <section class="botica" id="botica">
+        <div class="container">
+            <div class="section-header">
+                <h2>Nuestra Botica Natural</h2>
+                <p>Alquimias puras diseñadas para aliviar tensiones cotidianas y revitalizar tu salud de forma completamente natural.</p>
+            </div>
+            <div class="product-grid">
+                <!-- Product 1 -->
+                <div class="product-card">
+                    <span class="product-badge">Bienestar</span>
+                    <div class="product-img-placeholder">🍵</div>
+                    <h3>Blend Relajante Infusión</h3>
+                    <p>Fusión equilibrada de Melisa, Pasiflora, Tilo y flores de Lavanda. Ideal para calmar estados de ansiedad alta y lograr un sueño reparador.</p>
+                    <div class="product-footer">
+                        <div class="product-price">$4.800</div>
+                        <a href="https://wa.me/5491122334455?text=Hola!%20Me%20interesa%20el%20Blend%20Relajante%20Infusion" class="btn-card" id="btn-buy-1">Comprar</a>
+                    </div>
+                </div>
+                <!-- Product 2 -->
+                <div class="product-card">
+                    <span class="product-badge">Digestivo</span>
+                    <div class="product-img-placeholder">🌱</div>
+                    <h3>Tintura Madre Carqueja</h3>
+                    <p>Extracto concentrado de Carqueja y boldo orgánicos. Actúa como protector hepático natural y estimulante de la digestión lenta.</p>
+                    <div class="product-footer">
+                        <div class="product-price">$5.200</div>
+                        <a href="https://wa.me/5491122334455?text=Hola!%20Me%20interesa%20la%20Tintura%20Madre%20Carqueja" class="btn-card" id="btn-buy-2">Comprar</a>
+                    </div>
+                </div>
+                <!-- Product 3 -->
+                <div class="product-card">
+                    <span class="product-badge">Energía</span>
+                    <div class="product-img-placeholder">🍊</div>
+                    <h3>Elixir Vitalidad</h3>
+                    <p>Blend estimulante a base de Jengibre, Romero, cáscara de Naranja y menta piperita. Aporta energía natural y despierta la concentración.</p>
+                    <div class="product-footer">
+                        <div class="product-price">$4.500</div>
+                        <a href="https://wa.me/5491122334455?text=Hola!%20Me%20interesa%20el%20Elixir%20Vitalidad" class="btn-card" id="btn-buy-3">Comprar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Philosophy Section -->
+    <section class="philosophy" id="sabiduria">
+        <div class="container phil-grid">
+            <div class="phil-content">
+                <h2>El Respeto a los Ciclos de la Tierra</h2>
+                <p style="margin: 20px 0 30px 0; color: var(--color-text-light);">Cosechamos nuestras plantas en fases lunares específicas y bajo normas agroecológicas estrictas. Sin pesticidas, sin conservantes químicos. Alquimia pura del suelo a tu taza.</p>
+                <a href="https://wa.me/5491122334455?text=Quiero%20conocer%20sobre%20asesoria%20herbal%20gratis" class="btn btn-primary" id="phil-btn-wa">Recibir Guía de Iniciación</a>
+            </div>
+            <div class="phil-items-list">
+                <!-- Item 1 -->
+                <div class="phil-item">
+                    <div class="phil-icon">🌿</div>
+                    <div class="phil-text">
+                        <h3>Cosecha Consciente</h3>
+                        <p>Cada hoja y flor se recolecta a mano en su punto óptimo de concentración de principios activos medicinales.</p>
+                    </div>
+                </div>
+                <!-- Item 2 -->
+                <div class="phil-item">
+                    <div class="phil-icon">🧪</div>
+                    <div class="phil-text">
+                        <h3>Pureza Garantizada</h3>
+                        <p>Secado lento controlado a la sombra para preservar aceites esenciales vitales y el color vivo de cada planta.</p>
+                    </div>
+                </div>
+                <!-- Item 3 -->
+                <div class="phil-item">
+                    <div class="phil-icon">🌍</div>
+                    <div class="phil-text">
+                        <h3>Envases Eco-Amigables</h3>
+                        <p>Utilizamos vidrio ámbar y bolsas de papel kraft compostables para proteger el producto y respetar al planeta.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Plant Index -->
+    <section class="plant-index">
+        <div class="container">
+            <div class="section-header">
+                <h2>Guía de Medicina Natural</h2>
+                <p>Haz clic en las plantas principales para conocer cómo pueden ayudarte a mejorar tu bienestar diario.</p>
+            </div>
+            <div class="plant-tabs">
+                <div class="plant-tab-header">
+                    <button class="plant-tab-btn active" onclick="switchTab(event, 'melisa')">Melisa</button>
+                    <button class="plant-tab-btn" onclick="switchTab(event, 'pasiflora')">Pasiflora</button>
+                    <button class="plant-tab-btn" onclick="switchTab(event, 'boldo')">Boldo</button>
+                </div>
+                <div class="plant-tab-content active" id="melisa">
+                    <h3>Melisa</h3>
+                    <span class="plant-scientific">Melissa officinalis</span>
+                    <p>Reconocida ancestralmente por sus propiedades ansiolíticas y calmantes. Ideal para apaciguar taquicardias y dolores estomacales de origen nervioso. Su infusión de aroma cítrico es excelente para el final del día.</p>
+                </div>
+                <div class="plant-tab-content" id="pasiflora">
+                    <h3>Pasiflora</h3>
+                    <span class="plant-scientific">Passiflora incarnata</span>
+                    <p>Un poderoso somnífero natural no adictivo. Relaja la musculatura lisa del cuerpo y apaga la mente sobreestimulada por el estrés laboral. Ideal para combatir el insomnio crónico y despertar completamente renovado.</p>
+                </div>
+                <div class="plant-tab-content" id="boldo">
+                    <h3>Boldo</h3>
+                    <span class="plant-scientific">Peumus boldus</span>
+                    <p>La hierba aliada del sistema hepático por excelencia. Facilita la secreción de bilis, alivia digestiones pesadas, combate la inflamación abdominal e intoxicaciones alimentarias leves. Esencial después de comidas copiosas.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials" id="testimonios">
+        <div class="container">
+            <div class="section-header">
+                <h2>Experiencias de Bienestar</h2>
+                <p>Historias reales de personas que reconectaron con la fitoterapia y transformaron su calidad de vida.</p>
+            </div>
+            <div class="testimonial-grid">
+                <!-- Testimonial 1 -->
+                <div class="testimonial-card">
+                    <div class="quote-icon">“</div>
+                    <p>"Sufría de insomnio crónico por estrés laboral. Empecé a tomar el Blend Relajante todas las noches y mi descanso cambió 180 grados. Sabor suave, natural y sumamente efectivo."</p>
+                    <div class="testimonial-user">
+                        <div class="user-avatar">S</div>
+                        <div class="user-info">
+                            <h4>Sofía Benítez</h4>
+                            <span>CABA, Argentina</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Testimonial 2 -->
+                <div class="testimonial-card">
+                    <div class="quote-icon">“</div>
+                    <p>"Las tinturas madres son de excelente concentración. Me curé de una gastritis nerviosa que ningún medicamento lograba calmar del todo. Súper agradecido con el asesoramiento."</p>
+                    <div class="testimonial-user">
+                        <div class="user-avatar">J</div>
+                        <div class="user-info">
+                            <h4>Juan Carlos Pérez</h4>
+                            <span>Mendoza, Argentina</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-bottom">
+        <div class="container">
+            <h2>¿Buscas aliviar un malestar específico?</h2>
+            <p>"Deja que las plantas sanen lo que el cuerpo expresa. Consulta con nuestro Asesor Herbal IA en WhatsApp para armar tu plan personalizado de infusión."</p>
+            <a href="https://wa.me/5491122334455?text=Hola,%20busco%20aliviar%20un%20malestar%20naturalmente." class="btn btn-white" id="cta-btn-whatsapp-bot">Consultar Asesor Herbal IA</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <a href="#" class="footer-logo">
+                    <div class="logo-icon">🌿</div>
+                    <div class="logo-text">Vía<span>Natural</span></div>
+                </a>
+                <p style="margin-bottom: 20px;">Reconectando vidas con la sabiduría medicinal ancestral de la tierra a través de productos fitoterapéuticos orgánicos.</p>
+                <span>© 2026 Vía Natural Plantas. Todos los derechos reservados.</span>
+            </div>
+            <div class="footer-col">
+                <h3>Botica</h3>
+                <ul>
+                    <li><a href="#botica">Infusiones Orgánicas</a></li>
+                    <li><a href="#botica">Tinturas Madres</a></li>
+                    <li><a href="#botica">Aceites y Cremas</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Contacto</h3>
+                <ul>
+                    <li>📍 Buenos Aires, Argentina</li>
+                    <li>📞 +54 9 11 2233 4455</li>
+                    <li>✉️ hola@vianatural.com.ar</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Diseño y tecnología optimizada por <a href="https://generarise.space" style="color: var(--color-accent); font-weight: 600; text-decoration: none;">Neurova Agency</a></p>
+        </div>
+    </footer>
+
+    <!-- FLOATING CHAT WIDGET (Neurova Expansion Option Showcase) -->
+    <div class="neurova-chat-widget">
+        <div class="chat-trigger" onclick="toggleChatWindow()" id="whatsapp-widget-trigger">
+            <span style="display: flex;">💬</span>
+            <div class="chat-notification">1</div>
+        </div>
+        <div class="chat-window" id="whatsapp-chat-window">
+            <div class="chat-header">
+                <div class="chat-profile">
+                    <div class="chat-avatar">🌿</div>
+                    <div class="chat-profile-info">
+                        <h4>Asesor Herbal IA</h4>
+                        <span>Alquimia Natural</span>
+                    </div>
+                </div>
+                <div class="chat-close" onclick="toggleChatWindow()">✕</div>
+            </div>
+            <div class="chat-body" id="chat-conversation-body">
+                <div class="chat-msg msg-received">
+                    ¡Bienvenido a Vía Natural! 🌿 Soy tu **Asesor Herbal IA**.
+                </div>
+                <div class="chat-msg msg-received">
+                    Cuéntame, ¿cómo te sientes hoy o qué aspecto de tu bienestar físico o mental te gustaría mejorar naturalmente?
+                </div>
+            </div>
+            <div class="chat-footer">
+                <div class="chat-upgrade-badge">✨ Demo de la Suite de Ventas Neurova</div>
+                <p>¿Quieres chatear con nuestra IA fitoterapeuta real por WhatsApp y ver cómo atiende y asesora a tus clientes?</p>
+                <a href="https://wa.me/5491122334455?text=Hola,%20quiero%20probar%20el%20demo%20interactivo%20para%20via%20natural%20plantas" class="btn-whatsapp-chat" id="widget-btn-wa">
+                    <span>📲 Probar en WhatsApp</span>
+                </a>
+            </div>
+        </div>
     </div>
-  </nav>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-content">
-      <span class="hero-tagline">🌱 Fitoterapia natural y artesanal</span>
-      <h1>Volvamos a la <em>Madre Tierra</em></h1>
-      <p class="hero-desc">Descubrí el poder curativo de las plantas medicinales. Blends artesanales, hierbas puras y productos naturales para tu bienestar integral.</p>
-      <div class="hero-buttons">
-        <a href="#productos" class="btn btn-primary" id="hero-cta-ver">Ver Productos 🍃</a>
-        <a href="https://wa.me/5491XXXXXXXXX?text=Hola!%20Quiero%20consultar%20sobre%20plantas%20medicinales%20🌿" target="_blank" class="btn btn-whatsapp" id="hero-cta-wa">WhatsApp 💬</a>
-      </div>
-    </div>
-    <div class="hero-visual">
-      <div class="herb-showcase">
-        <div class="herb-card">
-          <span class="plant-emoji">🌿</span>
-          <h4>Manzanilla</h4>
-          <p>Digestión y calma</p>
-        </div>
-        <div class="herb-card">
-          <span class="plant-emoji">🍵</span>
-          <h4>Boldo</h4>
-          <p>Hígado y desintoxicación</p>
-        </div>
-        <div class="herb-card">
-          <span class="plant-emoji">🌸</span>
-          <h4>Pasiflora</h4>
-          <p>Sueño reparador</p>
-        </div>
-        <div class="herb-card">
-          <span class="plant-emoji">🌻</span>
-          <h4>Caléndula</h4>
-          <p>Piel y cicatrización</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- PHILOSOPHY -->
-  <section style="padding-top: 0;">
-    <div class="container">
-      <div class="philosophy reveal">
-        <span class="leaf-icon">🍂</span>
-        <blockquote>
-          "La naturaleza nos brinda todo lo que necesitamos para sanar. Solo hay que escucharla y volver a conectar con ella."
-          <cite>— VÍA NATURAL</cite>
-        </blockquote>
-      </div>
-    </div>
-  </section>
-
-  <!-- PRODUCTS -->
-  <section id="productos">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-tag" style="background: rgba(45,106,79,0.06); color: var(--primary);">🍃 Catálogo Natural</span>
-        <h2>Nuestros Productos Artesanales</h2>
-        <p>Cada blend y hierba es seleccionada a mano, secada al sol y preparada con amor para tu bienestar</p>
-      </div>
-      <div class="products-grid">
-        <div class="product-card reveal">
-          <div class="product-visual pv-1">🧘</div>
-          <div class="product-body">
-            <p class="use">Relajación y sueño</p>
-            <h3>Blend Noche Serena</h3>
-            <p class="desc">Pasiflora, melisa, valeriana y tilo. Para quienes buscan un descanso profundo y reparador.</p>
-            <span class="price">$4.500</span>
-            <a href="https://wa.me/5491XXXXXXXXX?text=Hola!%20Me%20interesa%20el%20Blend%20Noche%20Serena%20🧘" target="_blank" class="btn btn-whatsapp" id="prod-1-cta">Consultar 💬</a>
-          </div>
-        </div>
-        <div class="product-card reveal">
-          <div class="product-visual pv-2">☀️</div>
-          <div class="product-body">
-            <p class="use">Energía y vitalidad</p>
-            <h3>Blend Despertar Solar</h3>
-            <p class="desc">Yerba mate, jengibre, romero y menta. Energía natural sin cafeína sintética para arrancar el día.</p>
-            <span class="price">$4.200</span>
-            <a href="https://wa.me/5491XXXXXXXXX?text=Hola!%20Me%20interesa%20el%20Blend%20Despertar%20Solar%20☀" target="_blank" class="btn btn-whatsapp" id="prod-2-cta">Consultar 💬</a>
-          </div>
-        </div>
-        <div class="product-card reveal">
-          <div class="product-visual pv-3">🌺</div>
-          <div class="product-body">
-            <p class="use">Digestión y bienestar</p>
-            <h3>Blend Armonía Interior</h3>
-            <p class="desc">Manzanilla, boldo, hinojo y anís estrellado. Alivia molestias estomacales y ayuda a la digestión.</p>
-            <span class="price">$3.900</span>
-            <a href="https://wa.me/5491XXXXXXXXX?text=Hola!%20Me%20interesa%20el%20Blend%20Armonía%20Interior%20🌺" target="_blank" class="btn btn-whatsapp" id="prod-3-cta">Consultar 💬</a>
-          </div>
-        </div>
-        <div class="product-card reveal">
-          <div class="product-visual pv-4">🌱</div>
-          <div class="product-body">
-            <p class="use">Inmunidad y defensa</p>
-            <h3>Blend Escudo Verde</h3>
-            <p class="desc">Equinácea, propóleo en polvo, tomillo y eucalipto. Fortalece tus defensas naturales todo el año.</p>
-            <span class="price">$5.100</span>
-            <a href="https://wa.me/5491XXXXXXXXX?text=Hola!%20Me%20interesa%20el%20Blend%20Escudo%20Verde%20🌱" target="_blank" class="btn btn-whatsapp" id="prod-4-cta">Consultar 💬</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- BENEFITS -->
-  <section id="beneficios" style="background: var(--bg-warm);">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-tag" style="background: rgba(212,163,115,0.12); color: var(--accent);">🌻 Nuestra esencia</span>
-        <h2>¿Por qué elegir lo Natural?</h2>
-        <p>Las plantas medicinales son el camino más antiguo y seguro hacia el bienestar integral</p>
-      </div>
-      <div class="benefits-grid">
-        <div class="benefit reveal">
-          <div class="icon">🌿</div>
-          <h3>100% Natural</h3>
-          <p>Sin conservantes, químicos ni aditivos. Hierbas puras, directas de la tierra a tu taza.</p>
-        </div>
-        <div class="benefit reveal">
-          <div class="icon">🤲</div>
-          <h3>Artesanal</h3>
-          <p>Cada blend es formulado y preparado a mano con conocimiento ancestral de fitoterapia.</p>
-        </div>
-        <div class="benefit reveal">
-          <div class="icon">💚</div>
-          <h3>Asesoramiento</h3>
-          <p>Te orientamos sobre qué plantas son ideales para tu situación particular de salud.</p>
-        </div>
-        <div class="benefit reveal">
-          <div class="icon">🚚</div>
-          <h3>Envíos a Todo el País</h3>
-          <p>Empaquetado ecológico que preserva la frescura y las propiedades de cada hierba.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- TESTIMONIALS -->
-  <section id="opiniones">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-tag" style="background: rgba(184,169,201,0.12); color: var(--lavender);">💜 Testimonios</span>
-        <h2>Lo que dicen quienes ya confiaron</h2>
-      </div>
-      <div class="testimonials-grid">
-        <div class="testimonial reveal">
-          <div class="stars">⭐⭐⭐⭐⭐</div>
-          <p>"El blend Noche Serena cambió mis noches. Después de años con insomnio, ahora duermo como un bebé. ¡Gracias por tanto!"</p>
-          <span class="author">— Alejandra P., Mendoza</span>
-        </div>
-        <div class="testimonial reveal">
-          <div class="stars">⭐⭐⭐⭐⭐</div>
-          <p>"Me asesoraron por WhatsApp y me recomendaron justo lo que necesitaba. El empaquetado es hermoso y las hierbas son frescas."</p>
-          <span class="author">— Ricardo M., Salta</span>
-        </div>
-        <div class="testimonial reveal">
-          <div class="stars">⭐⭐⭐⭐⭐</div>
-          <p>"Compro el Escudo Verde cada invierno para toda la familia. Desde que lo tomamos, no nos enfermamos más como antes."</p>
-          <span class="author">— Marta C., Buenos Aires</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section>
-    <div class="container">
-      <div class="cta-section reveal">
-        <h2>¿No sabés qué planta necesitás? 🌿</h2>
-        <p>Escribinos por WhatsApp y te asesoramos gratis. Contanos cómo te sentís y te recomendamos el blend ideal para vos.</p>
-        <a href="https://wa.me/5491XXXXXXXXX?text=Hola!%20Necesito%20asesoramiento%20sobre%20plantas%20medicinales%20🌿" target="_blank" class="btn btn-primary" id="cta-wa-final">Pedir Asesoramiento Gratis 🍃</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer>
-    <div class="container">
-      <div class="footer-links">
-        <a href="#" aria-label="Instagram">📷</a>
-        <a href="https://wa.me/5491XXXXXXXXX" target="_blank" aria-label="WhatsApp">💬</a>
-      </div>
-      <p>© 2026 Vía Natural · Plantas Medicinales · Volvamos a la Madre Tierra 🌍</p>
-    </div>
-  </footer>
-
-  <script>
-    // Scroll reveal
-    const reveals = document.querySelectorAll('.reveal');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
+    <script>
+        function toggleChatWindow() {
+            const chatWin = document.getElementById('whatsapp-chat-window');
+            chatWin.classList.toggle('active');
+            
+            const notification = document.querySelector('.chat-notification');
+            if (notification) {
+                notification.style.display = 'none';
+            }
         }
-      });
-    }, { threshold: 0.1 });
-    reveals.forEach(el => observer.observe(el));
 
-    // Smooth scrolling
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', e => {
-        e.preventDefault();
-        const target = document.querySelector(a.getAttribute('href'));
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-    });
-  </script>
+        function openChatWithDemo() {
+            const chatWin = document.getElementById('whatsapp-chat-window');
+            if (!chatWin.classList.contains('active')) {
+                toggleChatWindow();
+            }
+            
+            const trigger = document.getElementById('whatsapp-widget-trigger');
+            trigger.style.transform = 'scale(1.15)';
+            setTimeout(() => { trigger.style.transform = 'scale(1)'; }, 300);
+
+            const chatBody = document.getElementById('chat-conversation-body');
+            
+            if (chatBody.children.length === 2) {
+                setTimeout(() => {
+                    const userMsg = document.createElement('div');
+                    userMsg.className = 'chat-msg msg-sent';
+                    userMsg.innerText = 'Tengo acidez estomacal y colon irritable';
+                    chatBody.appendChild(userMsg);
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                }, 1000);
+
+                setTimeout(() => {
+                    const aiMsg = document.createElement('div');
+                    aiMsg.className = 'chat-msg msg-received';
+                    aiMsg.innerHTML = 'Lamento que te sientas así. Para calmar la acidez estomacal y relajar la inflamación del colon, te sugiero una infusión digestiva a base de **Manzanilla** (desinflama la mucosa digestiva) y **Melisa** (que actúa reduciendo los espasmos provocados por el nerviosismo o estrés).<br><br>¿Te gustaría que te reserve nuestro blend digestivo o deseas más información?';
+                    chatBody.appendChild(aiMsg);
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                }, 2500);
+            }
+        }
+
+        function switchTab(evt, plantId) {
+            const tabs = document.querySelectorAll('.plant-tab-content');
+            const btns = document.querySelectorAll('.plant-tab-btn');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            btns.forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(plantId).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const notification = document.querySelector('.chat-notification');
+                if (notification) {
+                    notification.style.display = 'flex';
+                }
+            }, 4000);
+        });
+    </script>
 </body>
 </html>

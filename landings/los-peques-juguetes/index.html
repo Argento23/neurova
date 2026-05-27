@@ -1,756 +1,1268 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Los Peques Juguetes · Juguetes Didácticos y Creativos</title>
-  <meta name="description" content="Juguetes didácticos, creativos y seguros para niños. Estimulá su imaginación con los mejores juguetes educativos. Envíos a todo el país.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #FF6B9D;
-      --primary-light: #FFB8D1;
-      --secondary: #4ECDC4;
-      --accent: #FFE66D;
-      --accent-warm: #FF8A5C;
-      --purple: #A78BFA;
-      --bg: #FFF9FB;
-      --bg-card: #FFFFFF;
-      --text: #2D2040;
-      --text-light: #6B5B7B;
-      --radius: 20px;
-      --radius-sm: 12px;
-      --shadow: 0 8px 32px rgba(255,107,157,0.12);
-      --shadow-hover: 0 16px 48px rgba(255,107,157,0.2);
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Los Peques Juguetes | Juguetes Didácticos y de Madera Montessori</title>
+    <meta name="description" content="Descubre juguetes de madera sustentable que fomentan la creatividad, imaginación y motricidad fina de tus hijos con metodologías activas Montessori y Waldorf.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     
-    body {
-      font-family: 'Nunito', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      overflow-x: hidden;
-    }
+    <style>
+        :root {
+            --color-bg: #FDFBF7;
+            --color-primary: #FF8C42;
+            --color-primary-light: #FFF2EB;
+            --color-secondary: #4E9FBF;
+            --color-secondary-light: #EBF7FC;
+            --color-accent: #FFC15E;
+            --color-text-dark: #3D3A37;
+            --color-text-light: #706B64;
+            --color-white: #FFFFFF;
+            --font-title: 'Quicksand', sans-serif;
+            --font-body: 'Outfit', sans-serif;
+            --shadow-soft: 0 10px 30px rgba(224, 203, 178, 0.2);
+            --shadow-hover: 0 15px 35px rgba(255, 140, 66, 0.15);
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-    h1, h2, h3, h4 { font-family: 'Baloo 2', cursive; }
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
 
-    /* ── ANIMATED BACKGROUND ── */
-    .bg-shapes {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    .bg-shapes span {
-      position: absolute;
-      display: block;
-      border-radius: 50%;
-      opacity: 0.07;
-      animation: float-shapes 20s infinite ease-in-out;
-    }
-    .bg-shapes span:nth-child(1) { width: 300px; height: 300px; background: var(--primary); top: 10%; left: -5%; animation-delay: 0s; }
-    .bg-shapes span:nth-child(2) { width: 200px; height: 200px; background: var(--secondary); top: 60%; right: -3%; animation-delay: 5s; }
-    .bg-shapes span:nth-child(3) { width: 250px; height: 250px; background: var(--accent); top: 30%; left: 50%; animation-delay: 10s; }
-    .bg-shapes span:nth-child(4) { width: 180px; height: 180px; background: var(--purple); bottom: 5%; left: 20%; animation-delay: 3s; }
+        body {
+            background-color: var(--color-bg);
+            font-family: var(--font-body);
+            color: var(--color-text-dark);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
 
-    @keyframes float-shapes {
-      0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
-      33% { transform: translateY(-30px) rotate(120deg) scale(1.1); }
-      66% { transform: translateY(20px) rotate(240deg) scale(0.95); }
-    }
+        /* Typography */
+        h1, h2, h3, h4 {
+            font-family: var(--font-title);
+            font-weight: 700;
+            color: var(--color-text-dark);
+        }
 
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 24px;
-      position: relative;
-      z-index: 1;
-    }
+        /* Container */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
 
-    /* ── NAVBAR ── */
-    nav {
-      padding: 16px 0;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(255,249,251,0.85);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(255,107,157,0.08);
-    }
-    .nav-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: 'Baloo 2', cursive;
-      font-size: 1.6rem;
-      font-weight: 800;
-      color: var(--primary);
-      text-decoration: none;
-    }
-    .logo-icon {
-      width: 44px; height: 44px;
-      background: linear-gradient(135deg, var(--primary), var(--accent-warm));
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      box-shadow: 0 4px 16px rgba(255,107,157,0.25);
-    }
-    .nav-links {
-      display: flex;
-      gap: 28px;
-      list-style: none;
-    }
-    .nav-links a {
-      text-decoration: none;
-      color: var(--text-light);
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: color 0.3s;
-    }
-    .nav-links a:hover { color: var(--primary); }
-    .nav-cta {
-      background: linear-gradient(135deg, var(--primary), var(--accent-warm));
-      color: #fff !important;
-      padding: 10px 24px;
-      border-radius: 50px;
-      font-weight: 700 !important;
-      box-shadow: 0 4px 16px rgba(255,107,157,0.3);
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-    .nav-cta:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+        /* Header / Navbar */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(253, 251, 247, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(224, 203, 178, 0.2);
+            transition: var(--transition-smooth);
+        }
 
-    /* ── HERO ── */
-    .hero {
-      padding: 80px 0 60px;
-      text-align: center;
-    }
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: linear-gradient(135deg, rgba(255,107,157,0.1), rgba(255,230,109,0.15));
-      padding: 8px 20px;
-      border-radius: 50px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 24px;
-      animation: fade-in-up 0.6s ease-out;
-    }
-    .hero h1 {
-      font-size: clamp(2.2rem, 5vw, 3.8rem);
-      line-height: 1.15;
-      margin-bottom: 20px;
-      animation: fade-in-up 0.6s ease-out 0.1s backwards;
-    }
-    .hero h1 .gradient-text {
-      background: linear-gradient(135deg, var(--primary), var(--accent-warm), var(--secondary));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .hero p {
-      font-size: 1.15rem;
-      color: var(--text-light);
-      max-width: 560px;
-      margin: 0 auto 36px;
-      line-height: 1.7;
-      animation: fade-in-up 0.6s ease-out 0.2s backwards;
-    }
-    .hero-buttons {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      flex-wrap: wrap;
-      animation: fade-in-up 0.6s ease-out 0.3s backwards;
-    }
+        .nav-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 80px;
+        }
 
-    @keyframes fade-in-up {
-      from { opacity: 0; transform: translateY(24px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
 
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 14px 32px;
-      border-radius: 50px;
-      font-family: 'Nunito', sans-serif;
-      font-weight: 700;
-      font-size: 1rem;
-      text-decoration: none;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--accent-warm));
-      color: #fff;
-      box-shadow: 0 6px 24px rgba(255,107,157,0.35);
-    }
-    .btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 36px rgba(255,107,157,0.4);
-    }
-    .btn-secondary {
-      background: #fff;
-      color: var(--text);
-      border: 2px solid rgba(255,107,157,0.2);
-    }
-    .btn-secondary:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      transform: translateY(-2px);
-    }
-    .btn-whatsapp {
-      background: linear-gradient(135deg, #25D366, #128C7E);
-      color: #fff;
-      box-shadow: 0 6px 24px rgba(37,211,102,0.35);
-    }
-    .btn-whatsapp:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 36px rgba(37,211,102,0.4);
-    }
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--color-primary);
+            border-radius: 50% 50% 50% 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: var(--font-title);
+            font-weight: 700;
+            font-size: 20px;
+            transform: rotate(5deg);
+        }
 
-    /* ── HERO CARDS (Toy categories preview) ── */
-    .hero-cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-top: 60px;
-      animation: fade-in-up 0.6s ease-out 0.4s backwards;
-    }
-    .hero-card {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      padding: 32px 24px;
-      text-align: center;
-      box-shadow: var(--shadow);
-      transition: transform 0.4s, box-shadow 0.4s;
-      border: 1px solid rgba(255,107,157,0.06);
-    }
-    .hero-card:hover {
-      transform: translateY(-8px);
-      box-shadow: var(--shadow-hover);
-    }
-    .hero-card .emoji {
-      font-size: 3rem;
-      margin-bottom: 12px;
-      display: block;
-    }
-    .hero-card h3 {
-      font-size: 1.1rem;
-      margin-bottom: 8px;
-      color: var(--text);
-    }
-    .hero-card p {
-      font-size: 0.88rem;
-      color: var(--text-light);
-      line-height: 1.6;
-    }
-    .hero-card .age-badge {
-      display: inline-block;
-      margin-top: 12px;
-      padding: 4px 14px;
-      border-radius: 50px;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-    .hero-card:nth-child(1) .age-badge { background: rgba(78,205,196,0.12); color: var(--secondary); }
-    .hero-card:nth-child(2) .age-badge { background: rgba(255,107,157,0.12); color: var(--primary); }
-    .hero-card:nth-child(3) .age-badge { background: rgba(167,139,250,0.12); color: var(--purple); }
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-text-dark);
+            letter-spacing: -0.5px;
+        }
 
-    /* ── SECTION COMMON ── */
-    section { padding: 80px 0; }
+        .logo-text span {
+            color: var(--color-primary);
+        }
 
-    .section-header {
-      text-align: center;
-      margin-bottom: 48px;
-    }
-    .section-tag {
-      display: inline-block;
-      padding: 6px 16px;
-      border-radius: 50px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 12px;
-    }
-    .section-header h2 {
-      font-size: clamp(1.8rem, 3vw, 2.4rem);
-      margin-bottom: 12px;
-    }
-    .section-header p {
-      color: var(--text-light);
-      max-width: 480px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 32px;
+            align-items: center;
+        }
 
-    /* ── PRODUCTS / CATEGORIES ── */
-    .products-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 24px;
-    }
-    .product-card {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      transition: transform 0.4s, box-shadow 0.4s;
-      border: 1px solid rgba(255,107,157,0.06);
-    }
-    .product-card:hover {
-      transform: translateY(-6px);
-      box-shadow: var(--shadow-hover);
-    }
-    .product-img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 4rem;
-    }
-    .product-img-1 { background: linear-gradient(135deg, #FFE6E9, #FFF0E6); }
-    .product-img-2 { background: linear-gradient(135deg, #E6F9F7, #E6F0FF); }
-    .product-img-3 { background: linear-gradient(135deg, #F0E6FF, #FFE6F5); }
-    .product-img-4 { background: linear-gradient(135deg, #FFFCE6, #FFF0E6); }
-    .product-info {
-      padding: 20px;
-    }
-    .product-info h3 {
-      font-size: 1.05rem;
-      margin-bottom: 6px;
-    }
-    .product-info .price {
-      font-family: 'Baloo 2', cursive;
-      font-size: 1.3rem;
-      color: var(--primary);
-      font-weight: 700;
-    }
-    .product-info .desc {
-      font-size: 0.85rem;
-      color: var(--text-light);
-      margin: 8px 0 14px;
-      line-height: 1.5;
-    }
-    .product-info .btn {
-      width: 100%;
-      justify-content: center;
-      padding: 11px 20px;
-      font-size: 0.9rem;
-    }
+        nav a {
+            text-decoration: none;
+            color: var(--color-text-dark);
+            font-weight: 600;
+            font-size: 16px;
+            transition: var(--transition-smooth);
+            position: relative;
+        }
 
-    /* ── FEATURES / WHY US ── */
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 24px;
-    }
-    .feature {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      padding: 32px 24px;
-      box-shadow: var(--shadow);
-      transition: transform 0.3s;
-      border: 1px solid rgba(255,107,157,0.06);
-    }
-    .feature:hover { transform: translateY(-4px); }
-    .feature .icon {
-      width: 56px; height: 56px;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.6rem;
-      margin-bottom: 16px;
-    }
-    .feature:nth-child(1) .icon { background: rgba(78,205,196,0.12); }
-    .feature:nth-child(2) .icon { background: rgba(255,107,157,0.12); }
-    .feature:nth-child(3) .icon { background: rgba(167,139,250,0.12); }
-    .feature:nth-child(4) .icon { background: rgba(255,230,109,0.2); }
-    .feature h3 { font-size: 1.05rem; margin-bottom: 8px; }
-    .feature p { font-size: 0.88rem; color: var(--text-light); line-height: 1.6; }
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background-color: var(--color-primary);
+            border-radius: 2px;
+            transition: var(--transition-smooth);
+        }
 
-    /* ── TESTIMONIALS ── */
-    .testimonials-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px;
-    }
-    .testimonial {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      padding: 28px;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(255,107,157,0.06);
-    }
-    .testimonial .stars {
-      color: var(--accent);
-      font-size: 1.1rem;
-      margin-bottom: 12px;
-    }
-    .testimonial p {
-      font-size: 0.95rem;
-      line-height: 1.7;
-      color: var(--text-light);
-      font-style: italic;
-      margin-bottom: 16px;
-    }
-    .testimonial .author {
-      font-weight: 700;
-      color: var(--text);
-      font-size: 0.9rem;
-    }
+        nav a:hover::after {
+            width: 100%;
+        }
 
-    /* ── CTA SECTION ── */
-    .cta-section {
-      background: linear-gradient(135deg, var(--primary), var(--accent-warm));
-      border-radius: var(--radius);
-      padding: 60px 40px;
-      text-align: center;
-      color: #fff;
-      margin-bottom: 80px;
-      position: relative;
-      overflow: hidden;
-    }
-    .cta-section::before {
-      content: '';
-      position: absolute;
-      top: -50%; left: -50%;
-      width: 200%; height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%);
-      animation: cta-glow 6s ease-in-out infinite;
-    }
-    @keyframes cta-glow {
-      0%, 100% { transform: translate(0, 0); }
-      50% { transform: translate(5%, 5%); }
-    }
-    .cta-section h2 {
-      font-size: clamp(1.6rem, 3vw, 2.2rem);
-      margin-bottom: 12px;
-      position: relative;
-    }
-    .cta-section p {
-      opacity: 0.9;
-      margin-bottom: 28px;
-      max-width: 450px;
-      margin-left: auto;
-      margin-right: auto;
-      position: relative;
-    }
-    .cta-section .btn {
-      background: #fff;
-      color: var(--primary);
-      font-weight: 800;
-      position: relative;
-    }
-    .cta-section .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 36px rgba(0,0,0,0.15);
-    }
+        nav a:hover {
+            color: var(--color-primary);
+        }
 
-    /* ── FOOTER ── */
-    footer {
-      padding: 40px 0;
-      text-align: center;
-      border-top: 1px solid rgba(255,107,157,0.08);
-    }
-    footer p {
-      font-size: 0.85rem;
-      color: var(--text-light);
-    }
-    .footer-links {
-      display: flex;
-      gap: 24px;
-      justify-content: center;
-      margin-bottom: 16px;
-    }
-    .footer-links a {
-      color: var(--text-light);
-      text-decoration: none;
-      font-size: 1.2rem;
-      transition: color 0.3s, transform 0.3s;
-    }
-    .footer-links a:hover { color: var(--primary); transform: scale(1.2); }
+        .btn-header {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(255, 140, 66, 0.2);
+        }
 
-    /* ── MOBILE ── */
-    @media (max-width: 768px) {
-      .nav-links { display: none; }
-      .hero-cards { grid-template-columns: 1fr; }
-      .hero { padding: 50px 0 40px; }
-      .cta-section { padding: 40px 24px; }
-    }
+        .btn-header:hover {
+            background-color: #e5752e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 140, 66, 0.3);
+        }
 
-    /* ── SCROLL ANIMATIONS ── */
-    .reveal {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 0.6s, transform 0.6s;
-    }
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
+        .btn-header::after {
+            display: none;
+        }
 
-    /* ── WHATSAPP FLOAT ── */
-    .wa-float {
-      position: fixed;
-      bottom: 28px;
-      right: 28px;
-      width: 60px;
-      height: 60px;
-      background: linear-gradient(135deg, #25D366, #128C7E);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8rem;
-      color: #fff;
-      text-decoration: none;
-      box-shadow: 0 6px 24px rgba(37,211,102,0.4);
-      z-index: 1000;
-      transition: transform 0.3s;
-      animation: wa-pulse 2s infinite;
-    }
-    .wa-float:hover { transform: scale(1.1); }
-    @keyframes wa-pulse {
-      0%, 100% { box-shadow: 0 6px 24px rgba(37,211,102,0.4); }
-      50% { box-shadow: 0 6px 36px rgba(37,211,102,0.6); }
-    }
-  </style>
+        /* Hero Section */
+        .hero {
+            padding: 160px 0 100px 0;
+            background: radial-gradient(circle at 80% 20%, var(--color-primary-light) 0%, transparent 40%),
+                        radial-gradient(circle at 10% 80%, var(--color-secondary-light) 0%, transparent 35%);
+            position: relative;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 48px;
+            align-items: center;
+        }
+
+        .hero-badge {
+            background-color: var(--color-primary-light);
+            color: var(--color-primary);
+            padding: 6px 16px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
+            gap: 8px;
+            margin-bottom: 24px;
+            animation: bounce 2s infinite;
+        }
+
+        .hero h1 {
+            font-size: 54px;
+            line-height: 1.15;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 span {
+            color: var(--color-primary);
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--color-text-light);
+            margin-bottom: 36px;
+            max-width: 540px;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 32px;
+            border-radius: 30px;
+            font-family: var(--font-title);
+            font-weight: 700;
+            font-size: 16px;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+            border: none;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+            box-shadow: 0 10px 25px rgba(255, 140, 66, 0.3);
+        }
+
+        .btn-primary:hover {
+            background-color: #e5752e;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(255, 140, 66, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: var(--color-text-dark);
+            border: 2px solid rgba(224, 203, 178, 0.4);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(224, 203, 178, 0.3);
+        }
+
+        /* Hero Image Showcase */
+        .hero-image-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-blob {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: var(--color-accent);
+            opacity: 0.2;
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+            animation: rotate-blob 20s linear infinite;
+            z-index: 1;
+        }
+
+        .hero-img-box {
+            position: relative;
+            z-index: 2;
+            background-color: white;
+            border-radius: 24px;
+            padding: 16px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(224, 203, 178, 0.3);
+            transform: rotate(-2deg);
+            transition: var(--transition-smooth);
+            max-width: 420px;
+        }
+
+        .hero-img-box:hover {
+            transform: rotate(1deg) scale(1.02);
+        }
+
+        .hero-img-box img {
+            width: 100%;
+            height: auto;
+            border-radius: 16px;
+            display: block;
+        }
+
+        /* Custom decorative play elements */
+        .hero-star {
+            position: absolute;
+            background-color: var(--color-accent);
+            width: 30px;
+            height: 30px;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            z-index: 3;
+            animation: pulse-star 3s infinite ease-in-out;
+        }
+        
+        .star-1 { top: 20%; left: 0; transform: scale(0.8); }
+        .star-2 { bottom: 15%; right: 10%; transform: scale(1.2); background-color: var(--color-secondary); }
+
+        /* Catalog / Products Section */
+        .catalog {
+            padding: 100px 0;
+            background-color: white;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 60px auto;
+        }
+
+        .section-header h2 {
+            font-size: 42px;
+            margin-bottom: 16px;
+        }
+
+        .section-header p {
+            font-size: 16px;
+            color: var(--color-text-light);
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .product-card {
+            background-color: var(--color-bg);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid rgba(224, 203, 178, 0.2);
+            box-shadow: var(--shadow-soft);
+            transition: var(--transition-smooth);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(255, 140, 66, 0.2);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: var(--color-secondary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .product-img-placeholder {
+            width: 100%;
+            height: 200px;
+            background-color: var(--color-primary-light);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-primary);
+            font-size: 48px;
+        }
+
+        .product-card h3 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .product-card p {
+            color: var(--color-text-light);
+            font-size: 14px;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-primary);
+            font-family: var(--font-title);
+        }
+
+        .btn-card {
+            background-color: var(--color-white);
+            border: 1px solid var(--color-primary);
+            color: var(--color-primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-card:hover {
+            background-color: var(--color-primary);
+            color: white;
+        }
+
+        /* Why Us Section */
+        .why-us {
+            padding: 100px 0;
+            background: linear-gradient(180deg, white 0%, var(--color-secondary-light) 100%);
+        }
+
+        .why-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .why-item {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            background-color: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-soft);
+            transition: var(--transition-smooth);
+        }
+
+        .why-item:hover {
+            transform: translateX(8px);
+        }
+
+        .why-icon {
+            width: 50px;
+            height: 50px;
+            background-color: var(--color-secondary-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-secondary);
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .why-text h3 {
+            font-size: 20px;
+            margin-bottom: 6px;
+        }
+
+        .why-text p {
+            color: var(--color-text-light);
+            font-size: 15px;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            padding: 100px 0;
+            background-color: white;
+        }
+
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .testimonial-card {
+            background-color: var(--color-bg);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid rgba(224, 203, 178, 0.2);
+            box-shadow: var(--shadow-soft);
+            position: relative;
+        }
+
+        .quote-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 48px;
+            color: var(--color-primary);
+            opacity: 0.1;
+            font-family: var(--font-title);
+        }
+
+        .testimonial-rating {
+            color: var(--color-accent);
+            margin-bottom: 16px;
+            font-size: 18px;
+        }
+
+        .testimonial-card p {
+            font-size: 15px;
+            font-style: italic;
+            color: var(--color-text-light);
+            margin-bottom: 24px;
+        }
+
+        .testimonial-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--color-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            font-family: var(--font-title);
+        }
+
+        .user-info h4 {
+            font-size: 16px;
+            margin-bottom: 2px;
+        }
+
+        .user-info span {
+            font-size: 13px;
+            color: var(--color-text-light);
+        }
+
+        /* Expansion CTA Section */
+        .cta-bottom {
+            padding: 100px 0;
+            background: linear-gradient(135deg, var(--color-primary) 0%, #ff6b15 100%);
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-bottom h2 {
+            color: white;
+            font-size: 46px;
+            margin-bottom: 20px;
+        }
+
+        .cta-bottom p {
+            font-size: 18px;
+            max-width: 600px;
+            margin: 0 auto 40px auto;
+            opacity: 0.9;
+        }
+
+        .btn-white {
+            background-color: white;
+            color: var(--color-primary);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-white:hover {
+            background-color: var(--color-primary-light);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Footer */
+        footer {
+            background-color: #312E2B;
+            color: #CFCBC5;
+            padding: 60px 0 30px 0;
+            font-size: 14px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr;
+            gap: 48px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .footer-logo .logo-icon {
+            background-color: var(--color-accent);
+            color: var(--color-text-dark);
+        }
+
+        .footer-logo .logo-text {
+            color: white;
+        }
+
+        .footer-col h3 {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 12px;
+        }
+
+        .footer-col a {
+            color: #CFCBC5;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+        }
+
+        .footer-col a:hover {
+            color: var(--color-accent);
+            padding-left: 4px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 30px;
+            text-align: center;
+            color: #9C9790;
+        }
+
+        /* FLOATING CHAT WIDGET (Neurova Expansion Option Showcase) */
+        .neurova-chat-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 9999;
+            font-family: var(--font-body);
+        }
+
+        .chat-trigger {
+            width: 65px;
+            height: 65px;
+            background-color: #25D366; /* WhatsApp Green */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            position: relative;
+        }
+
+        .chat-trigger:hover {
+            transform: scale(1.08);
+            box-shadow: 0 15px 30px rgba(37, 211, 102, 0.5);
+        }
+
+        .chat-notification {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background-color: #FF3B30;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            animation: pulse-notification 2.5s infinite;
+        }
+
+        .chat-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 360px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(224, 203, 178, 0.4);
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .chat-window.active {
+            display: flex;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .chat-header {
+            background-color: #075E54; /* Deep WhatsApp Teal */
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #EBF7FC;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .chat-profile-info h4 {
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .chat-profile-info span {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .chat-profile-info span::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: #25D366;
+            border-radius: 50%;
+        }
+
+        .chat-close {
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: var(--transition-smooth);
+        }
+
+        .chat-close:hover {
+            opacity: 1;
+        }
+
+        .chat-body {
+            height: 280px;
+            padding: 20px;
+            background-color: #ECE5DD; /* WhatsApp chat wallpaper shade */
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-msg {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.4;
+            animation: fade-in-msg 0.3s forwards;
+        }
+
+        .msg-received {
+            background-color: white;
+            align-self: flex-start;
+            border-top-left-radius: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            color: var(--color-text-dark);
+        }
+
+        .msg-sent {
+            background-color: #DCF8C6; /* WhatsApp Sent shade */
+            align-self: flex-end;
+            border-top-right-radius: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            color: var(--color-text-dark);
+        }
+
+        .chat-upgrade-badge {
+            background-color: var(--color-primary-light);
+            border: 1px dashed var(--color-primary);
+            color: var(--color-primary);
+            font-size: 11px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .chat-footer {
+            padding: 16px 20px;
+            background-color: white;
+            border-top: 1px solid rgba(224, 203, 178, 0.3);
+            text-align: center;
+        }
+
+        .chat-footer p {
+            font-size: 11px;
+            color: var(--color-text-light);
+            margin-bottom: 12px;
+        }
+
+        .btn-whatsapp-chat {
+            background-color: #25D366;
+            color: white;
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-family: var(--font-title);
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 14px;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);
+            transition: var(--transition-smooth);
+        }
+
+        .btn-whatsapp-chat:hover {
+            background-color: #20BA56;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(37, 211, 102, 0.3);
+        }
+
+        /* Animations */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        @keyframes rotate-blob {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse-star {
+            0%, 100% { transform: scale(0.9); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        @keyframes pulse-notification {
+            0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(255, 59, 48, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); }
+        }
+
+        @keyframes fade-in-msg {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 992px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 40px;
+            }
+
+            .hero h1 {
+                font-size: 42px;
+            }
+
+            .hero p {
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .hero-ctas {
+                justify-content: center;
+            }
+
+            .why-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+                text-align: center;
+            }
+
+            .footer-logo {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav ul {
+                display: none; /* Can expand to simple mobile drawer later */
+            }
+
+            .btn-header {
+                display: inline-flex;
+            }
+
+            .section-header h2 {
+                font-size: 32px;
+            }
+
+            .cta-bottom h2 {
+                font-size: 32px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <!-- Background shapes -->
-  <div class="bg-shapes">
-    <span></span><span></span><span></span><span></span>
-  </div>
 
-  <!-- WhatsApp Floating Button -->
-  <a href="https://wa.me/5491XXXXXXXXX?text=Hola!%20Quiero%20consultar%20por%20juguetes%20🧸" target="_blank" class="wa-float" id="wa-float" aria-label="Contactar por WhatsApp">💬</a>
+    <!-- Header / Nav -->
+    <header id="header">
+        <div class="container nav-wrapper">
+            <a href="#" class="logo">
+                <div class="logo-icon">P</div>
+                <div class="logo-text">Los<span>Peques</span></div>
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Inicio</a></li>
+                    <li><a href="#catalogo">Catálogo</a></li>
+                    <li><a href="#beneficios">Beneficios</a></li>
+                    <li><a href="#testimonios">Opiniones</a></li>
+                </ul>
+            </nav>
+            <a href="https://wa.me/5491122334455?text=Hola%20Los%20Peques!%20Me%20interesa%20conocer%20los%20juguetes." class="btn btn-header" id="btn-nav-whatsapp">Escríbenos</a>
+        </div>
+    </header>
 
-  <!-- NAV -->
-  <nav>
-    <div class="container nav-inner">
-      <a href="#" class="logo" id="logo">
-        <span class="logo-icon">🧸</span>
-        Los Peques
-      </a>
-      <ul class="nav-links">
-        <li><a href="#productos" id="nav-productos">Productos</a></li>
-        <li><a href="#nosotros" id="nav-nosotros">Nosotros</a></li>
-        <li><a href="#opiniones" id="nav-opiniones">Opiniones</a></li>
-        <li><a href="https://wa.me/5491XXXXXXXXX?text=Hola!%20Quiero%20consultar%20por%20juguetes%20🧸" target="_blank" class="nav-cta" id="nav-cta">Consultar 💬</a></li>
-      </ul>
+    <!-- Hero Section -->
+    <section class="hero" id="inicio">
+        <div class="container hero-grid">
+            <div class="hero-content">
+                <div class="hero-badge">🎨 Juguetes Didácticos Activos</div>
+                <h1>Aprender jugando con <span>Juguetes de Madera</span></h1>
+                <p>Diseñamos juguetes sustentables inspirados en las pedagogías Montessori y Waldorf. Estimula la concentración, psicomotricidad y la imaginación natural de tus peques de forma no invasiva.</p>
+                <div class="hero-ctas">
+                    <a href="#catalogo" class="btn btn-primary" id="hero-btn-catalog">Ver Catálogo</a>
+                    <button class="btn btn-secondary" onclick="openChatWithDemo()" id="hero-btn-ai">Probar Asesor IA</button>
+                </div>
+            </div>
+            <div class="hero-image-container">
+                <div class="hero-blob"></div>
+                <div class="hero-star star-1"></div>
+                <div class="hero-star star-2"></div>
+                <div class="hero-img-box">
+                    <!-- Placeholder SVG mimicking warm wooden toys mockup -->
+                    <svg viewBox="0 0 400 400" width="100%" height="100%" style="background-color: #FCF5EC; border-radius: 12px;">
+                        <circle cx="200" cy="180" r="100" fill="#FFC15E" opacity="0.3"/>
+                        <!-- Wooden blocks visual -->
+                        <rect x="120" y="240" width="80" height="80" rx="8" fill="#FF8C42" transform="rotate(-5, 160, 280)"/>
+                        <rect x="210" y="220" width="70" height="100" rx="6" fill="#4E9FBF" transform="rotate(10, 245, 270)"/>
+                        <polygon points="200,80 140,180 260,180" fill="#FFC15E"/>
+                        <circle cx="200" cy="180" r="30" fill="#FF8C42" opacity="0.8"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Catalog Section -->
+    <section class="catalog" id="catalogo">
+        <div class="container">
+            <div class="section-header">
+                <h2>El Regalo Perfecto</h2>
+                <p>Nuestra colección artesanal está pensada para acompañar cada etapa de crecimiento de forma segura, natural y sumamente divertida.</p>
+            </div>
+            <div class="product-grid">
+                <!-- Product 1 -->
+                <div class="product-card">
+                    <span class="product-badge">1 - 3 Años</span>
+                    <div class="product-img-placeholder">🧱</div>
+                    <h3>Bloques Creativos</h3>
+                    <p>Bloques de madera nativa de encastre para construir figuras sin límites. Fomenta la coordinación ojo-mano y el pensamiento espacial.</p>
+                    <div class="product-footer">
+                        <div class="product-price">$8.500</div>
+                        <a href="https://wa.me/5491122334455?text=Hola!%20Me%20interesa%20el%20Set%20de%20Bloques%20Creativos" class="btn-card" id="btn-buy-1">Consultar</a>
+                    </div>
+                </div>
+                <!-- Product 2 -->
+                <div class="product-card">
+                    <span class="product-badge">2 - 5 Años</span>
+                    <div class="product-img-placeholder">📐</div>
+                    <h3>Arcoíris Waldorf</h3>
+                    <p>El clásico de la pedagogía Waldorf. 12 arcos de madera curvada que se transforman en túneles, puentes, casas y esculturas únicas.</p>
+                    <div class="product-footer">
+                        <div class="product-price">$14.200</div>
+                        <a href="https://wa.me/5491122334455?text=Hola!%20Me%20interesa%20el%20Arcoiris%20Waldorf" class="btn-card" id="btn-buy-2">Consultar</a>
+                    </div>
+                </div>
+                <!-- Product 3 -->
+                <div class="product-card">
+                    <span class="product-badge">Bebés</span>
+                    <div class="product-img-placeholder">🔔</div>
+                    <h3>Gimnasio Sensorial</h3>
+                    <p>Estructura de madera suave con móviles colgantes texturizados y cascabeles suaves que estimulan el agarre y sentido del oído.</p>
+                    <div class="product-footer">
+                        <div class="product-price">$18.900</div>
+                        <a href="https://wa.me/5491122334455?text=Hola!%20Me%20interesa%20el%20Gimnasio%20Sensorial" class="btn-card" id="btn-buy-3">Consultar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Montessori Section -->
+    <section class="why-us" id="beneficios">
+        <div class="container why-grid">
+            <div class="why-content">
+                <h2>¿Por qué elegir Juguetes Didácticos de Madera?</h2>
+                <p style="margin: 20px 0 30px 0; color: var(--color-text-light);">A diferencia de los juguetes de plástico con luces y sonidos estridentes que sobreestimulan a los niños, la madera ofrece una experiencia rica, calmante y de aprendizaje real.</p>
+                <a href="https://wa.me/5491122334455?text=Quiero%20asesoramiento%20para%20un%20juguete" class="btn btn-primary" id="why-btn-wa">Recibir Asesoría Gratis</a>
+            </div>
+            <div class="why-items-list">
+                <!-- Item 1 -->
+                <div class="why-item">
+                    <div class="why-icon">🌳</div>
+                    <div class="why-text">
+                        <h3>Sustentables y Seguros</h3>
+                        <p>Madera de reforestación certificada, pulida a mano meticulosamente y coloreada con tintes orgánicos no tóxicos.</p>
+                    </div>
+                </div>
+                <!-- Item 2 -->
+                <div class="why-item">
+                    <div class="why-icon">💡</div>
+                    <div class="why-text">
+                        <h3>Fomenta la Imaginación</h3>
+                        <p>Juguetes abiertos y libres de reglas. Un arcoíris puede ser un puente, un barco, una cuna o lo que el peque imagine hoy.</p>
+                    </div>
+                </div>
+                <!-- Item 3 -->
+                <div class="why-item">
+                    <div class="why-icon">🛡️</div>
+                    <div class="why-text">
+                        <h3>Durabilidad Generacional</h3>
+                        <p>Diseñados para durar años. Resisten golpes, caídas y el paso del tiempo, listos para heredarse de hermanos a hermanos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials" id="testimonios">
+        <div class="container">
+            <div class="section-header">
+                <h2>Lo que opinan los papás</h2>
+                <p>Nuestra mayor satisfacción es ver a los peques descubrir nuevas maneras de jugar y crear todos los días.</p>
+            </div>
+            <div class="testimonial-grid">
+                <!-- Testimonial 1 -->
+                <div class="testimonial-card">
+                    <div class="quote-icon">“</div>
+                    <div class="testimonial-rating">★★★★★</div>
+                    <p>"El Arcoíris Waldorf es sin dudas el preferido de Julián. Pasa horas armando pistas para sus autos. La calidad de la madera y la pintura es impecable."</p>
+                    <div class="testimonial-user">
+                        <div class="user-avatar">M</div>
+                        <div class="user-info">
+                            <h4>Mariana Gómez</h4>
+                            <span>Mamá de Julián (3 años)</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Testimonial 2 -->
+                <div class="testimonial-card">
+                    <div class="quote-icon">“</div>
+                    <div class="testimonial-rating">★★★★★</div>
+                    <p>"Excelente atención telefónica. Me ayudaron a elegir los bloques didácticos ideales para el cumpleaños de mi ahijada de 2 años. Se divierte un montón."</p>
+                    <div class="testimonial-user">
+                        <div class="user-avatar">F</div>
+                        <div class="user-info">
+                            <h4>Facundo Rivas</h4>
+                            <span>Tío Orgulloso</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-bottom">
+        <div class="container">
+            <h2>¿No sabes cuál elegir?</h2>
+            <p>Habla con nuestro asistente de regalos inteligente en WhatsApp. Te recomendará la opción ideal según la edad y etapa de desarrollo de tu pequeño.</p>
+            <a href="https://wa.me/5491122334455?text=Hola,%20busco%20un%20juguete%20para%20mi%20peque." class="btn btn-white" id="cta-btn-whatsapp-bot">Consultar con Asesor IA</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <a href="#" class="footer-logo">
+                    <div class="logo-icon">P</div>
+                    <div class="logo-text">Los<span>Peques</span></div>
+                </a>
+                <p style="margin-bottom: 20px;">Fomentando el aprendizaje natural, creativo y seguro de tus hijos mediante juegos didácticos sustentables de madera.</p>
+                <span>© 2026 Los Peques Juguetes. Todos los derechos reservados.</span>
+            </div>
+            <div class="footer-col">
+                <h3>Enlaces</h3>
+                <ul>
+                    <li><a href="#inicio">Inicio</a></li>
+                    <li><a href="#catalogo">Catálogo</a></li>
+                    <li><a href="#beneficios">Beneficios</a></li>
+                    <li><a href="#testimonios">Opiniones</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Contacto</h3>
+                <ul>
+                    <li>📞 +54 9 11 2233 4455</li>
+                    <li>📍 Buenos Aires, Argentina</li>
+                    <li>✉️ hola@lospequesjuguetes.com.ar</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Diseño y tecnología optimizada por <a href="https://generarise.space" style="color: var(--color-accent); font-weight: 600; text-decoration: none;">Neurova Agency</a></p>
+        </div>
+    </footer>
+
+    <!-- FLOATING CHAT WIDGET (Neurova Expansion Option Showcase) -->
+    <div class="neurova-chat-widget">
+        <div class="chat-trigger" onclick="toggleChatWindow()" id="whatsapp-widget-trigger">
+            <span style="display: flex;">💬</span>
+            <div class="chat-notification">1</div>
+        </div>
+        <div class="chat-window" id="whatsapp-chat-window">
+            <div class="chat-header">
+                <div class="chat-profile">
+                    <div class="chat-avatar">🤖</div>
+                    <div class="chat-profile-info">
+                        <h4>Peques-Bot IA</h4>
+                        <span>Asesor Inteligente</span>
+                    </div>
+                </div>
+                <div class="chat-close" onclick="toggleChatWindow()">✕</div>
+            </div>
+            <div class="chat-body" id="chat-conversation-body">
+                <!-- Messages simulated with delays -->
+                <div class="chat-msg msg-received">
+                    ¡Hola! 🧸 Soy el **Asesor IA** de Los Peques.
+                </div>
+                <div class="chat-msg msg-received">
+                    Cuéntame, ¿qué edad tiene el niño/a y qué habilidades te gustaría que desarrolle jugando?
+                </div>
+            </div>
+            <div class="chat-footer">
+                <div class="chat-upgrade-badge">✨ Demo de la Suite de Ventas Neurova</div>
+                <p>¿Quieres chatear con nuestra IA de verdad por WhatsApp y ver cómo cierra ventas en piloto automático?</p>
+                <a href="https://wa.me/5491122334455?text=Hola,%20quiero%20probar%20el%20demo%20interactivo%20para%20los%20peques%20juguetes" class="btn-whatsapp-chat" id="widget-btn-wa">
+                    <span>📲 Probar en WhatsApp</span>
+                </a>
+            </div>
+        </div>
     </div>
-  </nav>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="container">
-      <div class="hero-badge">✨ Juguetes que inspiran creatividad</div>
-      <h1>Juguetes <span class="gradient-text">Didácticos<br>y Creativos</span> para tus Peques</h1>
-      <p>Estimulá la imaginación de tus hijos con juguetes educativos, seguros y de la mejor calidad. Envíos a todo el país 🇦🇷</p>
-      <div class="hero-buttons">
-        <a href="#productos" class="btn btn-primary" id="hero-cta-ver">Ver Catálogo 🎁</a>
-        <a href="https://wa.me/5491XXXXXXXXX?text=Hola!%20Quiero%20consultar%20por%20juguetes%20🧸" target="_blank" class="btn btn-whatsapp" id="hero-cta-wa">WhatsApp 💬</a>
-      </div>
-
-      <!-- Categories Preview -->
-      <div class="hero-cards">
-        <div class="hero-card">
-          <span class="emoji">🧩</span>
-          <h3>Encastres y Puzzles</h3>
-          <p>Desarrollan la motricidad fina y el pensamiento lógico</p>
-          <span class="age-badge">1 a 3 años</span>
-        </div>
-        <div class="hero-card">
-          <span class="emoji">🎨</span>
-          <h3>Arte y Creatividad</h3>
-          <p>Pinturas, masas y kits para explorar su lado artístico</p>
-          <span class="age-badge">3 a 6 años</span>
-        </div>
-        <div class="hero-card">
-          <span class="emoji">🔬</span>
-          <h3>Ciencia y Exploración</h3>
-          <p>Kits STEM para los pequeños científicos curiosos</p>
-          <span class="age-badge">6 a 12 años</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- PRODUCTS -->
-  <section id="productos">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-tag" style="background: rgba(255,107,157,0.1); color: var(--primary);">🎁 Catálogo</span>
-        <h2>Nuestros Juguetes Más Populares</h2>
-        <p>Cada juguete es elegido con amor pensando en el desarrollo y la diversión de tus peques</p>
-      </div>
-      <div class="products-grid">
-        <div class="product-card reveal">
-          <div class="product-img product-img-1">🧱</div>
-          <div class="product-info">
-            <h3>Torre de Bloques de Madera</h3>
-            <p class="desc">48 piezas de madera natural pintadas con colores no tóxicos. Ideal para desarrollar la coordinación.</p>
-            <span class="price">$12.500</span>
-            <br><br>
-            <a href="https://wa.me/5491XXXXXXXXX?text=Hola!%20Me%20interesa%20la%20Torre%20de%20Bloques%20🧱" target="_blank" class="btn btn-whatsapp" id="prod-1-cta">Consultar 💬</a>
-          </div>
-        </div>
-        <div class="product-card reveal">
-          <div class="product-img product-img-2">🎪</div>
-          <div class="product-info">
-            <h3>Kit de Masa Sensorial</h3>
-            <p class="desc">6 colores de masa moldeable no tóxica + moldes temáticos + herramientas de juego.</p>
-            <span class="price">$8.900</span>
-            <br><br>
-            <a href="https://wa.me/5491XXXXXXXXX?text=Hola!%20Me%20interesa%20el%20Kit%20de%20Masa%20Sensorial" target="_blank" class="btn btn-whatsapp" id="prod-2-cta">Consultar 💬</a>
-          </div>
-        </div>
-        <div class="product-card reveal">
-          <div class="product-img product-img-3">🔭</div>
-          <div class="product-info">
-            <h3>Mini Laboratorio STEM</h3>
-            <p class="desc">15 experimentos fáciles para hacer en casa. Incluye microscopio, tubos y guía ilustrada.</p>
-            <span class="price">$18.500</span>
-            <br><br>
-            <a href="https://wa.me/5491XXXXXXXXX?text=Hola!%20Me%20interesa%20el%20Mini%20Laboratorio%20STEM%20🔬" target="_blank" class="btn btn-whatsapp" id="prod-3-cta">Consultar 💬</a>
-          </div>
-        </div>
-        <div class="product-card reveal">
-          <div class="product-img product-img-4">🎹</div>
-          <div class="product-info">
-            <h3>Piano Musical de Colores</h3>
-            <p class="desc">Teclas iluminadas con 8 melodías, sonidos de animales y modo aprendizaje.</p>
-            <span class="price">$15.200</span>
-            <br><br>
-            <a href="https://wa.me/5491XXXXXXXXX?text=Hola!%20Me%20interesa%20el%20Piano%20Musical%20🎹" target="_blank" class="btn btn-whatsapp" id="prod-4-cta">Consultar 💬</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- WHY US -->
-  <section id="nosotros" style="background: linear-gradient(180deg, var(--bg), #FFF0F5);">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-tag" style="background: rgba(78,205,196,0.12); color: var(--secondary);">💖 ¿Por qué elegirnos?</span>
-        <h2>Más que Juguetes, Experiencias</h2>
-        <p>Creemos que cada juguete es una oportunidad de aprendizaje y conexión</p>
-      </div>
-      <div class="features-grid">
-        <div class="feature reveal">
-          <div class="icon">🛡️</div>
-          <h3>100% Seguros</h3>
-          <p>Materiales no tóxicos, bordes redondeados y certificaciones de seguridad infantil.</p>
-        </div>
-        <div class="feature reveal">
-          <div class="icon">🧠</div>
-          <h3>Educativos</h3>
-          <p>Cada juguete está diseñado para estimular habilidades cognitivas y motoras.</p>
-        </div>
-        <div class="feature reveal">
-          <div class="icon">🚚</div>
-          <h3>Envíos Rápidos</h3>
-          <p>Envíos a todo el país. Empaquetado especial para regalo sin costo extra.</p>
-        </div>
-        <div class="feature reveal">
-          <div class="icon">💬</div>
-          <h3>Asesoramiento</h3>
-          <p>Te ayudamos a elegir el juguete ideal según la edad e intereses de tu peque.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- TESTIMONIALS -->
-  <section id="opiniones">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-tag" style="background: rgba(167,139,250,0.12); color: var(--purple);">⭐ Opiniones</span>
-        <h2>Lo que dicen las Mamás y Papás</h2>
-      </div>
-      <div class="testimonials-grid">
-        <div class="testimonial reveal">
-          <div class="stars">⭐⭐⭐⭐⭐</div>
-          <p>"Le regalé los bloques de madera a mi nena de 2 años y no los suelta. La calidad es excelente y se nota que son seguros."</p>
-          <span class="author">— Carolina M., Buenos Aires</span>
-        </div>
-        <div class="testimonial reveal">
-          <div class="stars">⭐⭐⭐⭐⭐</div>
-          <p>"El kit STEM fue un éxito total en el cumple de mi hijo. Todos los nenes querían hacer los experimentos. ¡Súper recomendados!"</p>
-          <span class="author">— Martín R., Córdoba</span>
-        </div>
-        <div class="testimonial reveal">
-          <div class="stars">⭐⭐⭐⭐⭐</div>
-          <p>"Me asesoraron por WhatsApp y me ayudaron a elegir el regalo perfecto. Llegó súper rápido y con un empaquetado hermoso."</p>
-          <span class="author">— Laura G., Rosario</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section>
-    <div class="container">
-      <div class="cta-section reveal">
-        <h2>¿No sabés qué regalar? 🎁</h2>
-        <p>Escribinos por WhatsApp y te asesoramos gratis para elegir el juguete ideal según la edad y los gustos de tu peque.</p>
-        <a href="https://wa.me/5491XXXXXXXXX?text=Hola!%20Necesito%20asesoramiento%20para%20elegir%20un%20juguete%20🎁" target="_blank" class="btn" id="cta-wa-final">Pedir Asesoramiento Gratis 💬</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer>
-    <div class="container">
-      <div class="footer-links">
-        <a href="https://www.instagram.com/lospequesjuguetes/" target="_blank" aria-label="Instagram">📷</a>
-        <a href="https://wa.me/5491XXXXXXXXX" target="_blank" aria-label="WhatsApp">💬</a>
-      </div>
-      <p>© 2026 Los Peques Juguetes · Hecho con 💖 en Argentina</p>
-    </div>
-  </footer>
-
-  <script>
-    // Scroll reveal animation
-    const reveals = document.querySelectorAll('.reveal');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
+    <script>
+        function toggleChatWindow() {
+            const chatWin = document.getElementById('whatsapp-chat-window');
+            chatWin.classList.toggle('active');
+            
+            // Remove notification dot upon click
+            const notification = document.querySelector('.chat-notification');
+            if (notification) {
+                notification.style.display = 'none';
+            }
         }
-      });
-    }, { threshold: 0.1 });
-    reveals.forEach(el => observer.observe(el));
 
-    // Smooth scrolling
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', e => {
-        e.preventDefault();
-        const target = document.querySelector(a.getAttribute('href'));
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-    });
-  </script>
+        function openChatWithDemo() {
+            const chatWin = document.getElementById('whatsapp-chat-window');
+            if (!chatWin.classList.contains('active')) {
+                toggleChatWindow();
+            }
+            
+            // Highlight widget by bouncing it briefly
+            const trigger = document.getElementById('whatsapp-widget-trigger');
+            trigger.style.transform = 'scale(1.15)';
+            setTimeout(() => { trigger.style.transform = 'scale(1)'; }, 300);
+
+            // Append simulation
+            const chatBody = document.getElementById('chat-conversation-body');
+            
+            // Add custom simulation messages if they don't exist yet
+            if (chatBody.children.length === 2) {
+                setTimeout(() => {
+                    const userMsg = document.createElement('div');
+                    userMsg.className = 'chat-msg msg-sent';
+                    userMsg.innerText = 'Tiene 3 años y quiero algo Montessori';
+                    chatBody.appendChild(userMsg);
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                }, 1000);
+
+                setTimeout(() => {
+                    const aiMsg = document.createElement('div');
+                    aiMsg.className = 'chat-msg msg-received';
+                    aiMsg.innerHTML = '¡Es una edad mágica! Para un peque de 3 años, te recomiendo nuestro **Set de Bloques Creativos**. Ayuda a desarrollar su motricidad fina y pensamiento abstracto espacial construyendo torres y figuras.<br><br>¿Te gustaría que te reserve uno o prefieres ver otra opción?';
+                    chatBody.appendChild(aiMsg);
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                }, 2500);
+            }
+        }
+
+        // Auto trigger demo simulation after 4 seconds to grab attention
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const notification = document.querySelector('.chat-notification');
+                if (notification) {
+                    notification.style.display = 'flex';
+                }
+            }, 4000);
+        });
+    </script>
 </body>
 </html>
