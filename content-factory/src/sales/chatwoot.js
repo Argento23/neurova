@@ -65,10 +65,56 @@ export async function syncMessageToChatwoot(lead, messageContent, direction = 'o
             // Save conversation ID back to Lead in Supabase
             breakdown.chatwoot_conversation_id = conversationId;
             await supabase.updateLead(lead.id, { ai_score_breakdown: breakdown });
+          } else if (config.CHATWOOT_INBOX_ID) {
+            // Contact exists, but no conversation. Create conversation.
+            const newConvRes = await axios.post(
+              `${baseUrl}/api/v1/accounts/${accountId}/conversations`,
+              {
+                inbox_id: config.CHATWOOT_INBOX_ID,
+                contact_id: contactId,
+                status: 'open'
+              },
+              { headers, timeout: 10000 }
+            );
+            conversationId = newConvRes.data?.id;
+            logger.info(`Created new Chatwoot conversation ID ${conversationId} for contact ${contactId}`);
+            breakdown.chatwoot_conversation_id = conversationId;
+            await supabase.updateLead(lead.id, { ai_score_breakdown: breakdown });
           }
+        } else if (config.CHATWOOT_INBOX_ID) {
+          // Contact doesn't exist. Create contact and then conversation.
+          logger.info(`Contact not found. Creating new Chatwoot contact for ${lead.name || cleanPhone}`);
+          const newContactRes = await axios.post(
+            `${baseUrl}/api/v1/accounts/${accountId}/contacts`,
+            {
+              inbox_id: config.CHATWOOT_INBOX_ID,
+              name: lead.name || cleanPhone,
+              phone_number: `+${cleanPhone}`
+            },
+            { headers, timeout: 10000 }
+          );
+          const contactId = newContactRes.data?.payload?.contact?.id;
+          
+          if (contactId) {
+            const newConvRes = await axios.post(
+              `${baseUrl}/api/v1/accounts/${accountId}/conversations`,
+              {
+                inbox_id: config.CHATWOOT_INBOX_ID,
+                contact_id: contactId,
+                status: 'open'
+              },
+              { headers, timeout: 10000 }
+            );
+            conversationId = newConvRes.data?.id;
+            logger.info(`Created new Chatwoot conversation ID ${conversationId} for new contact ${contactId}`);
+            breakdown.chatwoot_conversation_id = conversationId;
+            await supabase.updateLead(lead.id, { ai_score_breakdown: breakdown });
+          }
+        } else {
+          logger.warn('Contact not found and CHATWOOT_INBOX_ID not configured to create one.');
         }
       } catch (err) {
-        logger.warn('Failed to search Chatwoot contact/conversation', { error: err.message });
+        logger.warn('Failed to search or create Chatwoot contact/conversation', { error: err.message });
       }
     }
 

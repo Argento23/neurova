@@ -79,6 +79,7 @@ const config = {
   CHATWOOT_API_TOKEN: process.env.CHATWOOT_API_TOKEN || '',
   CHATWOOT_API_URL: process.env.CHATWOOT_API_URL || 'https://woot.generarise.space',
   CHATWOOT_ACCOUNT_ID: process.env.CHATWOOT_ACCOUNT_ID || '1',
+  CHATWOOT_INBOX_ID: process.env.CHATWOOT_INBOX_ID || '',
 
   // Telegram
   TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || '',
