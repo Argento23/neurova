@@ -39,15 +39,31 @@ export async function syncMessageToChatwoot(lead, messageContent, direction = 'o
     // 2. If no conversation ID, search contact in Chatwoot by phone number
     if (!conversationId && lead.phone) {
       const cleanPhone = lead.phone.replace(/[^\d]/g, '');
-      logger.info(`Searching Chatwoot contact for phone: ${cleanPhone}`);
       
+      // Build search variants (Chatwoot may store numbers differently)
+      const searchVariants = [cleanPhone];
+      if (cleanPhone.startsWith('54') && !cleanPhone.startsWith('549')) {
+        searchVariants.push('549' + cleanPhone.substring(2)); // Add Argentine mobile 9
+      } else if (cleanPhone.startsWith('549')) {
+        searchVariants.push('54' + cleanPhone.substring(3)); // Remove Argentine mobile 9
+      }
+      // Also try with + prefix (Chatwoot often stores +XXXXXXXXXXX)
+      searchVariants.push(`+${cleanPhone}`);
+      
+      logger.info(`Searching Chatwoot contact for phone variants: ${searchVariants.join(', ')}`);
       try {
-        const searchRes = await axios.get(
-          `${baseUrl}/api/v1/accounts/${accountId}/contacts/search?q=${cleanPhone}`,
-          { headers, timeout: 10000 }
-        );
-
-        const contacts = searchRes.data?.payload || [];
+        let contacts = [];
+        for (const variant of searchVariants) {
+          const searchRes = await axios.get(
+            `${baseUrl}/api/v1/accounts/${accountId}/contacts/search?q=${variant}`,
+            { headers, timeout: 10000 }
+          );
+          contacts = searchRes.data?.payload || [];
+          if (contacts.length > 0) {
+            logger.info(`Found Chatwoot contact with variant: ${variant}`);
+            break;
+          }
+        }
         if (contacts.length > 0) {
           const contactId = contacts[0].id;
           
@@ -120,18 +136,21 @@ export async function syncMessageToChatwoot(lead, messageContent, direction = 'o
 
     // 3. Post message to the Chatwoot conversation if conversationId is known
     if (conversationId) {
-      logger.info(`Posting ${direction} message to Chatwoot conversation ${conversationId}`);
+      // Chatwoot API uses numeric message_type: 0=incoming, 1=outgoing, 2=activity
+      const messageType = direction === 'incoming' ? 0 : 1;
+      logger.info(`Posting ${direction} (type=${messageType}) message to Chatwoot conversation ${conversationId}: "${messageContent.substring(0, 60)}..."`);
       
       const response = await axios.post(
         `${baseUrl}/api/v1/accounts/${accountId}/conversations/${conversationId}/messages`,
         {
           content: messageContent,
-          message_type: direction,
+          message_type: messageType,
           private: false
         },
         { headers, timeout: 15000 }
       );
 
+      logger.info(`Chatwoot message synced OK (conversation ${conversationId}, type=${messageType}, id=${response.data?.id || 'unknown'})`);
       return response.data;
     } else {
       logger.warn(`Could not sync to Chatwoot: Conversation ID not found for lead ${lead.name}`);
