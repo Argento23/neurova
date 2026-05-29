@@ -105,7 +105,7 @@ function resetDailyCounters() {
 
 // ─── WHATSAPP PROVIDER DETECTION ───────────────────
 
-function getWhatsAppProvider() {
+export function getWhatsAppProvider() {
   const provider = config.WHATSAPP_PROVIDER;
   
   if (provider === 'cloud_api') {
@@ -438,7 +438,7 @@ async function contactLead(lead, { dryRun = false, channel = 'auto' } = {}) {
 
       templateData = {
         name: 'neurova_outreach',
-        language: config.META_TEMPLATE_LANGUAGE || 'es',
+        language: config.META_TEMPLATE_LANGUAGE || 'es_ES',
         parameters: [
           lead.name || 'amigo/a',
           lead.company || lead.industry || 'tu negocio',
@@ -677,5 +677,6 @@ export default {
   sendWhatsApp,
   sendEmail,
   checkEvolutionHealth,
-  generateAIOutreach
+  generateAIOutreach,
+  getWhatsAppProvider
 };

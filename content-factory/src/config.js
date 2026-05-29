@@ -58,7 +58,7 @@ const config = {
   META_PHONE_NUMBER_ID: process.env.META_PHONE_NUMBER_ID || '',
   META_WABA_ID: process.env.META_WABA_ID || '',
   META_API_VERSION: process.env.META_API_VERSION || 'v22.0',
-  META_TEMPLATE_LANGUAGE: process.env.META_TEMPLATE_LANGUAGE || 'es',
+  META_TEMPLATE_LANGUAGE: process.env.META_TEMPLATE_LANGUAGE || 'es_ES',
 
   // Meta Webhook Verification
   META_WEBHOOK_VERIFY_TOKEN: process.env.META_WEBHOOK_VERIFY_TOKEN || 'neurova_verify',

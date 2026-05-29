@@ -234,7 +234,20 @@ async function handleEvolutionWebhook(body, res) {
 async function processInboundMessage(phone, text, contactName = null) {
   try {
     // 1. Find lead by phone
-    const leads = await supabase.getLeads({ phone });
+    let leads = await supabase.getLeads({ phone });
+
+    // Fallback: Argentina 9 prefix handling (e.g. 54911... vs 5411...)
+    if ((!leads || leads.length === 0) && phone.startsWith('54')) {
+      if (phone.startsWith('549')) {
+        const without9 = '54' + phone.substring(3);
+        logger.info(`Argentine number fallback in processInboundMessage: searching without 9 prefix: ${without9}`);
+        leads = await supabase.getLeads({ phone: without9 });
+      } else {
+        const with9 = '549' + phone.substring(2);
+        logger.info(`Argentine number fallback in processInboundMessage: searching with 9 prefix: ${with9}`);
+        leads = await supabase.getLeads({ phone: with9 });
+      }
+    }
 
     if (leads && leads.length > 0) {
       const lead = leads[0];

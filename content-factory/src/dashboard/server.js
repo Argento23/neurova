@@ -227,8 +227,39 @@ app.post('/api/sales/leads/:id/whatsapp', async (req, res) => {
     const lead = await supabaseClient.getLeadById(id);
     if (!lead || !lead.phone) return res.status(404).json({ error: 'Lead not found or has no phone' });
 
-    logger.info(`Sending manual WhatsApp to ${lead.name} using provider: ${provider || 'default (config)'}`);
-    const result = await outreachEngine.sendWhatsApp(lead.phone, message, null, provider);
+    const activeProvider = provider || outreachEngine.getWhatsAppProvider();
+    let templateData = null;
+
+    if (activeProvider === 'cloud_api') {
+      // Check if lead has responded recently (within 24 hours) to determine if the window is open
+      const hasOpenWindow = lead.outreach_status === 'responded' &&
+                            lead.updated_at &&
+                            (new Date() - new Date(lead.updated_at) < 24 * 60 * 60 * 1000);
+
+      if (!hasOpenWindow) {
+        let cleanMessage = message;
+        // Clean up greeting patterns to prevent duplication with the template
+        cleanMessage = cleanMessage.replace(/^Hola\s+[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s,]+[.!]\s*/i, '');
+        cleanMessage = cleanMessage.replace(/^¡?Hola!?,?\s*/i, '');
+        cleanMessage = cleanMessage.replace(/^vi\s+(que\s+)?tu\s+empresa\s+[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s,]+[.!]\s*/i, '');
+
+        templateData = {
+          name: 'neurova_outreach',
+          language: config.META_TEMPLATE_LANGUAGE || 'es_ES',
+          parameters: [
+            lead.name || 'amigo/a',
+            lead.company || lead.industry || 'tu negocio',
+            cleanMessage
+          ]
+        };
+        logger.info(`Manual send to ${lead.name}: 24h window closed. Routing via Meta Template.`);
+      } else {
+        logger.info(`Manual send to ${lead.name}: 24h window open. Sending as free-text.`);
+      }
+    }
+
+    logger.info(`Sending manual WhatsApp to ${lead.name} using provider: ${activeProvider}`);
+    const result = await outreachEngine.sendWhatsApp(lead.phone, message, templateData, provider);
 
     if (result.success) {
       // Update lead stages/status

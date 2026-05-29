@@ -95,8 +95,11 @@ class TikTokPublisher {
    * @param {string} caption - Video description/caption
    * @returns {string} Publish ID
    */
-  async publishVideo(videoPath, caption) {
-    if (!this.isConfigured()) {
+  async publishVideo(videoPath, caption, creds = null) {
+    const token = creds?.tiktok_access_token || this.accessToken;
+    const openId = creds?.tiktok_open_id || this.openId;
+
+    if (!token || !openId) {
       logger.warn('TikTok not configured — skipping publish');
       return null;
     }
@@ -105,21 +108,21 @@ class TikTokPublisher {
       // Step 1: Query creator info (required before posting)
       let creatorInfo;
       try {
-        creatorInfo = await this._getCreatorInfo();
+        creatorInfo = await this._getCreatorInfo(token);
       } catch (err) {
         const errorData = err.response?.data || {};
         const isExpired = err.response?.status === 401 || 
                          errorData.error?.code === 'access_token_invalid' ||
                          errorData.error?.code === 'token_expired';
         
-        if (isExpired) {
+        if (isExpired && !creds) {
           logger.info('TikTok token looks expired, attempting refresh...');
           const refreshed = await this._refreshAccessToken();
           if (!refreshed) {
             // If refresh fails, try to proceed with current token as a last resort
             logger.warn('TikTok refresh failed, attempting to proceed with current token anyway...');
           }
-          creatorInfo = await this._getCreatorInfo();
+          creatorInfo = await this._getCreatorInfo(this.accessToken);
         } else {
           throw err;
         }
@@ -152,7 +155,7 @@ class TikTokPublisher {
         },
         {
           headers: {
-            'Authorization': `Bearer ${this.accessToken}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
           timeout: 30000
@@ -175,7 +178,7 @@ class TikTokPublisher {
       logger.info(`TikTok: Video uploaded! Publish ID: ${publish_id}`);
 
       // Step 4: Check publish status
-      await this._checkStatus(publish_id);
+      await this._checkStatus(publish_id, 10, token);
 
       return publish_id;
 
@@ -187,19 +190,21 @@ class TikTokPublisher {
     }
   }
 
-  async _getCreatorInfo() {
+  async _getCreatorInfo(tokenOverride = null) {
+    const token = tokenOverride || this.accessToken;
     const res = await axios.post(
       `${this.apiBase}/post/publish/creator_info/query/`,
       {},
       {
-        headers: { 'Authorization': `Bearer ${this.accessToken}` },
+        headers: { 'Authorization': `Bearer ${token}` },
         timeout: 10000
       }
     );
     return res.data.data;
   }
 
-  async _checkStatus(publishId, maxAttempts = 10) {
+  async _checkStatus(publishId, maxAttempts = 10, tokenOverride = null) {
+    const token = tokenOverride || this.accessToken;
     for (let i = 0; i < maxAttempts; i++) {
       await new Promise(r => setTimeout(r, 5000));
       try {
@@ -207,7 +212,7 @@ class TikTokPublisher {
           `${this.apiBase}/post/publish/status/fetch/`,
           { publish_id: publishId },
           {
-            headers: { 'Authorization': `Bearer ${this.accessToken}` },
+            headers: { 'Authorization': `Bearer ${token}` },
             timeout: 10000
           }
         );

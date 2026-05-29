@@ -41,7 +41,8 @@ foreach ($item in $items) {
         $isDir = (Get-Item $localPath).PSIsContainer
         if ($isDir) {
             Write-Host "   -> Subiendo $item/..." -ForegroundColor Gray
-            scp -r "$localPath" "${vpsUser}@${vpsIp}:${remotePath}/${item}"
+            $remoteParent = Split-Path "${remotePath}/${item}" -Parent
+            scp -r "$localPath" "${vpsUser}@${vpsIp}:${remoteParent}"
         } else {
             $remoteDir = Split-Path "${remotePath}/${item}" -Parent
             ssh "${vpsUser}@${vpsIp}" "mkdir -p ${remoteDir}"
@@ -55,8 +56,21 @@ foreach ($item in $items) {
 
 # Instalar dependencias y reiniciar
 Write-Host "`n[*] Instalando dependencias y reiniciando..." -ForegroundColor Yellow
-ssh "${vpsUser}@${vpsIp}" @"
-  cd ${remotePath}
+ssh "${vpsUser}@${vpsIp}" @'
+  # Cargar NVM directamente (elude la proteccion no-interactiva de .bashrc)
+  export NVM_DIR="$HOME/.nvm"
+  if [ -s "$NVM_DIR/nvm.sh" ]; then
+    . "$NVM_DIR/nvm.sh"
+  fi
+
+  # Asegurar rutas comunes y de NVM en el PATH
+  export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.local/bin:$PATH"
+
+  cd /root/neurova/content-factory
+  
+  # Limpiar posibles carpetas duplicadas por versiones previas de scp -r
+  rm -rf src/src assets/assets
+  
   npm install --production --no-audit --no-fund 2>&1 | tail -3
   
   # Verificar si ffmpeg esta instalado
@@ -68,10 +82,10 @@ ssh "${vpsUser}@${vpsIp}" @"
   pm2 start ecosystem.config.cjs
   pm2 save
   
-  echo ""
-  echo "[OK] Content Factory desplegado!"
+  echo ''
+  echo '[OK] Content Factory desplegado!'
   pm2 status content-factory
-"@
+'@
 
 Write-Host ""
 Write-Host "  [OK] ¡Deploy completado!" -ForegroundColor Green
