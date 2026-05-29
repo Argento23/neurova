@@ -152,7 +152,9 @@ const TEMPLATES = {
         `Hola ${lead.name}. Te comparto por acá el link para formalizar el inicio del onboarding y activar el asistente de IA para ${lead.company || 'su negocio'}: https://generarise.space/onboarding\n\nCualquier duda, contáctame por aquí.`,
       email_subject: (lead) => `${lead.company} — Sistema cerrado de tráfico y captación`,
       email_body: (lead) =>
-        `Hola ${lead.name},\n\nVi el excelente nivel de ${lead.company} y noté una gran oportunidad. Armé un sistema cerrado que genera prospectos usando tráfico orgánico y los califica automáticamente.\n\nTengo un cupo para hacerles una demostración con su propio contenido. ¿Les interesaría verlo sin compromiso?\n\nSaludos,\nGustavo Dornhofer\nGenerArise`
+        `Hola ${lead.name},\n\nVi el excelente nivel de ${lead.company} y noté una gran oportunidad. Armé un sistema cerrado que genera prospectos usando tráfico orgánico y los califica automáticamente.\n\nTengo un cupo para hacerles una demostración con su propio contenido. ¿Les interesaría verlo sin compromiso?\n\nSaludos,\nGustavo Dornhofer\nGenerArise`,
+      linkedin_intro: (lead) =>
+        `Hola ${lead.name}. Un gusto conectar. Vi el excelente nivel de ${lead.company}. Armé un sistema cerrado que genera tráfico orgánico y automatiza la captación de clientes. Me encantaría mostrarte cómo funciona. ¡Saludos!`
     }
   }
 };
@@ -160,27 +162,35 @@ const TEMPLATES = {
 // ─── TEMPLATE SELECTOR ─────────────────────────────
 
 function getTemplate(lead, type = 'whatsapp_first') {
-  const industry = lead.industry || 'hotel';
+  const industry = lead.industry || 'default';
   const lang = lead.language || 'es';
 
+  // Try industry-specific template first
   const industryTemplates = TEMPLATES[industry];
-  if (!industryTemplates) {
-    // Fallback to hotel templates
-    return TEMPLATES.hotel[lang]?.[type] || TEMPLATES.hotel.es[type];
+  if (industryTemplates) {
+    const langTemplates = industryTemplates[lang] || industryTemplates.es || industryTemplates.en;
+    if (langTemplates && langTemplates[type]) {
+      return langTemplates[type];
+    }
   }
 
-  const langTemplates = industryTemplates[lang] || industryTemplates.es || industryTemplates.en;
-  if (!langTemplates || !langTemplates[type]) {
-    return TEMPLATES.hotel.es[type]; // Ultimate fallback
+  // Fallback to default templates
+  const defaultTemplates = TEMPLATES.default[lang] || TEMPLATES.default.es;
+  if (defaultTemplates && defaultTemplates[type]) {
+    return defaultTemplates[type];
   }
 
-  return langTemplates[type];
+  // Ultimate fallback: hotel templates (most complete set)
+  const hotelTemplates = TEMPLATES.hotel[lang] || TEMPLATES.hotel.es;
+  return hotelTemplates?.[type] || null;
 }
 
 function renderMessage(lead, type = 'whatsapp_first') {
   const template = getTemplate(lead, type);
   if (typeof template === 'function') return template(lead);
-  return template;
+  if (template) return template;
+  // Defensive fallback: never return undefined
+  return `Hola ${lead.name || 'amigo/a'}. Qué excelente trabajo hacen en ${lead.company || 'su negocio'}. Te escribo porque tengo una idea rápida de cómo podrían automatizar la captación de clientes. ¿Estarías abierto/a a verla sin compromiso?`;
 }
 
 function renderEmailSubject(lead) {

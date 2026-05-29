@@ -446,20 +446,34 @@ async function openWaModal(id, step, isIa = false) {
 
   document.getElementById('waModalLeadInfo').textContent = `Lead: ${lead.name || '—'} (${lead.phone || 'Sin teléfono'}) · Empresa: ${lead.company || '—'}`;
   document.getElementById('waModalText').value = 'Generando borrador...';
+  document.getElementById('waModalText').placeholder = 'Escribí tu mensaje de WhatsApp aquí...';
   document.getElementById('waModalSendBtn').disabled = true;
   document.getElementById('waModal').style.display = 'flex';
 
   try {
     const channel = isIa ? 'ia' : 'whatsapp';
     const res = await fetch(`${API}/api/sales/leads/${id}/draft?channel=${channel}&step=${step}`);
-    if (!res.ok) throw new Error('Error al obtener draft');
+    if (!res.ok) throw new Error('Error de servidor al obtener draft');
     const data = await res.json();
-    document.getElementById('waModalText').value = data.message || '';
-    document.getElementById('waModalSendBtn').disabled = false;
+    const msg = data.message || '';
+    if (msg.trim()) {
+      document.getElementById('waModalText').value = msg;
+    } else {
+      // Draft came back empty — let user write manually
+      document.getElementById('waModalText').value = '';
+      document.getElementById('waModalText').placeholder = `Escribí el mensaje para ${lead.name || 'este lead'}...`;
+    }
+    if (data.fallback) {
+      showToast('⚠️ IA no disponible. Se cargó un template por defecto.');
+    }
   } catch (err) {
-    document.getElementById('waModalText').value = 'Error al cargar el borrador. Podés escribirlo manualmente aquí.';
-    document.getElementById('waModalSendBtn').disabled = false;
+    console.warn('Draft load failed:', err);
+    document.getElementById('waModalText').value = '';
+    document.getElementById('waModalText').placeholder = `No se pudo cargar el borrador. Escribí el mensaje manualmente para ${lead.name || 'este lead'}...`;
+    showToast('⚠️ No se pudo cargar borrador. Podés escribirlo manualmente.');
   }
+  // Always enable send button so user can type and send manually
+  document.getElementById('waModalSendBtn').disabled = false;
 }
 
 function closeWaModal() {
@@ -515,7 +529,7 @@ async function openEmailModal(id, isClosing = false) {
 
   try {
     const res = await fetch(`${API}/api/sales/leads/${id}/draft?channel=email`);
-    if (!res.ok) throw new Error('Error al obtener draft');
+    if (!res.ok) throw new Error('Error de servidor al obtener draft');
     const data = await res.json();
     
     if (isClosing) {
@@ -544,13 +558,16 @@ async function openEmailModal(id, isClosing = false) {
       document.getElementById('emailModalSubject').value = data.subject || '';
       document.getElementById('emailModalBody').value = data.body || '';
     }
-    
-    document.getElementById('emailModalSendBtn').disabled = false;
   } catch (err) {
-    document.getElementById('emailModalSubject').value = 'Error al cargar borrador';
-    document.getElementById('emailModalBody').value = 'Error al cargar borrador';
-    document.getElementById('emailModalSendBtn').disabled = false;
+    console.warn('Email draft load failed:', err);
+    document.getElementById('emailModalSubject').value = '';
+    document.getElementById('emailModalBody').value = '';
+    document.getElementById('emailModalSubject').placeholder = 'No se pudo cargar el asunto. Escribilo manualmente...';
+    document.getElementById('emailModalBody').placeholder = 'No se pudo cargar el cuerpo. Escribilo manualmente...';
+    showToast('⚠️ No se pudo cargar borrador de email. Podés escribirlo manualmente.');
   }
+  // Always enable send button so user can type and send manually
+  document.getElementById('emailModalSendBtn').disabled = false;
 }
 
 function closeEmailModal() {

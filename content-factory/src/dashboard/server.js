@@ -185,29 +185,31 @@ app.get('/api/sales/leads/:id/draft', async (req, res) => {
     if (!lead) return res.status(404).json({ error: 'Lead not found' });
 
     if (channel === 'email') {
-      const subject = outreachTemplates.renderEmailSubject(lead);
-      const body = outreachTemplates.renderEmailBody(lead);
+      const subject = outreachTemplates.renderEmailSubject(lead) || `${lead.company || 'Su empresa'} — Propuesta de automatización`;
+      const body = outreachTemplates.renderEmailBody(lead) || `Hola ${lead.name || 'amigo/a'},\n\nLe escribo desde GenerArise. ¿Estarían interesados en ver una demostración de nuestro sistema de automatización?\n\nSaludos,\nGustavo Dornhofer\nGenerArise`;
       return res.json({ subject, body });
     }
 
     if (channel === 'whatsapp') {
       let message = '';
-      if (step === '1') message = outreachTemplates.renderMessage(lead, 'whatsapp_first');
-      else if (step === '2') message = outreachTemplates.renderMessage(lead, 'whatsapp_second');
-      else if (step === '3') message = outreachTemplates.renderMessage(lead, 'whatsapp_third');
-      else if (step === '5') message = outreachTemplates.renderMessage(lead, 'whatsapp_closing');
-      else message = outreachTemplates.renderMessage(lead, 'whatsapp_first'); // Fallback
-
-      return res.json({ message });
+      const stepMap = { '1': 'whatsapp_first', '2': 'whatsapp_second', '3': 'whatsapp_third', '5': 'whatsapp_closing' };
+      const templateType = stepMap[step] || 'whatsapp_first';
+      message = outreachTemplates.renderMessage(lead, templateType);
+      return res.json({ message: message || '' });
     }
 
     if (channel === 'ia') {
-      const msg = await outreachEngine.generateAIOutreach(lead, category || 'outreach_industrial');
-      if (msg) {
-        return res.json({ message: msg });
-      } else {
-        return res.json({ message: outreachTemplates.renderMessage(lead, 'whatsapp_first'), fallback: true });
+      try {
+        const msg = await outreachEngine.generateAIOutreach(lead, category || 'outreach_industrial');
+        if (msg) {
+          return res.json({ message: msg });
+        }
+      } catch (aiErr) {
+        logger.warn('AI draft generation failed, falling back to template', { error: aiErr.message });
       }
+      // Fallback to template if AI fails or returns empty
+      const fallbackMsg = outreachTemplates.renderMessage(lead, 'whatsapp_first');
+      return res.json({ message: fallbackMsg || '', fallback: true });
     }
 
     res.status(400).json({ error: 'Invalid channel. Use "whatsapp", "email", or "ia"' });
