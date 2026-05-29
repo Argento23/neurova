@@ -170,11 +170,20 @@ async function checkEvolutionHealth() {
 // ─── WHATSAPP VIA META CLOUD API (Official — no bans) ───
 
 async function sendWhatsAppCloudAPI(phone, message, templateData = null) {
-  const cleanPhone = phone.replace(/[^\d]/g, '');
+  let cleanPhone = phone.replace(/[^\d]/g, '');
   
+  // Format Argentine mobile numbers correctly for Meta Cloud API
+  // Standard Argentine number with country code has 12 digits (54 + 10 digits area+local).
+  // WhatsApp requires 549 + 10 digits (13 digits total) for mobiles.
+  if (cleanPhone.startsWith('54') && cleanPhone.length === 12) {
+    cleanPhone = '549' + cleanPhone.substring(2);
+  } else if (cleanPhone.length === 10 && (cleanPhone.startsWith('11') || cleanPhone.startsWith('341') || cleanPhone.startsWith('261') || cleanPhone.startsWith('351') || cleanPhone.startsWith('381'))) {
+    // If it's a 10-digit number starting with a common Argentine area code, assume Argentine mobile and prepend 549
+    cleanPhone = '549' + cleanPhone;
+  }
+  
+  let payload;
   try {
-    let payload;
-    
     if (templateData) {
       // Send official WhatsApp Template (No bans!)
       payload = {
@@ -195,7 +204,7 @@ async function sendWhatsAppCloudAPI(phone, message, templateData = null) {
           ]
         }
       };
-      logger.info(`Sending WhatsApp Cloud API Template "${payload.template.name}" to ${cleanPhone}`);
+      logger.info(`Sending WhatsApp Cloud API Template "${payload.template.name}" (Lang: ${payload.template.language.code}) to ${cleanPhone}`);
     } else {
       // Send regular text message (only works if 24h customer window is open)
       payload = {
@@ -227,6 +236,34 @@ async function sendWhatsAppCloudAPI(phone, message, templateData = null) {
     let errorMsg = metaError?.message || error.message;
     const errorCode = metaError?.code;
     
+    // Auto-retry with 'es' (Spanish standard) if it failed due to regional/language policy mismatch
+    if (templateData && templateData.language && templateData.language !== 'es' && (errorCode === 100 || errorMsg.includes('template') || errorMsg.includes('language'))) {
+      logger.warn(`WhatsApp Cloud API failed with language "${templateData.language}" (${errorMsg}). Retrying with "es" (Spanish standard)...`);
+      try {
+        const retryPayload = JSON.parse(JSON.stringify(payload));
+        retryPayload.template.language.code = 'es';
+        
+        const response = await axios.post(
+          `https://graph.facebook.com/${config.META_API_VERSION}/${config.META_PHONE_NUMBER_ID}/messages`,
+          retryPayload,
+          {
+            headers: {
+              'Authorization': `Bearer ${config.META_CLOUD_TOKEN}`,
+              'Content-Type': 'application/json'
+            },
+            timeout: 30000
+          }
+        );
+        const msgId = response.data?.messages?.[0]?.id;
+        logger.info(`WhatsApp (Cloud API) sent successfully after language retry to ${cleanPhone}`, { messageId: msgId });
+        return { success: true, messageId: msgId, provider: 'cloud_api' };
+      } catch (retryErr) {
+        const retryMetaError = retryErr.response?.data?.error;
+        errorMsg = retryMetaError?.message || retryErr.message;
+        logger.error(`WhatsApp Cloud API retry failed`, { phone: cleanPhone, error: errorMsg });
+      }
+    }
+    
     // Common error codes
     const isInvalid = errorCode === 131026 || // Number not on WhatsApp
                       errorCode === 131021 || // Recipient not valid
@@ -247,7 +284,14 @@ async function sendWhatsAppCloudAPI(phone, message, templateData = null) {
 // ─── WHATSAPP VIA EVOLUTION API (Legacy fallback) ───
 
 async function sendWhatsAppEvolution(phone, message) {
-  const cleanPhone = phone.replace(/[^\d]/g, '');
+  let cleanPhone = phone.replace(/[^\d]/g, '');
+  
+  // Format Argentine mobile numbers correctly
+  if (cleanPhone.startsWith('54') && cleanPhone.length === 12) {
+    cleanPhone = '549' + cleanPhone.substring(2);
+  } else if (cleanPhone.length === 10 && (cleanPhone.startsWith('11') || cleanPhone.startsWith('341') || cleanPhone.startsWith('261') || cleanPhone.startsWith('351') || cleanPhone.startsWith('381'))) {
+    cleanPhone = '549' + cleanPhone;
+  }
   const baseUrl = config.EVOLUTION_API_URL.endsWith('/') 
     ? config.EVOLUTION_API_URL.slice(0, -1) 
     : config.EVOLUTION_API_URL;
@@ -617,8 +661,9 @@ async function runOutreachBatch({ dryRun = false, maxLeads = 50, type = 'new' } 
         failed++;
       }
 
-      // Anti-Ban Delay: 5 a 10 MINUTOS entre cada mensaje (no segundos)
-      const delay = dryRun ? 500 : (300000 + Math.random() * 300000);
+      // Anti-Ban Delay: 5 to 10 MINUTES for Evolution API (anti-ban), but only 2 seconds for Meta Cloud API (official)!
+      const provider = getWhatsAppProvider();
+      const delay = dryRun ? 500 : (provider === 'cloud_api' ? 2000 : (300000 + Math.random() * 300000));
       await new Promise(r => setTimeout(r, delay));
 
     } catch (error) {
